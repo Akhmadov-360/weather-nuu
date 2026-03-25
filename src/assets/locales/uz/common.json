@@ -1,0 +1,19 @@
+{
+  "nav_room": "Xona",
+  "nav_street": "Ko'cha",
+  "panel_room": "Xona sensor paneli",
+  "panel_street": "Ko'cha sensor paneli",
+  "btn_temp": "Harorat",
+  "btn_hum": "Namlik",
+  "btn_press": "Bosim",
+  "btn_mq5": "MQ-5",
+  "btn_mq3": "MQ-3",
+  "lbl_temp": "Harorat",
+  "lbl_hum": "Namlik",
+  "lbl_press": "Bosim",
+  "lbl_mq5": "MQ-5 gazi",
+  "lbl_mq3": "MQ-3 gazi",
+  "empty_title": "Ma'lumot yo'q",
+  "empty_description": "API ulanishini va endpoint sozlamalarini tekshiring.",
+  "error_data": "Ma'lumotlarni yuklashda xatolik. Qayta urinib ko'ring."
+}

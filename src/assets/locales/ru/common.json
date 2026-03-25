@@ -1,0 +1,19 @@
+{
+  "nav_room": "Аудитория",
+  "nav_street": "Улица",
+  "panel_room": "Датчики в аудитории",
+  "panel_street": "Датчики на улице",
+  "btn_temp": "Температура",
+  "btn_hum": "Влажность",
+  "btn_press": "Давление",
+  "btn_mq5": "MQ-5",
+  "btn_mq3": "MQ-3",
+  "lbl_temp": "Температура",
+  "lbl_hum": "Влажность",
+  "lbl_press": "Давление",
+  "lbl_mq5": "Газ MQ-5",
+  "lbl_mq3": "Газ MQ-3",
+  "empty_title": "Нет данных",
+  "empty_description": "Проверьте подключение API и endpoint'ы.",
+  "error_data": "Не удалось загрузить данные. Попробуйте снова."
+}
