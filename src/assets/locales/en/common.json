@@ -1,0 +1,19 @@
+{
+  "nav_room": "Room",
+  "nav_street": "Street",
+  "panel_room": "Room sensor dashboard",
+  "panel_street": "Street sensor dashboard",
+  "btn_temp": "Temperature",
+  "btn_hum": "Humidity",
+  "btn_press": "Pressure",
+  "btn_mq5": "MQ-5",
+  "btn_mq3": "MQ-3",
+  "lbl_temp": "Temperature",
+  "lbl_hum": "Humidity",
+  "lbl_press": "Pressure",
+  "lbl_mq5": "MQ-5 gas",
+  "lbl_mq3": "MQ-3 gas",
+  "empty_title": "No data",
+  "empty_description": "Check API connection and endpoint configuration.",
+  "error_data": "Failed to load data. Please try again."
+}
