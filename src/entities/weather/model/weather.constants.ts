@@ -1,29 +1,28 @@
-import { ENV } from '@/shared/config/env';
-import { ROUTES } from '@/shared/config/routes';
-import type { DashboardPageConfig, SensorType } from './weather.types';
-
-export const SENSOR_ORDER: SensorType[] = ['temp', 'hum', 'press', 'mq5', 'mq3'];
+import type { DashboardPageConfig, SensorType } from "./weather.types";
+import { ENV } from "@/shared/config/env";
 
 export const ROOM_CONFIG: DashboardPageConfig = {
-  key: 'room',
-  titleKey: 'panel_room',
-  navKey: 'nav_room',
-  oppositeNavKey: 'nav_street',
-  oppositePath: ROUTES.street,
+  key: "room",
+  titleKey: "panel_room",
+  navKey: "nav_room",
+  oppositeNavKey: "nav_street",
+  oppositePath: "/street",
   api: {
-    latest: ENV.roomLatestPath,
-    history: ENV.roomHistoryPath,
+    latest: ENV.endpoints.room.latest,
+    history: ENV.endpoints.room.history,
   },
 };
 
 export const STREET_CONFIG: DashboardPageConfig = {
-  key: 'street',
-  titleKey: 'panel_street',
-  navKey: 'nav_street',
-  oppositeNavKey: 'nav_room',
-  oppositePath: ROUTES.room,
+  key: "street",
+  titleKey: "panel_street",
+  navKey: "nav_street",
+  oppositeNavKey: "nav_room",
+  oppositePath: "/room",
   api: {
-    latest: ENV.streetLatestPath,
-    history: ENV.streetHistoryPath,
+    latest: ENV.endpoints.street.latest,
+    history: ENV.endpoints.street.history,
   },
 };
+
+export const SENSOR_ORDER: SensorType[] = ["temp", "hum", "press", "mq5", "mq3"];

@@ -11,9 +11,19 @@
   "lbl_temp": "Harorat",
   "lbl_hum": "Namlik",
   "lbl_press": "Bosim",
-  "lbl_mq5": "MQ-5 gazi",
-  "lbl_mq3": "MQ-3 gazi",
+  "lbl_mq5": "MQ5 - Yonuvchan gaz",
+  "lbl_mq3": "MQ3 - Spirt bug'i",
   "empty_title": "Ma'lumot yo'q",
   "empty_description": "API ulanishini va endpoint sozlamalarini tekshiring.",
-  "error_data": "Ma'lumotlarni yuklashda xatolik. Qayta urinib ko'ring."
+  "error_data": "Ma'lumotlarni yuklashda xatolik. Qayta urinib ko'ring.",
+  "current_weather": "Hozirgi ob-havo",
+  "sunny": "Quyoshli",
+  "cloudy": "Bulutli",
+  "rain": "Yomg'irli",
+  "snow": "Qor",
+  "fog": "Tuman",
+  "unknown": "Noma'lum",
+  "no_streams_available": "Hech qanday translyatsiya mavjud emas",
+  "live_streams": "Jonli translyatsiyalar",
+  "university": "Mirzo Ulug'bek nomidagi O'zbekiston Milliy universiteti"
 }

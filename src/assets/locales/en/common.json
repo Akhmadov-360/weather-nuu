@@ -11,9 +11,19 @@
   "lbl_temp": "Temperature",
   "lbl_hum": "Humidity",
   "lbl_press": "Pressure",
-  "lbl_mq5": "MQ-5 gas",
-  "lbl_mq3": "MQ-3 gas",
+  "lbl_mq5": "MQ5 - Flammable gas",
+  "lbl_mq3": "MQ3 - Alcohol vapor",
   "empty_title": "No data",
   "empty_description": "Check API connection and endpoint configuration.",
-  "error_data": "Failed to load data. Please try again."
+  "error_data": "Failed to load data. Please try again.",
+  "current_weather": "Current weather",
+  "sunny": "Sunny",
+  "cloudy": "Cloudy",
+  "rain": "Rainy",
+  "snow": "Snow",
+  "fog": "Fog",
+  "unknown": "Unknown",
+  "no_streams_available": "No streams available",
+  "live_streams": "Live streams",
+  "university": "National University of Uzbekistan named after Mirzo Ulugbek"
 }
