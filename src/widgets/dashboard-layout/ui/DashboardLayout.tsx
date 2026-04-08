@@ -49,7 +49,7 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
 
         {isInitialLoading ? (
           <div className="mt-6 flex flex-1 flex-col gap-6">
-            <section className="grid gap-6 xl:grid-cols-[minmax(260px,320px)_1fr] xl:items-start">
+            <section className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)] xl:items-stretch">
               <motion.div
                 variants={fadeUp}
                 initial="hidden"
@@ -88,7 +88,7 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
           </div>
         ) : (
           <div className="mt-6 flex flex-1 flex-col gap-6">
-            <section className="grid gap-6 xl:grid-cols-[minmax(260px,320px)_1fr] xl:items-start">
+            <section className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)] xl:items-stretch">
               <motion.div variants={fadeUp} initial="hidden" animate="visible">
                 <GlassPanel className="p-5 sm:p-6">
                   <TimeDisplay />
@@ -99,9 +99,10 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
                 variants={fadeUp}
                 initial="hidden"
                 animate="visible"
-                transition={{ delay: 0.05, duration: 0.45, ease: "easeOut" }}
+                transition={{ delay: 0.05, duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
+                className="min-w-0"
               >
-                <WeatherSummary latest={latest} />
+                <WeatherSummary latest={latest} history={history} />
               </motion.div>
             </section>
 

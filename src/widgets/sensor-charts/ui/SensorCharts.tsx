@@ -107,7 +107,7 @@ export function SensorCharts({ history }: SensorChartsProps): React.JSX.Element 
   const [activeSensor, setActiveSensor] = useState<SensorType>("temp");
   const { t } = useTranslation();
 
-  const recentPoints = useMemo(() => history.slice(-1000), [history]);
+  const recentPoints = useMemo(() => history.slice(-1500), [history]);
 
   const chartData = useMemo<ChartPoint[]>(
     () =>
@@ -297,10 +297,6 @@ export function SensorCharts({ history }: SensorChartsProps): React.JSX.Element 
               {t("chart_history_title")}
             </h3>
           </div>
-
-          <span className="text-[11px] uppercase tracking-[0.24em] text-slate-400/60 sm:text-xs">
-            {t("chart_last_points", { count: 1000 })}
-          </span>
         </div>
 
         <ChartSelector active={activeSensor} onChange={setActiveSensor} />
