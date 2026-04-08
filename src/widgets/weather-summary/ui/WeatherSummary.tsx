@@ -186,8 +186,11 @@ function Metric({ sensor, label, value, unit }: MetricProps) {
 }
 
 function getMinMax(latest?: number | null, history?: WeatherHistoryItem[]) {
-  if (history && history.length > 0) {
-    const temps = history.map((h) => h.temp).filter((v): v is number => v != null);
+  const recentHistory = history?.slice(-1000);
+
+  if (recentHistory && recentHistory.length > 0) {
+    const temps = recentHistory.map((h) => h.temp).filter((v): v is number => v != null);
+
     if (temps.length > 0) {
       return {
         min: Math.min(...temps).toFixed(1),
@@ -229,7 +232,7 @@ export function WeatherSummary({ latest, history }: WeatherSummaryProps): React.
       animate={{ opacity: 1, y: 0 }}
       className="rounded-[28px] border border-white/10 bg-white/8 p-4 backdrop-blur-xl sm:p-5 lg:p-6"
     >
-      <div className="flex flex-col gap-6">
+      <div className="grid gap-6 lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)] lg:items-start">
         <div className="flex flex-col justify-between rounded-[24px] p-4 sm:p-5">
           <span className="text-[10px] uppercase tracking-[0.25em] text-slate-300/60 sm:text-xs">
             {t("current_weather")}
@@ -251,13 +254,20 @@ export function WeatherSummary({ latest, history }: WeatherSummaryProps): React.
             </div>
           </div>
 
-          <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-slate-300/70 sm:text-sm">
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">↓ {min ?? "—"}°C</span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">↑ {max ?? "—"}°C</span>
+          <div className="mt-5 flex flex-col gap-2 text-xs text-slate-300/70 sm:text-sm">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+              <span className="text-sky-300">↓</span>
+              <span>{min ?? "—"}°C</span>
+            </div>
+
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+              <span className="text-amber-300">↑</span>
+              <span>{max ?? "—"}°C</span>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
           <Metric sensor="hum" label={t("lbl_hum")} value={latest.hum} />
           <Metric sensor="press" label={t("lbl_press")} value={latest.press} />
           <Metric sensor="mq5" label={t("lbl_mq5")} value={latest.mq5} />
