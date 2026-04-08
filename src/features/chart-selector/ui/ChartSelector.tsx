@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { Thermometer, Droplets, Wind, ShieldCheck, SprayCan } from "lucide-react";
+
 import { SENSOR_ORDER } from "@/entities/weather/model/weather.constants";
 import type { SensorType } from "@/entities/weather/model/weather.types";
 import { cn } from "@/shared/lib/cn";
-import { Thermometer, Droplets, Wind, Flame, Activity } from "lucide-react";
 import { SENSOR_COLORS } from "@/shared/lib/chart/chart-colors";
 
 type ChartSelectorProps = {
@@ -15,16 +16,24 @@ const SENSOR_ICONS: Record<SensorType, React.ReactNode> = {
   temp: <Thermometer className="h-4 w-4" />,
   hum: <Droplets className="h-4 w-4" />,
   press: <Wind className="h-4 w-4" />,
-  mq5: <Flame className="h-4 w-4" />,
-  mq3: <Activity className="h-4 w-4" />,
+  mq5: <ShieldCheck className="h-4 w-4" />,
+  mq3: <SprayCan className="h-4 w-4" />,
 };
 
 export function ChartSelector({ active, onChange }: ChartSelectorProps): React.JSX.Element {
   const { t } = useTranslation();
 
+  const MOBILE_LABELS: Record<SensorType, string> = {
+    temp: t("btn_temp_short"),
+    hum: t("btn_hum_short"),
+    press: t("btn_press_short"),
+    mq5: t("btn_mq5_short"),
+    mq3: t("btn_mq3_short"),
+  };
+
   return (
-    <div className="relative w-full overflow-x-auto">
-      <div className="flex w-max items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 backdrop-blur-xl">
+    <div className="relative w-full overflow-x-auto pb-1">
+      <div className="flex w-max min-w-full items-center gap-1 rounded-2xl border border-white/10 bg-white/5 p-1 backdrop-blur-xl">
         {SENSOR_ORDER.map((sensor) => {
           const isActive = active === sensor;
 
@@ -33,31 +42,28 @@ export function ChartSelector({ active, onChange }: ChartSelectorProps): React.J
               key={sensor}
               onClick={() => onChange(sensor)}
               className={cn(
-                "relative flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-all sm:px-4 sm:py-2 sm:text-sm",
-                isActive ? "text-white" : "text-white/60 hover:text-white",
+                "relative flex min-w-[82px] flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition-all sm:min-w-[110px] sm:px-4 sm:text-sm",
+                isActive ? "text-white" : "text-white/65 hover:text-white",
               )}
             >
-              {isActive && (
+              {isActive ? (
                 <motion.div
                   layoutId="chart-selector-active"
-                  className="absolute inset-0 rounded-full"
+                  className="absolute inset-0 rounded-xl"
                   style={{
-                    backgroundColor: SENSOR_COLORS[sensor] + "22",
+                    backgroundColor: `${SENSOR_COLORS[sensor]}22`,
                   }}
-                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 22 }}
                 />
-              )}
+              ) : null}
 
-              <span
-                className={cn("relative z-10", isActive ? "" : "opacity-80")}
-                style={{
-                  color: SENSOR_COLORS[sensor],
-                }}
-              >
+              <span className="relative z-10 shrink-0" style={{ color: SENSOR_COLORS[sensor] }}>
                 {SENSOR_ICONS[sensor]}
               </span>
 
-              <span className="relative z-10 hidden sm:inline">{t(`btn_${sensor}`)}</span>
+              <span className="relative z-10 whitespace-nowrap sm:hidden">{MOBILE_LABELS[sensor]}</span>
+
+              <span className="relative z-10 hidden whitespace-nowrap sm:inline">{t(`btn_${sensor}`)}</span>
             </button>
           );
         })}

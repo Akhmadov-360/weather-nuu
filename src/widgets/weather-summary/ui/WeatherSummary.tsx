@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Sun, Cloud, CloudRain, CloudSnow, CloudFog } from "lucide-react";
-import type { WeatherLatest, WeatherHistoryItem } from "@/entities/weather/model/weather.types";
+import { Sun, Cloud, CloudRain, CloudSnow, CloudFog, Droplets, Gauge, ShieldCheck, SprayCan } from "lucide-react";
+
+import type { WeatherLatest, WeatherHistoryItem, SensorType } from "@/entities/weather/model/weather.types";
+import { getSensorStatus, getTempDeltaFromNorm, type MetricTone } from "@/entities/weather/model/weather-thresholds";
 
 type WeatherSummaryProps = {
   latest: WeatherLatest;
@@ -9,6 +11,7 @@ type WeatherSummaryProps = {
 };
 
 type MetricProps = {
+  sensor: SensorType;
   label: string;
   value: number | null | undefined;
   unit?: string;
@@ -16,7 +19,7 @@ type MetricProps = {
 
 function formatValue(value: number | null | undefined) {
   if (value == null) return "—";
-  return Number.isInteger(value) ? value : value.toFixed(2);
+  return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
 
 function getWeatherCondition(temp?: number) {
@@ -31,14 +34,56 @@ function getWeatherCondition(temp?: number) {
 
   return { label: "snow", icon: CloudSnow };
 }
-function Metric({ label, value, unit }: MetricProps) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 backdrop-blur-md">
-      <div className="text-[11px] uppercase tracking-[0.22em] text-slate-300/60">{label}</div>
 
-      <div className="mt-1 text-lg font-medium">
-        {formatValue(value)} {unit}
+function getMetricIcon(sensor: SensorType) {
+  switch (sensor) {
+    case "hum":
+      return Droplets;
+    case "press":
+      return Gauge;
+    case "mq5":
+      return ShieldCheck;
+    case "mq3":
+      return SprayCan;
+    default:
+      return Gauge;
+  }
+}
+
+function getToneClass(tone: MetricTone) {
+  switch (tone) {
+    case "good":
+      return "text-emerald-400";
+    case "warn":
+      return "text-amber-400";
+    case "bad":
+      return "text-rose-400";
+    default:
+      return "text-slate-400";
+  }
+}
+
+function Metric({ sensor, label, value, unit }: MetricProps) {
+  const { t } = useTranslation();
+  const status = getSensorStatus(sensor, value ?? null);
+  const Icon = getMetricIcon(sensor);
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-3 backdrop-blur-md sm:px-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 text-[10px] uppercase tracking-[0.2em] text-slate-300/60 sm:text-[11px]">{label}</div>
+
+        <div className="shrink-0 rounded-lg border border-white/10 bg-white/5 p-1.5 text-slate-300/80">
+          <Icon className="h-4 w-4" />
+        </div>
       </div>
+
+      <div className="mt-2 flex items-end gap-1">
+        <span className="text-base font-semibold text-white sm:text-lg">{formatValue(value)}</span>
+        {unit ? <span className="pb-[2px] text-[11px] text-slate-400 sm:text-xs">{unit}</span> : null}
+      </div>
+
+      <div className={`mt-2 text-[11px] sm:text-xs ${getToneClass(status.tone)}`}>{t(status.labelKey)}</div>
     </div>
   );
 }
@@ -71,36 +116,58 @@ export function WeatherSummary({ latest, history }: WeatherSummaryProps): React.
   const weather = getWeatherCondition(latest.temp);
   const Icon = weather.icon;
   const { min, max } = getMinMax(latest.temp, history);
+
+  const tempStatus = getSensorStatus("temp", latest.temp ?? null);
+  const tempDelta = getTempDeltaFromNorm(latest.temp ?? null);
+
+  const tempHint =
+    tempDelta === null
+      ? t("status_reference")
+      : tempDelta === 0
+        ? t("temp_delta_normal")
+        : latest.temp > 24
+          ? t("temp_delta_above", { value: tempDelta.toFixed(1) })
+          : t("temp_delta_below", { value: tempDelta.toFixed(1) });
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-[28px] border border-white/10 bg-white/8 p-5 backdrop-blur-xl sm:p-6"
+      className="rounded-[28px] border border-white/10 bg-white/8 p-4 backdrop-blur-xl sm:p-6"
     >
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <div className="flex flex-col justify-between">
-          <span className="text-xs uppercase tracking-[0.25em] text-slate-300/60">{t("current_weather")}</span>
+      <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr] lg:gap-6">
+        <div className="flex flex-col justify-between rounded-[24px] p-4 sm:p-5">
+          <span className="text-[10px] uppercase tracking-[0.25em] text-slate-300/60 sm:text-xs">
+            {t("current_weather")}
+          </span>
 
-          <div className="flex items-center gap-4">
-            <Icon className="h-12 w-12 text-yellow-300 sm:h-14 sm:w-14" />
+          <div className="mt-4 flex items-center gap-3 sm:gap-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-3 sm:p-4">
+              <Icon className="h-10 w-10 text-yellow-300 sm:h-12 sm:w-12" />
+            </div>
 
-            <div>
-              <div className="text-4xl font-semibold tracking-tight sm:text-5xl">{formatValue(latest.temp)}°C</div>
+            <div className="min-w-0">
+              <div className="text-3xl font-semibold tracking-tight text-white sm:text-5xl">
+                {formatValue(latest.temp)}°C
+              </div>
 
               <div className="mt-1 text-sm text-slate-300/70 sm:text-base">{t(weather.label)}</div>
+
+              <div className={`mt-2 text-xs sm:text-sm ${getToneClass(tempStatus.tone)}`}>{tempHint}</div>
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-4 text-sm text-slate-300/70">
-            <span>↓ {min ?? "—"}°C</span>
-            <span>↑ {max ?? "—"}°C</span>
+
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-300/70 sm:text-sm">
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">↓ {min ?? "—"}°C</span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">↑ {max ?? "—"}°C</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-2">
-          <Metric label={t("lbl_hum")} value={latest.hum} unit="%" />
-          <Metric label={t("lbl_press")} value={latest.press} unit="hPa" />
-          <Metric label={t("lbl_mq5")} value={latest.mq5} />
-          <Metric label={t("lbl_mq3")} value={latest.mq3} />
+        <div className="grid grid-cols-2 gap-3">
+          <Metric sensor="hum" label={t("lbl_hum")} value={latest.hum} unit="%" />
+          <Metric sensor="press" label={t("lbl_press")} value={latest.press} unit="hPa" />
+          <Metric sensor="mq5" label={t("lbl_mq5")} value={latest.mq5} />
+          <Metric sensor="mq3" label={t("lbl_mq3")} value={latest.mq3} />
         </div>
       </div>
     </motion.section>
