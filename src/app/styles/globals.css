@@ -5,38 +5,8 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: 210 40% 98%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
-  --radius: 0.75rem;
-}
-
-* {
-  @apply border-border;
-}
-
-body {
-  @apply bg-background text-foreground antialiased;
-}
-
+/* ─── Shadcn tokens (oklch) ─────────────────────────────────────── */
 @layer base {
-  .theme {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
-  }
   :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
@@ -56,11 +26,6 @@ body {
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
     --radius: 0.625rem;
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
@@ -71,6 +36,7 @@ body {
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
   }
+
   .dark {
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
@@ -90,11 +56,6 @@ body {
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
     --sidebar: oklch(0.205 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -104,6 +65,7 @@ body {
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
   }
+
   * {
     @apply border-border outline-ring/50;
   }
@@ -113,4 +75,105 @@ body {
   html {
     @apply font-sans;
   }
+}
+
+/* ─── Dashboard design tokens ────────────────────────────────────── */
+
+/* Sensor palette — hex для ECharts и style={} */
+:root {
+  --sensor-temp:  #ef4444;
+  --sensor-hum:   #0ea5e9;
+  --sensor-press: #6366f1;
+  --sensor-mq5:   #f59e0b;
+  --sensor-mq3:   #22c55e;
+}
+
+/* ── DARK THEME (default, ThemeProvider устанавливает .dark) ──── */
+.dark {
+  /* Gradient background */
+  --dash-base:     #0f172a;
+  --dash-accent-1: rgba(99, 102, 241, 0.12);
+  --dash-accent-2: rgba(14, 165, 233, 0.08);
+  --dash-accent-3: rgba(139, 92, 246, 0.06);
+
+  /* Glass surface */
+  --glass-surface:       rgba(255 255 255 / 0.05);
+  --glass-surface-hover: rgba(255 255 255 / 0.10);
+  --glass-surface-soft:  rgba(255 255 255 / 0.03);
+  --glass-border:        rgba(255 255 255 / 0.10);
+
+  /* Topbar sticky backdrop */
+  --topbar-bg: rgba(15, 23, 42, 0.82);
+
+  /* Semantic text */
+  --text-primary:   rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(148, 163, 184, 0.75);
+  --text-muted:     rgba(100, 116, 139, 0.90);
+
+  /* Shadows — заметны на тёмном фоне */
+  --panel-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 12px 40px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.25);
+  --card-shadow:  0 0 0 1px rgba(255,255,255,0.06), 0 6px 20px rgba(0,0,0,0.30);
+
+  /* ECharts */
+  --chart-axis-label:      rgba(255, 255, 255, 0.45);
+  --chart-grid-line:       rgba(255, 255, 255, 0.05);
+  --chart-axis-line:       rgba(255, 255, 255, 0.08);
+  --chart-tooltip-bg:      rgba(15, 23, 42, 0.95);
+  --chart-tooltip-border:  rgba(255, 255, 255, 0.10);
+  --chart-tooltip-text:    rgba(255, 255, 255, 0.92);
+  --chart-tooltip-label:   rgba(148, 163, 184, 0.70);
+}
+
+/* ── LIGHT THEME ─────────────────────────────────────────────── */
+html:not(.dark) {
+  /* Gradient background */
+  --dash-base:     #eef2ff;
+  --dash-accent-1: rgba(99, 102, 241, 0.10);
+  --dash-accent-2: rgba(14, 165, 233, 0.07);
+  --dash-accent-3: rgba(139, 92, 246, 0.06);
+
+  /*
+   * Glass — максимально непрозрачный белый + усиленная тень,
+   * иначе фон "просвечивает" сквозь backdrop-blur и текст нечитаем.
+   */
+  --glass-surface:       rgba(255 255 255 / 0.90);
+  --glass-surface-hover: rgba(255 255 255 / 0.97);
+  --glass-surface-soft:  rgba(255 255 255 / 0.75);
+  --glass-border:        rgba(15 23 42 / 0.09);
+
+  --topbar-bg: rgba(238, 242, 255, 0.90);
+
+  /* Semantic text */
+  --text-primary:   rgba(15, 23, 42, 0.92);
+  --text-secondary: rgba(51, 65, 85, 0.78);
+  --text-muted:     rgba(71, 85, 105, 0.68);
+
+  /* Shadows — мягкие на светлом фоне */
+  --panel-shadow: 0 0 0 1px rgba(15,23,42,0.07), 0 8px 32px rgba(15,23,42,0.10), 0 2px 8px rgba(15,23,42,0.06);
+  --card-shadow:  0 0 0 1px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.07);
+
+  /* ECharts */
+  --chart-axis-label:     rgba(30, 41, 59, 0.55);
+  --chart-grid-line:      rgba(15, 23, 42, 0.06);
+  --chart-axis-line:      rgba(15, 23, 42, 0.10);
+  --chart-tooltip-bg:     rgba(255, 255, 255, 0.98);
+  --chart-tooltip-border: rgba(15, 23, 42, 0.10);
+  --chart-tooltip-text:   rgba(15, 23, 42, 0.92);
+  --chart-tooltip-label:  rgba(71, 85, 105, 0.70);
+}
+
+/* ─── Dashboard gradient utility ─────────────────────────────── */
+@layer utilities {
+  .dash-bg {
+    background:
+      radial-gradient(ellipse 80% 55% at 0% 0%,   var(--dash-accent-1) 0%, transparent 100%),
+      radial-gradient(ellipse 60% 40% at 100% 0%,  var(--dash-accent-2) 0%, transparent 100%),
+      radial-gradient(ellipse 50% 60% at 50% 100%, var(--dash-accent-3) 0%, transparent 100%),
+      var(--dash-base);
+  }
+
+  /* Semantic text utilities */
+  .text-primary-themed   { color: var(--text-primary); }
+  .text-secondary-themed { color: var(--text-secondary); }
+  .text-muted-themed     { color: var(--text-muted); }
 }

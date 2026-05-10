@@ -15,16 +15,10 @@ const streams: Stream[] = [
   //   },
 ];
 
-export function LiveStreams(): React.JSX.Element {
+export function LiveStreams(): React.JSX.Element | null {
   const { t } = useTranslation();
 
-  if (!streams.length) {
-    return (
-      <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 text-center backdrop-blur-xl">
-        {t("no_streams_available")}
-      </div>
-    );
-  }
+  if (!streams.length) return null;
 
   return (
     <section className="rounded-[28px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl">

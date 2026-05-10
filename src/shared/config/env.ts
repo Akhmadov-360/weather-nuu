@@ -1,5 +1,6 @@
 export const ENV = {
-  latestPollingMs: 2000,
+  latestPollingMs: 10_000,
+  historyPollingMs: 5 * 60_000, // 5 минут — полный refetch истории
 
   endpoints: {
     room: {
