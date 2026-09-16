@@ -67,7 +67,16 @@
   }
 
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+    /*
+     * Same intent as `outline-ring/50`, but `@apply` can't use Tailwind's
+     * color-mix() opacity fallback for CSS-variable colors the way a
+     * regular className can (--ring is a full `oklch(...)` value, not a
+     * bare triplet, so the classic `<alpha-value>` trick isn't available
+     * either — see tailwind.config.ts). Plain CSS color-mix() sidesteps
+     * both limitations directly.
+     */
+    outline-color: color-mix(in oklch, var(--ring) 50%, transparent);
   }
   body {
     @apply bg-background text-foreground;
@@ -82,10 +91,24 @@
 /* Sensor palette — hex для ECharts и style={} */
 :root {
   --sensor-temp:  #ef4444;
-  --sensor-hum:   #0ea5e9;
+  --sensor-hum:   #3b82f6;
   --sensor-press: #6366f1;
   --sensor-mq5:   #f59e0b;
   --sensor-mq3:   #22c55e;
+}
+
+/*
+ * Status accent tokens — единственный источник правды для "норма /
+ * предупреждение / критично / инфо" везде: status-badge, range-bar,
+ * иконки, ECharts threshold-линии. Не зависят от темы (акцентный
+ * цвет остаётся собой что на светлом, что на тёмном фоне) — меняется
+ * только фон/текст вокруг него через сами Tailwind-классы (/10, /20…).
+ */
+:root {
+  --status-safe:     #10b981; /* emerald-500 */
+  --status-warning:  #f59e0b; /* amber-500 */
+  --status-critical: #ef4444; /* red-500 */
+  --status-info:     #3b82f6; /* blue-500 */
 }
 
 /* ── DARK THEME (default, ThemeProvider устанавливает .dark) ──── */
@@ -96,14 +119,20 @@
   --dash-accent-2: rgba(14, 165, 233, 0.08);
   --dash-accent-3: rgba(139, 92, 246, 0.06);
 
-  /* Glass surface */
-  --glass-surface:       rgba(255 255 255 / 0.05);
-  --glass-surface-hover: rgba(255 255 255 / 0.10);
-  --glass-surface-soft:  rgba(255 255 255 / 0.03);
-  --glass-border:        rgba(255 255 255 / 0.10);
+  /*
+   * Glass surface — slate-800 tint, not a flat white overlay. At 5% white
+   * (the old value) cards were nearly indistinguishable from --dash-base
+   * since the background gradient is itself very subtle; a slate-toned
+   * surface reads as a distinct card while staying translucent enough
+   * for backdrop-blur to still pick up the gradient underneath.
+   */
+  --glass-surface:       rgba(30, 41, 59, 0.55);  /* slate-800 @ 55% */
+  --glass-surface-hover: rgba(30, 41, 59, 0.72);
+  --glass-surface-soft:  rgba(30, 41, 59, 0.35);
+  --glass-border:        rgba(51, 65, 85, 0.5);   /* slate-700 @ 50% */
 
   /* Topbar sticky backdrop */
-  --topbar-bg: rgba(15, 23, 42, 0.82);
+  --topbar-bg: rgba(15, 23, 42, 0.85);
 
   /* Semantic text */
   --text-primary:   rgba(255, 255, 255, 0.92);

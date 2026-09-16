@@ -6,29 +6,54 @@ export default {
   theme: {
     extend: {
       colors: {
-        border:     'oklch(var(--border))',
-        input:      'oklch(var(--input))',
-        ring:       'oklch(var(--ring))',
-        background: 'oklch(var(--background))',
-        foreground: 'oklch(var(--foreground))',
+        // Every --x variable in globals.css is already a COMPLETE color
+        // function (`oklch(0.205 0 0)`, sometimes with its own embedded
+        // alpha like `oklch(1 0 0 / 10%)`) — never bare component numbers.
+        // Wrapping any of them in `oklch(var(--x) / <alpha-value>)` nests
+        // an oklch() inside another oklch(), which is invalid CSS the
+        // browser silently drops (falls back to `transparent`). That was
+        // the actual cause of dropdowns rendering with no background at
+        // all — Tailwind still generated *a* rule so the build stopped
+        // erroring, but the rule itself painted nothing.
+        // Plain `var(--x)` is correct here; Tailwind 3.4's automatic
+        // color-mix() fallback already gives every one of these working
+        // `/NN` opacity-modifier support without needing the wrapper
+        // (proven by `status`/`sensor` below, which never used it).
+        border:     'var(--border)',
+        input:      'var(--input)',
+        ring:       'var(--ring)',
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
         primary: {
-          DEFAULT:    'oklch(var(--primary))',
-          foreground: 'oklch(var(--primary-foreground))',
+          DEFAULT:    'var(--primary)',
+          foreground: 'var(--primary-foreground)',
         },
         secondary: {
-          DEFAULT:    'oklch(var(--secondary))',
-          foreground: 'oklch(var(--secondary-foreground))',
+          DEFAULT:    'var(--secondary)',
+          foreground: 'var(--secondary-foreground)',
         },
         muted: {
-          DEFAULT:    'oklch(var(--muted))',
-          foreground: 'oklch(var(--muted-foreground))',
+          DEFAULT:    'var(--muted)',
+          foreground: 'var(--muted-foreground)',
         },
         card: {
-          DEFAULT:    'oklch(var(--card))',
-          foreground: 'oklch(var(--card-foreground))',
+          DEFAULT:    'var(--card)',
+          foreground: 'var(--card-foreground)',
         },
         destructive: {
-          DEFAULT:    'oklch(var(--destructive))',
+          DEFAULT:    'var(--destructive)',
+        },
+        // Referenced by shadcn's dropdown-menu.tsx/tooltip.tsx (bg-popover,
+        // focus:bg-accent, …) but were never wired here at all — the CSS
+        // variables existed in globals.css, Tailwind just never generated
+        // utilities for them.
+        popover: {
+          DEFAULT:    'var(--popover)',
+          foreground: 'var(--popover-foreground)',
+        },
+        accent: {
+          DEFAULT:    'var(--accent)',
+          foreground: 'var(--accent-foreground)',
         },
         /* Semantic sensor tokens — используют CSS переменные */
         sensor: {
@@ -37,6 +62,13 @@ export default {
           press: 'var(--sensor-press)',
           mq5:   'var(--sensor-mq5)',
           mq3:   'var(--sensor-mq3)',
+        },
+        /* Status accent tokens — canonical source for good/warn/bad/info everywhere */
+        status: {
+          safe:     'var(--status-safe)',
+          warning:  'var(--status-warning)',
+          critical: 'var(--status-critical)',
+          info:     'var(--status-info)',
         },
       },
       borderRadius: {

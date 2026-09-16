@@ -4,15 +4,30 @@ import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useWeatherHistoryCustomRangeQuery, useWeatherHistoryRangeQuery } from "@/entities/weather/api/weather.queries";
 import { getSensorStatus, getTempDeltaFromNorm } from "@/entities/weather/model/weather-thresholds";
 import type { SensorType, WeatherHistoryItem } from "@/entities/weather/model/weather.types";
 import { ChartSelector } from "@/features/chart-selector/ui/ChartSelector";
+import { DateRangePicker } from "@/features/date-range-picker/ui/DateRangePicker";
+import { ExportMenu } from "@/features/export-data/ui/ExportMenu";
+import { TimeRangeSelector } from "@/features/time-range-selector/ui/TimeRangeSelector";
+import type { WeatherPageType } from "@/shared/types/common";
 import { SENSOR_COLORS } from "@/shared/lib/chart/chart-colors";
-import { isValidTimestamp } from "@/shared/lib/date/filter-by-range";
+import {
+  CLIENT_ONLY_RANGES,
+  filterByExactRange,
+  filterByTimeRange,
+  isValidTimestamp,
+  type CustomDateRange,
+  type TimeRange,
+} from "@/shared/lib/date/filter-by-range";
+import { CHART_GAP_THRESHOLD_MS, detectGaps, insertGapBreaks } from "@/shared/lib/date/insert-gap-breaks";
 import { SENSOR_RANGES } from "@/shared/lib/weather-ranges";
 import { SensorStatCard } from "./SensorStatCard";
 
 type SensorChartsProps = {
+  type: WeatherPageType;
+  /** Canonical live cache (≤24h, kept fresh by WS/polling) — source for the 1h/6h/24h ranges. */
   history: WeatherHistoryItem[];
   isRefetching?: boolean;
 };
@@ -78,23 +93,48 @@ function formatTooltipTs(ts: number): string {
   }).format(new Date(ts));
 }
 
-export function SensorCharts({ history, isRefetching = false }: SensorChartsProps): React.JSX.Element {
+export function SensorCharts({ type, history, isRefetching = false }: SensorChartsProps): React.JSX.Element {
   const [activeSensor, setActiveSensor] = useState<SensorType>("temp");
+  const [activeRange, setActiveRange] = useState<TimeRange>("24h");
+  const [customRange, setCustomRange] = useState<CustomDateRange | null>(null);
   const { t } = useTranslation();
 
-  // Все валидные точки — соединяем непрерывно.
-  // Разрывы во времени видны через адаптивные метки оси (дд.мм\nЧЧ:мм)
-  // и через полную дату в tooltip.
-  const seriesData = useMemo(
+  // Календарь — если задан, имеет приоритет над чипами 1ч/6ч/.../Всё.
+  const customRangeQuery = useWeatherHistoryCustomRangeQuery(type, customRange);
+
+  // 1h/6h/24h — фильтруем на клиенте живой ≤24h кэш, без лишнего запроса.
+  // 7d/30d/all — данных за пределами 24h в live-кэше нет, отдельный запрос к бэку.
+  const isClientRange = CLIENT_ONLY_RANGES.has(activeRange);
+  const rangeQuery = useWeatherHistoryRangeQuery(type, activeRange);
+  const isRangeLoading = customRange ? customRangeQuery.isLoading : !isClientRange && rangeQuery.isLoading;
+
+  // Memoized on its actual inputs — `rangeQuery.data ?? []` would otherwise
+  // hand seriesData's useMemo a fresh [] reference every render (even when
+  // nothing changed), defeating the memo below and re-deriving on every
+  // unrelated re-render (e.g. every latest-value tick from WS/polling).
+  const rangedHistory = useMemo(() => {
+    if (customRange) return filterByExactRange(customRangeQuery.data ?? [], customRange);
+    return isClientRange ? filterByTimeRange(history, activeRange) : (rangeQuery.data ?? []);
+  }, [customRange, customRangeQuery.data, isClientRange, history, activeRange, rangeQuery.data]);
+
+  // Реальные точки — без искусственно вставленных разрывов, используются
+  // и для gap-детекции, и как основа для statистик (min/max/avg/trend).
+  const rawPoints = useMemo(
     () =>
-      history
+      rangedHistory
         .filter((item) => isValidTimestamp(item.date))
         .map((item) => [
           new Date(item.date).getTime(),
           item[activeSensor] ?? null,
         ] as [number, number | null]),
-    [history, activeSensor],
+    [rangedHistory, activeSensor],
   );
+
+  // Периоды простоя датчика (>90мин между соседними точками) — линия на
+  // графике должна рваться там, а не тянуться прямой через месяцы тишины.
+  const gaps = useMemo(() => detectGaps(rawPoints, CHART_GAP_THRESHOLD_MS), [rawPoints]);
+
+  const seriesData = useMemo(() => insertGapBreaks(rawPoints, gaps), [rawPoints, gaps]);
 
   const values = useMemo(
     () => seriesData.map(([, v]) => v).filter((v): v is number => typeof v === "number"),
@@ -292,10 +332,21 @@ export function SensorCharts({ history, isRefetching = false }: SensorChartsProp
           markLine: thresholds.length
             ? { silent: true, symbol: ["none", "none"], data: thresholds }
             : undefined,
+          // Shades the same offline stretches the line already breaks at —
+          // makes "sensor was down here" readable at a glance instead of
+          // only visible as an absence of line.
+          markArea: gaps.length
+            ? {
+                silent: true,
+                itemStyle: { color: "var(--glass-surface-hover)", opacity: 0.6 },
+                label: { show: false },
+                data: gaps.map((gap) => [{ xAxis: gap.fromTs }, { xAxis: gap.toTs }]),
+              }
+            : undefined,
         },
       ],
     };
-  }, [activeSensor, seriesData, t]);
+  }, [activeSensor, seriesData, gaps, t]);
 
   return (
     <div
@@ -316,21 +367,42 @@ export function SensorCharts({ history, isRefetching = false }: SensorChartsProp
         />
       )}
 
-      {/* Header — заголовок + селектор датчика */}
+      {/* Header — заголовок + селекторы датчика и диапазона */}
       <div className="mb-3 flex flex-col gap-3">
-        <div className="flex items-center gap-2">
-          <span className="h-5 w-1 shrink-0 rounded-full bg-blue-500" />
-          <h3 className="text-[11px] font-medium uppercase tracking-[0.24em] text-muted-themed sm:text-xs">
-            {t("chart_history_title")}
-          </h3>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="h-5 w-1 shrink-0 rounded-full bg-status-info" />
+            <h3 className="text-[11px] font-medium uppercase tracking-[0.24em] text-muted-themed sm:text-xs">
+              {t("chart_history_title")}
+            </h3>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <TimeRangeSelector
+              value={customRange ? null : activeRange}
+              onChange={(range) => {
+                setCustomRange(null);
+                setActiveRange(range);
+              }}
+            />
+            <DateRangePicker
+              value={customRange}
+              onChange={setCustomRange}
+              toDate={new Date()}
+            />
+            <ExportMenu type={type} selectedRange={customRange} />
+          </div>
         </div>
         <ChartSelector active={activeSensor} onChange={setActiveSensor} />
       </div>
 
       {/* График */}
-      {seriesData.length === 0 ? (
+      {isRangeLoading ? (
         <div className="flex flex-1 items-center justify-center text-sm text-muted-themed">
-          {t("empty_title")}
+          {t("chart_loading")}
+        </div>
+      ) : seriesData.length === 0 ? (
+        <div className="flex flex-1 items-center justify-center text-sm text-muted-themed">
+          {t("no_data_for_range")}
         </div>
       ) : (
         <motion.div
@@ -342,9 +414,10 @@ export function SensorCharts({ history, isRefetching = false }: SensorChartsProp
         >
           <ReactECharts
             // key только по сенсору — смена датчика сбрасывает zoom,
-            // polling-апдейты zoom не сбрасывают (merge mode)
+            // WS/polling-апдейты zoom не сбрасывают (merge mode)
             key={activeSensor}
             option={option}
+            notMerge={false}
             lazyUpdate
             style={{ height: "100%", width: "100%", minHeight: "inherit" }}
             opts={{ renderer: "canvas" }}

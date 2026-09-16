@@ -11,7 +11,10 @@ export async function getLatestWeather(type: WeatherPageType): Promise<WeatherLa
   return mapWeatherLatest(data);
 }
 
-export async function getWeatherHistory(type: WeatherPageType): Promise<WeatherHistoryItem[]> {
-  const { data } = await http.get(PATHS[type].history);
+export async function getWeatherHistory(
+  type: WeatherPageType,
+  opts?: { hours?: number; limit?: number },
+): Promise<WeatherHistoryItem[]> {
+  const { data } = await http.get(PATHS[type].history, { params: opts });
   return mapWeatherHistory(data);
 }

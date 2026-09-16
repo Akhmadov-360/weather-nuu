@@ -4,16 +4,19 @@ import type { WeatherHistoryItem, WeatherLatest } from './weather.types';
 const weatherRawSchema = z
   .object({
     fused_temp: z.coerce.number().optional(),
+    fusedTemp:  z.coerce.number().optional(), // apps/api WS payload (camelCase contract)
     temp:       z.coerce.number().optional(),
     hum:        z.coerce.number().optional(),
     humidity:   z.coerce.number().optional(),
     bmp_press:  z.coerce.number().optional(),
+    bmpPress:   z.coerce.number().optional(), // apps/api WS payload
     pressure:   z.coerce.number().optional(),
     mq5:        z.coerce.number().optional(),
     mq_5:       z.coerce.number().optional(),
     mq3:        z.coerce.number().optional(),
     mq_3:       z.coerce.number().optional(),
     date:       z.string().optional(),
+    recordedAt: z.string().optional(), // apps/api WS payload
     created_at: z.string().optional(),
     timestamp:  z.string().optional(),
   })
@@ -98,11 +101,11 @@ export function mapWeatherHistory(input: unknown): WeatherHistoryItem[] {
 }
 
 function normalizeWeather(raw: WeatherRaw): WeatherLatest {
-  const rawDate = raw.date ?? raw.created_at ?? raw.timestamp;
+  const rawDate = raw.date ?? raw.recordedAt ?? raw.created_at ?? raw.timestamp;
   return {
-    temp:  raw.fused_temp ?? raw.temp ?? 0,
+    temp:  raw.fusedTemp ?? raw.fused_temp ?? raw.temp ?? 0,
     hum:   raw.hum ?? raw.humidity ?? 0,
-    press: raw.bmp_press ?? raw.pressure ?? 0,
+    press: raw.bmpPress ?? raw.bmp_press ?? raw.pressure ?? 0,
     mq5:   raw.mq5 ?? raw.mq_5 ?? 0,
     mq3:   raw.mq3 ?? raw.mq_3 ?? 0,
     date:  parseApiDate(rawDate),

@@ -7,21 +7,18 @@ type GlassPanelProps = {
 
 /**
  * Основной surface-контейнер dashboard.
- * border-radius, shadow и цвета — через CSS vars,
- * чтобы корректно адаптироваться к dark/light теме.
- * border-radius задаётся inline (не через Tailwind токен)
- * для гарантированного применения поверх сбросов.
+ * Цвета и радиус — через Tailwind-токены (rounded-panel, shadow-panel из
+ * tailwind.config.ts) и CSS-переменные (--glass-surface/--glass-border из
+ * globals.css), а не inline style — так тема и масштаб радиуса остаются
+ * едиными на уровне конфига, а не разбросаны по компонентам.
  */
 export function GlassPanel({ children, className }: GlassPanelProps): React.JSX.Element {
   return (
     <div
-      className={cn('border backdrop-blur-xl', className)}
-      style={{
-        borderRadius: '24px',
-        backgroundColor: 'var(--glass-surface)',
-        borderColor: 'var(--glass-border)',
-        boxShadow: 'var(--panel-shadow)',
-      }}
+      className={cn(
+        'rounded-panel border border-[var(--glass-border)] bg-[var(--glass-surface)] shadow-panel backdrop-blur-xl',
+        className,
+      )}
     >
       {children}
     </div>

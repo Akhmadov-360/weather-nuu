@@ -1,3 +1,4 @@
+import { SENSOR_RANGES } from "@/shared/lib/weather-ranges";
 import type { SensorType } from "./weather.types";
 
 export type MetricTone = "good" | "warn" | "bad" | "neutral";
@@ -9,6 +10,20 @@ export type MetricStatus = {
 
 const TEMP_RANGE = { min: 20, max: 24 };
 const HUM_RANGE = { min: 30, max: 60 };
+
+/**
+ * Safe/warn boundary for a green→yellow→red sensor is the same "to" the
+ * range-bar zones use — derived here, not duplicated, so this status can
+ * never disagree with where the Slider marker actually sits (that's
+ * exactly the bug this replaced: mq5/mq3 had their own hand-picked
+ * thresholds here that drifted away from SENSOR_RANGES over time).
+ */
+function getZoneStatus(sensor: "mq5" | "mq3", value: number): MetricStatus {
+  const [safe, warn] = SENSOR_RANGES[sensor].zones;
+  if (value <= safe!.to) return { labelKey: "status_safe", tone: "good" };
+  if (value <= warn!.to) return { labelKey: "status_warning", tone: "warn" };
+  return { labelKey: "status_high", tone: "bad" };
+}
 
 export function getSensorStatus(sensor: SensorType, value: number | null): MetricStatus {
   if (value == null || Number.isNaN(value)) {
@@ -30,14 +45,10 @@ export function getSensorStatus(sensor: SensorType, value: number | null): Metri
       return { labelKey: "status_reference", tone: "neutral" };
 
     case "mq5":
-      if (value <= 100) return { labelKey: "status_safe", tone: "good" };
-      if (value <= 300) return { labelKey: "status_warning", tone: "warn" };
-      return { labelKey: "status_high", tone: "bad" };
+      return getZoneStatus("mq5", value);
 
     case "mq3":
-      if (value <= 5) return { labelKey: "status_safe", tone: "good" };
-      if (value <= 20) return { labelKey: "status_warning", tone: "warn" };
-      return { labelKey: "status_high", tone: "bad" };
+      return getZoneStatus("mq3", value);
   }
 }
 

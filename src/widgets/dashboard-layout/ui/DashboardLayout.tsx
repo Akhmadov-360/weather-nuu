@@ -1,4 +1,6 @@
 import { useLatestWeatherQuery, useWeatherHistoryQuery } from '@/entities/weather/api/weather.queries';
+import { useWeatherSocket } from '@/entities/weather/api/useWeatherSocket';
+import { computeFreshness } from '@/entities/weather/model/weather-freshness';
 import type { DashboardPageConfig } from '@/entities/weather/model/weather.types';
 import { GlassPanel } from '@/shared/ui/glass-panel';
 import { EmptyState } from '@/shared/ui/empty-state';
@@ -8,7 +10,9 @@ import { useTranslation } from 'react-i18next';
 
 import { SensorCharts } from '@/widgets/sensor-charts/ui/SensorCharts';
 import { TopBar } from '@/widgets/topbar/ui/TopBar';
-import { WeatherSummary } from '@/widgets/weather-summary/ui/WeatherSummary';
+import { MetricCard } from '@/widgets/weather-summary/ui/MetricCard';
+import { TempHeroCard } from '@/widgets/weather-summary/ui/TempHeroCard';
+import { ArchiveDataBanner } from './ArchiveDataBanner';
 import { SensorChartsSkeleton } from './SensorChartsSkeletom';
 import { TimeDisplay } from './TimeDisplay';
 import { WeatherSummarySkeleton } from './WeatherSummarySkeleton';
@@ -26,9 +30,21 @@ const fadeUp: Variants = {
   },
 };
 
+/**
+ * One flat grid — time, temp hero and the 4 metric tiles are all siblings
+ * of the same grid context, so row heights sync automatically (the tallest
+ * cell in a row sets that row's height for every column). A {time, temp}
+ * column next to an independent 2x2 metrics grid used to leave a dead gap
+ * under whichever column was shorter, since each grid balanced its own
+ * rows in isolation.
+ */
+const summaryGridClass =
+  'grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-[minmax(240px,300px)_repeat(2,minmax(0,1fr))] lg:grid-rows-2';
+
 export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Element {
   const latestQuery  = useLatestWeatherQuery(config.key);
   const historyQuery = useWeatherHistoryQuery(config.key);
+  useWeatherSocket(config.key);
   const { t } = useTranslation();
 
   const isInitialLoading = latestQuery.isLoading  || historyQuery.isLoading;
@@ -38,6 +54,7 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
 
   const latest  = latestQuery.data;
   const history = historyQuery.data;
+  const freshness = history ? computeFreshness(history) : 'live';
 
   return (
     <main className="relative min-h-screen overflow-hidden text-primary-themed">
@@ -52,16 +69,9 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
 
         {isInitialLoading ? (
           <div className="mt-6 flex flex-1 flex-col gap-6">
-            <section className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)] xl:items-stretch">
-              <motion.div variants={fadeUp} initial="hidden" animate="visible">
-                <GlassPanel className="p-5">
-                  <TimeDisplay isLoading />
-                </GlassPanel>
-              </motion.div>
-              <motion.div variants={fadeUp} initial="hidden" animate="visible">
-                <WeatherSummarySkeleton />
-              </motion.div>
-            </section>
+            <motion.div variants={fadeUp} initial="hidden" animate="visible">
+              <WeatherSummarySkeleton />
+            </motion.div>
             <motion.div variants={fadeUp} initial="hidden" animate="visible" className="flex-1">
               <SensorChartsSkeleton />
             </motion.div>
@@ -89,23 +99,20 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
 
         ) : (
           <div className="mt-6 flex flex-1 flex-col gap-6">
-            <section className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)] xl:items-stretch">
-              <motion.div variants={fadeUp} initial="hidden" animate="visible">
-                <GlassPanel className="h-full p-5 sm:p-6">
-                  <TimeDisplay />
-                </GlassPanel>
-              </motion.div>
+            <motion.div variants={fadeUp} initial="hidden" animate="visible" className={summaryGridClass}>
+              <TimeDisplay freshness={freshness} />
+              <MetricCard sensor="hum" label={t('lbl_hum')} value={latest.hum} />
+              <MetricCard sensor="press" label={t('lbl_press')} value={latest.press} />
+              <TempHeroCard temp={latest.temp} history={history} />
+              <MetricCard sensor="mq5" label={t('lbl_mq5')} value={latest.mq5} />
+              <MetricCard sensor="mq3" label={t('lbl_mq3')} value={latest.mq3} />
+            </motion.div>
 
-              <motion.div
-                variants={fadeUp}
-                initial="hidden"
-                animate="visible"
-                transition={{ delay: 0.05, duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
-                className="min-w-0"
-              >
-                <WeatherSummary latest={latest} history={history} />
+            {freshness !== 'live' && (
+              <motion.div variants={fadeUp} initial="hidden" animate="visible">
+                <ArchiveDataBanner lastSeenDate={history[history.length - 1]!.date} />
               </motion.div>
-            </section>
+            )}
 
             <motion.section
               variants={fadeUp}
@@ -114,7 +121,7 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
               transition={{ delay: 0.1, duration: 0.45, ease: 'easeOut' }}
               className="flex-1"
             >
-              <SensorCharts history={history} isRefetching={isRefetching} />
+              <SensorCharts type={config.key} history={history} isRefetching={isRefetching} />
             </motion.section>
 
             <LiveStreams />

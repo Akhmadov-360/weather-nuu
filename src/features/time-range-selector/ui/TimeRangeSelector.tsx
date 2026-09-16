@@ -4,17 +4,19 @@ import { cn } from '@/shared/lib/cn';
 import type { TimeRange } from '@/shared/lib/date/filter-by-range';
 
 type TimeRangeSelectorProps = {
-  value: TimeRange;
+  /** null means no preset is active — e.g. a custom calendar range is in use instead. */
+  value: TimeRange | null;
   onChange: (range: TimeRange) => void;
 };
 
-const RANGES: TimeRange[] = ['1h', '6h', '24h', '7d', 'all'];
+const RANGES: TimeRange[] = ['1h', '6h', '24h', '7d', '30d', 'all'];
 
 const RANGE_KEYS: Record<TimeRange, string> = {
   '1h':  'range_1h',
   '6h':  'range_6h',
   '24h': 'range_24h',
   '7d':  'range_7d',
+  '30d': 'range_30d',
   'all': 'range_all',
 };
 

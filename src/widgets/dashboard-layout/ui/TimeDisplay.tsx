@@ -1,12 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Skeleton } from '@/components/ui/skeleton';
+import type { FreshnessState } from '@/entities/weather/model/weather-freshness';
 
 type TimeDisplayProps = {
-  isLoading?: boolean;
+  /** Defaults to 'live' styling if omitted — callers without history data (e.g. loading state) don't need to know about this. */
+  freshness?: FreshnessState;
 };
 
-export function TimeDisplay({ isLoading = false }: TimeDisplayProps): React.JSX.Element {
+const FRESHNESS_STYLE: Record<FreshnessState, { badgeClass: string; dotClass: string; pulse: boolean; labelKey: string }> = {
+  live:    { badgeClass: 'border-status-safe/20 bg-status-safe/10 text-status-safe',       dotClass: 'bg-status-safe',    pulse: true,  labelKey: 'live' },
+  stale:   { badgeClass: 'border-status-warning/20 bg-status-warning/10 text-status-warning', dotClass: 'bg-status-warning', pulse: false, labelKey: 'stale' },
+  // Calm/neutral, not alarming — offline sensors are an expected state
+  // (e.g. nobody in the building over summer), not an error.
+  offline: { badgeClass: 'border-[var(--glass-border)] bg-[var(--glass-surface-hover)] text-muted-themed', dotClass: 'bg-[var(--text-muted)]', pulse: false, labelKey: 'offline' },
+};
+
+export function TimeDisplay({ freshness = 'live' }: TimeDisplayProps): React.JSX.Element {
   const { i18n, t } = useTranslation();
   const [now, setNow] = useState(() => new Date());
 
@@ -35,18 +44,8 @@ export function TimeDisplay({ isLoading = false }: TimeDisplayProps): React.JSX.
     [i18n.language, now],
   );
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-14 w-40 rounded-xl bg-white/10" />
-        <Skeleton className="h-6 w-28 rounded-lg bg-white/10" />
-        <Skeleton className="h-5 w-16 rounded-lg bg-white/10" />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex h-full flex-col justify-between">
+    <div className="flex h-full flex-col justify-between rounded-card border border-[var(--glass-border)] bg-[var(--glass-surface)] p-4 shadow-card backdrop-blur-md sm:p-5">
       <div>
         <div className="text-5xl font-semibold tracking-tight text-primary-themed sm:text-6xl">
           {time}
@@ -56,9 +55,13 @@ export function TimeDisplay({ isLoading = false }: TimeDisplayProps): React.JSX.
         </div>
       </div>
 
-      <div className="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-xs font-medium uppercase tracking-[0.22em] text-emerald-600 dark:text-emerald-300">
-        <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-glow" />
-        {t('live')}
+      <div
+        className={`mt-6 inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium uppercase tracking-[0.22em] ${FRESHNESS_STYLE[freshness].badgeClass}`}
+      >
+        <span
+          className={`h-2 w-2 rounded-full ${FRESHNESS_STYLE[freshness].dotClass} ${FRESHNESS_STYLE[freshness].pulse ? 'shadow-glow' : ''}`}
+        />
+        {t(FRESHNESS_STYLE[freshness].labelKey)}
       </div>
     </div>
   );
