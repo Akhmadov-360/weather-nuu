@@ -27,6 +27,7 @@ type WeatherRaw = z.infer<typeof weatherRawSchema>;
 const weatherListSchema = z.union([
   z.array(weatherRawSchema),
   z.object({ data: z.array(weatherRawSchema) }),
+  z.object({ items: z.array(weatherRawSchema) }), // apps/api /v1/sensors/:source/history shape
 ]);
 
 /**
@@ -96,7 +97,7 @@ export function mapWeatherLatest(input: unknown): WeatherLatest {
 
 export function mapWeatherHistory(input: unknown): WeatherHistoryItem[] {
   const parsed = weatherListSchema.parse(input);
-  const items  = Array.isArray(parsed) ? parsed : parsed.data;
+  const items  = Array.isArray(parsed) ? parsed : 'items' in parsed ? parsed.items : parsed.data;
   return items.map(normalizeWeather);
 }
 

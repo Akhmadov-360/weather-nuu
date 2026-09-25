@@ -9,7 +9,7 @@ type TimeRangeSelectorProps = {
   onChange: (range: TimeRange) => void;
 };
 
-const RANGES: TimeRange[] = ['1h', '6h', '24h', '7d', '30d', 'all'];
+const RANGES: TimeRange[] = ['1h', '6h', '24h', '7d', '30d', '90d'];
 
 const RANGE_KEYS: Record<TimeRange, string> = {
   '1h':  'range_1h',
@@ -17,7 +17,7 @@ const RANGE_KEYS: Record<TimeRange, string> = {
   '24h': 'range_24h',
   '7d':  'range_7d',
   '30d': 'range_30d',
-  'all': 'range_all',
+  '90d': 'range_90d',
 };
 
 export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps): React.JSX.Element {
@@ -35,7 +35,7 @@ export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps): 
             key={range}
             onClick={() => onChange(range)}
             className={cn(
-              'relative rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors sm:text-xs',
+              'relative cursor-pointer rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors sm:text-xs',
               isActive ? 'text-primary-themed' : 'text-muted-themed hover:text-secondary-themed',
             )}
           >

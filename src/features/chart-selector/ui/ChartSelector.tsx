@@ -44,7 +44,7 @@ export function ChartSelector({ active, onChange }: ChartSelectorProps): React.J
               key={sensor}
               onClick={() => onChange(sensor)}
               className={cn(
-                'relative flex min-w-[82px] flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition-all sm:min-w-[110px] sm:px-4 sm:text-sm',
+                'relative flex min-w-[82px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition-all sm:min-w-[110px] sm:px-4 sm:text-sm',
                 isActive ? 'text-primary-themed' : 'text-muted-themed hover:text-secondary-themed',
               )}
             >

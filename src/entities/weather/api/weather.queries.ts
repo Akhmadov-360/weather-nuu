@@ -1,10 +1,20 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getLatestWeather, getWeatherHistory } from "./weather.api";
+import { getLatestWeather, getWeatherAggregate, getWeatherHistory } from "./weather.api";
 import { ENV } from "@/shared/config/env";
-import { CLIENT_ONLY_RANGES, RANGE_TO_HOURS, customRangeToHours, type CustomDateRange, type TimeRange } from "@/shared/lib/date/filter-by-range";
+import { CLIENT_ONLY_RANGES, RANGE_TO_HOURS, type CustomDateRange, type TimeRange } from "@/shared/lib/date/filter-by-range";
 import type { WeatherPageType } from "@/shared/types/common";
 import { appendHistoryPoint } from "../model/append-history-point";
 import type { WeatherHistoryItem, WeatherLatest } from "../model/weather.types";
+
+/**
+ * Threshold at which we switch from raw pagination to bucketed aggregation
+ * for a custom calendar range. 7 days = the practical ceiling at which
+ * ~15k raw records still fit two paginated pages, so under it the extra
+ * fidelity is essentially free. Above it the raw path costs seconds and
+ * MB, and hourly aggregate carries the same visual signal much cheaper.
+ * Kept as a public constant so the UI can label the mode transition too.
+ */
+export const AGGREGATE_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function useLatestWeatherQuery(type: WeatherPageType) {
   const queryClient = useQueryClient();
@@ -42,37 +52,55 @@ export function useLatestPoint(type: WeatherPageType): WeatherLatest | undefined
 }
 
 /**
- * Для 1h/6h/24h канонический live-кэш (useWeatherHistoryQuery, ≤24h,
- * обновляется WS/поллингом) уже содержит всё нужное — просто фильтруется
- * на клиенте, без лишнего запроса. Для 7d/30d/all бэку нужно спросить
- * данные за пределами тех 24h отдельным запросом — этот хук именно за
- * этим и нужен, `enabled` выключен для диапазонов, которым он не нужен.
+ * Preset ranges (7д / 30д / 90д) now always use the bucketed aggregate
+ * endpoint — a single ~1500-point response instead of dozens of raw
+ * paginated pages. 1h/6h/24h still ride the live cache client-side.
+ * `enabled` is off for the ranges that don't need a server fetch.
  */
 export function useWeatherHistoryRangeQuery(type: WeatherPageType, range: TimeRange) {
   const needsServerFetch = !CLIENT_ONLY_RANGES.has(range);
   const hours = RANGE_TO_HOURS[range];
+  const to = new Date();
+  const from = hours ? new Date(to.getTime() - hours * 60 * 60 * 1000) : null;
 
   return useQuery({
-    queryKey: ["weather", type, "history", "range", range],
-    queryFn: () => getWeatherHistory(type, { hours, limit: 10_000 }),
-    enabled: needsServerFetch,
+    queryKey: ["weather", type, "aggregate", "range", range],
+    queryFn: () => getWeatherAggregate(type, { from: from!, to }),
+    enabled: needsServerFetch && from !== null,
     staleTime: 60_000,
   });
 }
 
 /**
- * Arbitrary calendar range — same "hours-based fetch, trim exactly on the
- * client" strategy as useWeatherHistoryRangeQuery, since the old backend
- * only understands `hours`, not explicit from/to bounds. Reused as-is by
- * the future export UI (same DateRangePicker primitive, same query shape).
+ * Custom calendar range picks its transport by span: ≤7 days keeps the
+ * raw paginated path (higher resolution, cheap enough), wider goes
+ * through the aggregate endpoint. The consumer inspects `mode` to know
+ * whether it got `WeatherHistoryItem[]` or an `AggregateBucketData`.
  */
-export function useWeatherHistoryCustomRangeQuery(type: WeatherPageType, range: CustomDateRange | null) {
-  const hours = range ? customRangeToHours(range) : undefined;
+export function useWeatherHistoryCustomRangeQuery(
+  type: WeatherPageType,
+  range: CustomDateRange | null,
+) {
+  const spanMs = range ? range.to.getTime() - range.from.getTime() : 0;
+  const mode: "raw" | "aggregate" = spanMs > AGGREGATE_THRESHOLD_MS ? "aggregate" : "raw";
 
-  return useQuery({
-    queryKey: ["weather", type, "history", "custom", range?.from.toISOString(), range?.to.toISOString()],
-    queryFn: () => getWeatherHistory(type, { hours, limit: 10_000 }),
-    enabled: range !== null,
+  const rawQuery = useQuery({
+    queryKey: ["weather", type, "history", "custom-raw", range?.from.toISOString(), range?.to.toISOString()],
+    queryFn: () => {
+      // Convert span to `hours` so getWeatherHistory can build `from`.
+      const hours = Math.max(1, Math.ceil(spanMs / 3_600_000));
+      return getWeatherHistory(type, { hours });
+    },
+    enabled: range !== null && mode === "raw",
     staleTime: 60_000,
   });
+
+  const aggregateQuery = useQuery({
+    queryKey: ["weather", type, "aggregate", "custom", range?.from.toISOString(), range?.to.toISOString()],
+    queryFn: () => getWeatherAggregate(type, range!),
+    enabled: range !== null && mode === "aggregate",
+    staleTime: 60_000,
+  });
+
+  return { mode, rawQuery, aggregateQuery };
 }

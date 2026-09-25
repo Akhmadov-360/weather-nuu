@@ -1,12 +1,19 @@
+import { useQuery } from "@tanstack/react-query";
 import type { EChartsOption } from "echarts";
 import ReactECharts from "echarts-for-react";
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { getSensorBounds } from "@/entities/weather/api/weather.api";
 import { useWeatherHistoryCustomRangeQuery, useWeatherHistoryRangeQuery } from "@/entities/weather/api/weather.queries";
 import { getSensorStatus, getTempDeltaFromNorm } from "@/entities/weather/model/weather-thresholds";
-import type { SensorType, WeatherHistoryItem } from "@/entities/weather/model/weather.types";
+import type {
+  AggregateBucketData,
+  AggregateBucketRow,
+  SensorType,
+  WeatherHistoryItem,
+} from "@/entities/weather/model/weather.types";
 import { ChartSelector } from "@/features/chart-selector/ui/ChartSelector";
 import { DateRangePicker } from "@/features/date-range-picker/ui/DateRangePicker";
 import { ExportMenu } from "@/features/export-data/ui/ExportMenu";
@@ -97,44 +104,107 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
   const [activeSensor, setActiveSensor] = useState<SensorType>("temp");
   const [activeRange, setActiveRange] = useState<TimeRange>("24h");
   const [customRange, setCustomRange] = useState<CustomDateRange | null>(null);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const { t } = useTranslation();
 
-  // Календарь — если задан, имеет приоритет над чипами 1ч/6ч/.../Всё.
-  const customRangeQuery = useWeatherHistoryCustomRangeQuery(type, customRange);
+  // The sensor's actual earliest recorded reading — used to disable
+  // calendar dates before the sensor ever existed. Cached for 24h since
+  // "earliest" only ever moves as far as the retention policy shifts it
+  // (i.e. very rarely relative to a user session).
+  const boundsQuery = useQuery({
+    queryKey: ["weather", type, "bounds"],
+    queryFn: () => getSensorBounds(type),
+    staleTime: 24 * 60 * 60 * 1000,
+  });
+  const earliestSensorDate = boundsQuery.data?.earliest ?? undefined;
 
-  // 1h/6h/24h — фильтруем на клиенте живой ≤24h кэш, без лишнего запроса.
-  // 7d/30d/all — данных за пределами 24h в live-кэше нет, отдельный запрос к бэку.
+  // Календарь — если задан, имеет приоритет над чипами 1ч/6ч/.../90д.
+  // The hook picks its transport (raw vs aggregate) by span internally.
+  const customRangeQuery = useWeatherHistoryCustomRangeQuery(type, customRange);
+  const customQueryActive = customRange
+    ? customRangeQuery.mode === "aggregate"
+      ? customRangeQuery.aggregateQuery
+      : customRangeQuery.rawQuery
+    : null;
+
+  // 1ч/6ч/24ч — фильтруем на клиенте живой ≤24h кэш, без лишнего запроса.
+  // 7д/30д/90д — сервер отдаёт бакетированный aggregate за одну запрос.
   const isClientRange = CLIENT_ONLY_RANGES.has(activeRange);
   const rangeQuery = useWeatherHistoryRangeQuery(type, activeRange);
-  const isRangeLoading = customRange ? customRangeQuery.isLoading : !isClientRange && rangeQuery.isLoading;
+  const isRangeLoading = customRange
+    ? (customQueryActive?.isLoading ?? false)
+    : !isClientRange && rangeQuery.isLoading;
 
-  // Memoized on its actual inputs — `rangeQuery.data ?? []` would otherwise
-  // hand seriesData's useMemo a fresh [] reference every render (even when
-  // nothing changed), defeating the memo below and re-deriving on every
-  // unrelated re-render (e.g. every latest-value tick from WS/polling).
-  const rangedHistory = useMemo(() => {
-    if (customRange) return filterByExactRange(customRangeQuery.data ?? [], customRange);
-    return isClientRange ? filterByTimeRange(history, activeRange) : (rangeQuery.data ?? []);
-  }, [customRange, customRangeQuery.data, isClientRange, history, activeRange, rangeQuery.data]);
+  /**
+   * The chart runs in one of two modes:
+   * - "raw":       every point is a real reading, drawn as-is, with
+   *                offline-gap detection breaking the line at outages.
+   * - "aggregate": each point is one bucket (avg/min/max/count) — drawn
+   *                as a line for avg plus a shaded min–max band, so
+   *                short outliers stay visible even after downsampling.
+   */
+  type ChartMode = "raw" | "aggregate";
+  const chartMode: ChartMode = useMemo(() => {
+    if (customRange) return customRangeQuery.mode;
+    return isClientRange ? "raw" : "aggregate";
+  }, [customRange, customRangeQuery.mode, isClientRange]);
 
-  // Реальные точки — без искусственно вставленных разрывов, используются
-  // и для gap-детекции, и как основа для statистик (min/max/avg/trend).
-  const rawPoints = useMemo(
-    () =>
-      rangedHistory
-        .filter((item) => isValidTimestamp(item.date))
-        .map((item) => [
-          new Date(item.date).getTime(),
-          item[activeSensor] ?? null,
-        ] as [number, number | null]),
-    [rangedHistory, activeSensor],
+  // Aggregate-mode raw response (may be null when in raw mode or loading).
+  const aggregateData: AggregateBucketData | null = useMemo(() => {
+    if (chartMode !== "aggregate") return null;
+    if (customRange) return customRangeQuery.aggregateQuery.data ?? null;
+    return (rangeQuery.data as AggregateBucketData | null | undefined) ?? null;
+  }, [chartMode, customRange, customRangeQuery.aggregateQuery.data, rangeQuery.data]);
+
+  // Raw-mode history rows, either from the live cache (client-only ranges)
+  // or from a raw custom-range fetch.
+  const rangedHistory: WeatherHistoryItem[] = useMemo(() => {
+    if (chartMode !== "raw") return [];
+    if (customRange) return filterByExactRange(customRangeQuery.rawQuery.data ?? [], customRange);
+    return filterByTimeRange(history, activeRange);
+  }, [chartMode, customRange, customRangeQuery.rawQuery.data, history, activeRange]);
+
+  // Aggregate-mode series — avg line + optional (min,max) band, indexed by activeSensor.
+  const aggregatePoints = useMemo(() => {
+    if (chartMode !== "aggregate" || !aggregateData) return null;
+    const rows = aggregateData.items.filter((r: AggregateBucketRow) => r.count > 0);
+    const avg: [number, number | null][] = [];
+    const min: [number, number | null][] = [];
+    const range: [number, number | null][] = []; // (max - min), stacked on min to draw the band
+    for (const r of rows) {
+      const ts = new Date(r.ts).getTime();
+      const stats = r[activeSensor];
+      avg.push([ts, stats.avg]);
+      min.push([ts, stats.min]);
+      range.push([ts, stats.min != null && stats.max != null ? stats.max - stats.min : null]);
+    }
+    return { rows, avg, min, range };
+  }, [chartMode, aggregateData, activeSensor]);
+
+  // Raw-mode series — every reading, with detected offline gaps.
+  const rawPoints = useMemo(() => {
+    if (chartMode !== "raw") return [];
+    return rangedHistory
+      .filter((item) => isValidTimestamp(item.date))
+      .map((item) => [
+        new Date(item.date).getTime(),
+        item[activeSensor] ?? null,
+      ] as [number, number | null]);
+  }, [chartMode, rangedHistory, activeSensor]);
+
+  const gaps = useMemo(
+    () => (chartMode === "raw" ? detectGaps(rawPoints, CHART_GAP_THRESHOLD_MS) : []),
+    [chartMode, rawPoints],
   );
 
-  // Периоды простоя датчика (>90мин между соседними точками) — линия на
-  // графике должна рваться там, а не тянуться прямой через месяцы тишины.
-  const gaps = useMemo(() => detectGaps(rawPoints, CHART_GAP_THRESHOLD_MS), [rawPoints]);
-
-  const seriesData = useMemo(() => insertGapBreaks(rawPoints, gaps), [rawPoints, gaps]);
+  // What ECharts actually plots — for raw, the reading points with null
+  // breaks at gaps; for aggregate, the avg line. Both share the same
+  // [ts, value|null] shape so downstream math (stats, tooltip, endLabel)
+  // stays uniform.
+  const seriesData: [number, number | null][] = useMemo(
+    () => (chartMode === "aggregate" ? aggregatePoints?.avg ?? [] : insertGapBreaks(rawPoints, gaps)),
+    [chartMode, aggregatePoints, rawPoints, gaps],
+  );
 
   const values = useMemo(
     () => seriesData.map(([, v]) => v).filter((v): v is number => typeof v === "number"),
@@ -193,14 +263,46 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
         left: 8,
         // Правый отступ для endLabel — на мобильных чуть меньше
         right: 56,
-        top: 16,
+        // +20 под toolbox-иконки (reset zoom / save as image) в правом верхнем углу
+        top: 36,
         bottom: 50,
         containLabel: true,
       },
 
+      toolbox: {
+        right: 8,
+        top: 0,
+        itemSize: 14,
+        itemGap: 10,
+        iconStyle: {
+          borderColor: "var(--chart-axis-label)",
+          opacity: 0.55,
+        },
+        emphasis: {
+          iconStyle: { borderColor: color, opacity: 1 },
+        },
+        feature: {
+          // Возвращает dataZoom к 0–100% после ручного зума/панорамирования —
+          // без этого единственный способ вернуться к полному виду — заново
+          // выбрать тот же диапазон в TimeRangeSelector.
+          restore: { title: t("chart_reset_zoom") },
+          saveAsImage: {
+            title: t("chart_save_image"),
+            name: `${type}-${activeSensor}-${new Date().toISOString().slice(0, 10)}`,
+            // No explicit backgroundColor — canvas fillStyle can't resolve
+            // CSS custom properties (var(--x) is a cascade-time construct,
+            // not something the 2D context understands), so a literal
+            // theme token here would silently no-op. Leaving it unset
+            // exports a transparent PNG instead, which is the standard,
+            // theme-safe default for canvas chart exports.
+            pixelRatio: 2,
+          },
+        },
+      },
+
       tooltip: {
         trigger: "axis",
-        triggerOn: "mousemove|click",
+        triggerOn: "mousemove|click|mousewheel",
         axisPointer: {
           type: "cross",
           snap: true,
@@ -215,20 +317,47 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
         extraCssText: "border-radius: 12px; backdrop-filter: blur(12px);",
         formatter: (params: unknown) => {
           const arr = Array.isArray(params) ? params : [params];
-          const p   = arr[0] as { value?: [number, number | null] } | undefined;
-          if (!p?.value) return "";
-          const [ts, val] = p.value;
-          const formatted =
-            typeof val === "number"
-              ? Number.isInteger(val) ? String(val) : val.toFixed(2)
+          const first = arr[0] as { value?: [number, number | null] } | undefined;
+          if (!first?.value) return "";
+          const [ts, val] = first.value;
+          const fmt = (n: number | null | undefined) =>
+            typeof n === "number"
+              ? Number.isInteger(n) ? String(n) : n.toFixed(2)
               : "—";
+
+          // Aggregate-mode tooltip: pull the corresponding bucket by ts so
+          // we can also show min/max/count — those are what distinguish a
+          // calm hourly avg from one that spiked hard and mean-reverted.
+          if (chartMode === "aggregate" && aggregatePoints) {
+            const bucket = aggregatePoints.rows.find((r) => new Date(r.ts).getTime() === ts);
+            const stats = bucket?.[activeSensor];
+            const rows: [string, string][] = [];
+            if (stats) {
+              rows.push([t("stat_avg"), `${fmt(stats.avg)} ${unit}`]);
+              rows.push([t("stat_min"), `${fmt(stats.min)} ${unit}`]);
+              rows.push([t("stat_max"), `${fmt(stats.max)} ${unit}`]);
+            }
+            if (bucket) rows.push([t("stat_count"), String(bucket.count)]);
+            return `
+              <div style="min-width:180px;">
+                <div style="margin-bottom:6px;font-size:11px;color:var(--chart-tooltip-label)">
+                  ${formatTooltipTs(ts)}
+                </div>
+                ${rows.map(([k, v]) => `
+                  <div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--chart-tooltip-text);line-height:1.7">
+                    <span style="opacity:0.7">${k}</span>
+                    <span style="font-weight:600">${v}</span>
+                  </div>`).join("")}
+              </div>`;
+          }
+
           return `
             <div style="min-width:140px;">
               <div style="margin-bottom:6px;font-size:11px;color:var(--chart-tooltip-label)">
                 ${formatTooltipTs(ts)}
               </div>
               <div style="font-size:18px;font-weight:700;color:var(--chart-tooltip-text);line-height:1.2">
-                ${formatted}
+                ${fmt(val)}
                 <span style="font-size:12px;font-weight:400;opacity:0.7;margin-left:2px">${unit}</span>
               </div>
             </div>`;
@@ -281,11 +410,58 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
       ],
 
       series: [
+        // In aggregate mode the min–max band is drawn first, underneath
+        // the avg line, so short-lived outliers stay visible: a bucket
+        // whose avg looks calm but whose max spiked hard shows up as a
+        // sudden widening of the band. Two stacked "invisible" lines are
+        // the standard ECharts pattern for a shaded confidence band — the
+        // first line sits at min with no stroke, the second's stacked
+        // value is (max - min) so its area style ends up filling the
+        // vertical gap between the two.
+        ...(chartMode === "aggregate" && aggregatePoints
+          ? [
+              {
+                name: "__min",
+                type: "line" as const,
+                data: aggregatePoints.min,
+                stack: "band",
+                lineStyle: { opacity: 0 },
+                symbol: "none",
+                tooltip: { show: false },
+                silent: true,
+                z: 0,
+              },
+              {
+                name: "__range",
+                type: "line" as const,
+                data: aggregatePoints.range,
+                stack: "band",
+                lineStyle: { opacity: 0 },
+                symbol: "none",
+                areaStyle: { color, opacity: 0.18 },
+                tooltip: { show: false },
+                silent: true,
+                z: 0,
+              },
+            ]
+          : []),
         {
           name: t(`btn_${activeSensor}`),
           type: "line",
+          // Safety net when a caller ends up throwing tens of thousands of
+          // raw points at ECharts — LTTB (Largest-Triangle-Three-Buckets)
+          // downsamples to what actually fits the viewport while preserving
+          // the shape of the line, so spikes don't get flattened by a naïve
+          // stride-based sampler. Kicks in only when there's enough data
+          // to warrant it; below that ECharts renders untouched.
+          // Disabled in aggregate mode — every bucket is already visually
+          // meaningful, an extra downsample would lose the point of it.
+          sampling: chartMode === "raw" ? "lttb" : undefined,
+          progressive: 5_000,
+          progressiveThreshold: 20_000,
           smooth: 0.4,
           showSymbol: false,
+          z: 1,
           lineStyle: {
             width: 2.5,
             color,
@@ -317,7 +493,11 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
               const p = params as { value?: [number, number | null] };
               const v = p?.value?.[1];
               if (typeof v !== "number") return "";
-              return `${Number.isInteger(v) ? String(v) : v.toFixed(1)} ${unit}`;
+              // Same precision as the tooltip (.toFixed(2)) — at 1 decimal,
+              // consecutive close readings (30.18 → 30.24) both round to
+              // "30.2" and the label looks frozen even though the value is
+              // actually ticking underneath.
+              return `${Number.isInteger(v) ? String(v) : v.toFixed(2)} ${unit}`;
             },
             color,
             fontWeight: "bold",
@@ -346,7 +526,7 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
         },
       ],
     };
-  }, [activeSensor, seriesData, gaps, t]);
+  }, [activeSensor, seriesData, gaps, chartMode, aggregatePoints, type, t]);
 
   return (
     <div
@@ -387,23 +567,47 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
             <DateRangePicker
               value={customRange}
               onChange={setCustomRange}
+              fromDate={earliestSensorDate}
               toDate={new Date()}
+              open={datePickerOpen}
+              onOpenChange={setDatePickerOpen}
             />
-            <ExportMenu type={type} selectedRange={customRange} />
+            <ExportMenu
+              type={type}
+              selectedRange={customRange}
+              earliestSensorDate={earliestSensorDate ?? null}
+              onRequestPickRange={() => setDatePickerOpen(true)}
+            />
           </div>
         </div>
         <ChartSelector active={activeSensor} onChange={setActiveSensor} />
       </div>
 
-      {/* График */}
+      {/* График. Empty/loading states share the same min-height as the chart
+          itself so the surrounding card doesn't visibly collapse and jump
+          back when the user switches to a range that has no data — the
+          transition should feel like the chart is being replaced in-place,
+          not like the whole panel is resizing. */}
       {isRangeLoading ? (
-        <div className="flex flex-1 items-center justify-center text-sm text-muted-themed">
+        <motion.div
+          key="loading"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className="flex min-h-[220px] w-full flex-1 items-center justify-center text-sm text-muted-themed sm:min-h-[300px] lg:min-h-[360px]"
+        >
           {t("chart_loading")}
-        </div>
+        </motion.div>
       ) : seriesData.length === 0 ? (
-        <div className="flex flex-1 items-center justify-center text-sm text-muted-themed">
+        <motion.div
+          key="empty"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className="flex min-h-[220px] w-full flex-1 items-center justify-center text-sm text-muted-themed sm:min-h-[300px] lg:min-h-[360px]"
+        >
           {t("no_data_for_range")}
-        </div>
+        </motion.div>
       ) : (
         <motion.div
           initial={{ opacity: 0 }}
@@ -413,9 +617,18 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
           className="min-h-[220px] w-full flex-1 sm:min-h-[300px] lg:min-h-[360px]"
         >
           <ReactECharts
-            // key только по сенсору — смена датчика сбрасывает zoom,
-            // WS/polling-апдейты zoom не сбрасывают (merge mode)
-            key={activeSensor}
+            // Remount (full re-render, not merge) whenever the sensor OR
+            // the selected time window changes — otherwise ECharts keeps
+            // the old dataZoom window/axis extent from merge-mode updates
+            // (e.g. switch 90д → 24ч and the x-axis stays stretched to
+            // the old 90-day span until the user manually re-zooms).
+            // WS/polling ticks for the SAME range don't change this key,
+            // so live updates still merge smoothly without a zoom reset.
+            key={`${activeSensor}:${
+              customRange
+                ? `custom:${customRange.from.toISOString()}_${customRange.to.toISOString()}`
+                : activeRange
+            }`}
             option={option}
             notMerge={false}
             lazyUpdate

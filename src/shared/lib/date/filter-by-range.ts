@@ -1,30 +1,31 @@
 import type { WeatherHistoryItem } from '@/entities/weather/model/weather.types';
 
-export type TimeRange = '1h' | '6h' | '24h' | '7d' | '30d' | 'all';
+export type TimeRange = '1h' | '6h' | '24h' | '7d' | '30d' | '90d';
 
 /** Ranges the canonical live-polled/WS-fed cache (≤24h) can satisfy client-side, no extra fetch needed. */
 export const CLIENT_ONLY_RANGES: ReadonlySet<TimeRange> = new Set(['1h', '6h', '24h']);
 
 /**
  * hours= value to send the backend for ranges that need a wider
- * server-side fetch. 'all' must send an explicit value too — confirmed
- * empirically that omitting `hours` does NOT mean "no limit": the old
- * backend's query param defaults to 24 when absent (`Query(24, ...)`),
- * so leaving it out silently returned the same last-24h window as the
- * '24h' preset. 8760 = its declared max (`le=8760`, one year).
+ * server-side fetch. Capped at 90 days: beyond that, raw pagination stops
+ * being a sensible model for chart rendering (>500k points, ~30 sequential
+ * requests, ECharts under strain even with LTTB sampling). Wider ranges
+ * belong on a future aggregate endpoint (bucketed avg/min/max), and the
+ * export flow for raw analytics. See docs/decisions/history-analytics.md.
  */
 export const RANGE_TO_HOURS: Partial<Record<TimeRange, number>> = {
-  '7d':  7 * 24,
+  '7d':  7  * 24,
   '30d': 30 * 24,
-  'all': 8760,
+  '90d': 90 * 24,
 };
 
-const RANGE_MS: Record<Exclude<TimeRange, 'all'>, number> = {
+const RANGE_MS: Record<TimeRange, number> = {
   '1h':  60 * 60_000,
   '6h':  6  * 60 * 60_000,
   '24h': 24 * 60 * 60_000,
   '7d':  7  * 24 * 60 * 60_000,
   '30d': 30 * 24 * 60 * 60_000,
+  '90d': 90 * 24 * 60 * 60_000,
 };
 
 /*
@@ -47,7 +48,6 @@ export function filterByTimeRange(
   // Сначала убираем записи с заведомо некорректными датами
   const valid = history.filter((item) => isValidTimestamp(item.date));
   if (!valid.length) return [];
-  if (range === 'all') return valid;
 
   /*
    * Точка отсчёта — МАКСИМАЛЬНЫЙ валидный timestamp в данных,
@@ -60,18 +60,24 @@ export function filterByTimeRange(
     if (ts > reference) reference = ts;
   }
 
-  const cutoff = reference - RANGE_MS[range as Exclude<TimeRange, 'all'>];
+  const cutoff = reference - RANGE_MS[range];
   return valid.filter((item) => new Date(item.date).getTime() >= cutoff);
 }
 
 export type CustomDateRange = { from: Date; to: Date };
 
-/** hours= to request from the backend for an arbitrary calendar range — wide
- *  enough to cover from `range.from` up to now, then trimmed exactly client-side.
- *  The old backend only understands `hours` (no explicit from/to params). */
+/**
+ * hours= to request from the backend for an arbitrary calendar range —
+ * wide enough to cover from `range.from` up to now, then trimmed exactly
+ * client-side. Same 90-day cap as the preset ranges: past that the chart
+ * pipeline (raw pagination + ECharts) starts costing seconds and MBs of
+ * memory rather than milliseconds — the calendar UI warns users when the
+ * span goes over.
+ */
+const CUSTOM_RANGE_MAX_HOURS = 90 * 24;
 export function customRangeToHours(range: CustomDateRange): number {
   const ms = Date.now() - range.from.getTime();
-  return Math.min(8760, Math.max(1, Math.ceil(ms / 3_600_000)));
+  return Math.min(CUSTOM_RANGE_MAX_HOURS, Math.max(1, Math.ceil(ms / 3_600_000)));
 }
 
 export function filterByExactRange(

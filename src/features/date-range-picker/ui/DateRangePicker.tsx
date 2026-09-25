@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalendarIcon } from 'lucide-react';
-import type { DateRange } from 'react-day-picker';
+import type { DateRange, Matcher } from 'react-day-picker';
 import { ru, uz, enUS } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,9 @@ type DateRangePickerProps = {
   /** Bounds what's pickable — typically the sensor's earliest known reading through today. */
   fromDate?: Date;
   toDate?: Date;
+  /** External open control — lets a sibling UI (e.g. the export menu) pop the calendar open. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 /**
@@ -25,9 +28,21 @@ type DateRangePickerProps = {
  * later (same `CustomDateRange` shape the export endpoint's from/to will
  * take, same gap-awareness once that's wired up).
  */
-export function DateRangePicker({ value, onChange, fromDate, toDate }: DateRangePickerProps): React.JSX.Element {
+export function DateRangePicker({
+  value,
+  onChange,
+  fromDate,
+  toDate,
+  open: openProp,
+  onOpenChange,
+}: DateRangePickerProps): React.JSX.Element {
   const { t, i18n } = useTranslation();
-  const [open, setOpen] = useState(false);
+  const [openInternal, setOpenInternal] = useState(false);
+  const open = openProp ?? openInternal;
+  const setOpen = (next: boolean) => {
+    onOpenChange?.(next);
+    if (openProp === undefined) setOpenInternal(next);
+  };
 
   const selected: DateRange | undefined = value ? { from: value.from, to: value.to } : undefined;
 
@@ -35,12 +50,17 @@ export function DateRangePicker({ value, onChange, fromDate, toDate }: DateRange
   const label = value ? `${formatter.format(value.from)} – ${formatter.format(value.to)}` : t('range_custom');
   const calendarLocale = CALENDAR_LOCALES[i18n.language as keyof typeof CALENDAR_LOCALES] ?? enUS;
 
+  const disabledMatchers: Matcher[] = [
+    ...(fromDate ? [{ before: fromDate }] : []),
+    ...(toDate ? [{ after: toDate }] : []),
+  ];
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="h-9 gap-1.5 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface-soft)] px-2.5 text-[11px] font-medium text-muted-themed transition-colors hover:bg-[var(--glass-surface-hover)] hover:text-secondary-themed sm:text-xs"
+          className="h-9 gap-1.5 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface-soft)] px-2.5 text-[11px] font-medium text-secondary-themed transition-colors hover:bg-[var(--glass-surface-hover)] hover:text-primary-themed sm:text-xs"
         >
           <CalendarIcon className="h-3.5 w-3.5" />
           {label}
@@ -53,8 +73,9 @@ export function DateRangePicker({ value, onChange, fromDate, toDate }: DateRange
           locale={calendarLocale}
           selected={selected}
           defaultMonth={value?.to}
-          fromDate={fromDate}
-          toDate={toDate}
+          startMonth={fromDate}
+          endMonth={toDate}
+          disabled={disabledMatchers}
           onSelect={(range) => {
             if (range?.from && range.to) {
               onChange({ from: range.from, to: range.to });
