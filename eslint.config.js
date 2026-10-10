@@ -28,6 +28,29 @@ export default tseslint.config(
     },
   },
   {
+    // Layering (Feature-Sliced Design): `shared` is the bottom layer and may not
+    // import upward. useTheme.ts is the one recorded exception: it re-exports the
+    // ThemeProvider context from `app` (moving the context down is future work).
+    files: ['src/shared/**/*.{ts,tsx}'],
+    ignores: ['src/shared/hooks/useTheme.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@/entities/*', '@/features/*', '@/widgets/*', '@/pages/*', '@/app/*',
+                '**/entities/**', '**/features/**', '**/widgets/**', '**/pages/**', '**/app/**',
+              ],
+              message: 'shared is the bottom layer: it cannot import from entities, features, widgets, pages or app.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     // The air-quality scale module must stay pure and portable: the map and
     // other projects take it as-is, so it may not reach into app layers or
     // UI frameworks.

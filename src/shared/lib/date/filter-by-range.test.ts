@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { WeatherHistoryItem } from '@/entities/weather/model/weather.types';
 import {
   customRangeToHours,
   filterByExactRange,
@@ -7,8 +6,8 @@ import {
   isValidTimestamp,
 } from './filter-by-range';
 
-function item(date: string): WeatherHistoryItem {
-  return { temp: 24, hum: 38, press: 962, mq5: 30, mq3: 3, pm25: null, pm10: null, date };
+function item(date: string): { date: string; temp: number } {
+  return { temp: 24, date };
 }
 
 describe('isValidTimestamp', () => {

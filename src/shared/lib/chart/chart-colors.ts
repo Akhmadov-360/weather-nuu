@@ -1,4 +1,4 @@
-import type { SensorType } from '@/entities/weather/model/weather.types';
+import type { SensorType } from '@/shared/types/sensor';
 
 export const SENSOR_COLORS: Record<SensorType, string> = {
   temp: '#ef4444',

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/shared/ui/button";
+import { Button } from "@/components/ui/button";
 
 type ErrorStateProps = {
   message?: string;

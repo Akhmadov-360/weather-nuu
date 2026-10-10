@@ -79,6 +79,8 @@ src/
 Правило зависимостей: слой может импортировать только из слоёв ниже
 (pages → widgets → features → entities → shared). Новый домен-специфичный код — в `entities`.
 
+Правила работы с кодом и PR — в [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Важно знать
 
 - **Tailwind v4.** Файла `tailwind.config.ts` нет: токены (цвета, радиусы, тени, шрифт) и свои

@@ -6,19 +6,24 @@ import { GlassPanel } from '@/shared/ui/glass-panel';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { ErrorState } from '@/shared/ui/error-state';
 import { motion, type Variants } from 'framer-motion';
+import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SensorCharts } from '@/widgets/sensor-charts/ui/SensorCharts';
 import { TopBar } from '@/widgets/topbar/ui/TopBar';
 import { AirQualityCard } from '@/widgets/weather-summary/ui/AirQualityCard';
 import { GasStrip } from '@/widgets/weather-summary/ui/GasStrip';
 import { MetricCard } from '@/widgets/weather-summary/ui/MetricCard';
 import { TempHeroCard } from '@/widgets/weather-summary/ui/TempHeroCard';
 import { ArchiveDataBanner } from './ArchiveDataBanner';
-import { SensorChartsSkeleton } from './SensorChartsSkeletom';
+import { SensorChartsSkeleton } from './SensorChartsSkeleton';
 import { TimeDisplay } from './TimeDisplay';
 import { WeatherSummarySkeleton } from './WeatherSummarySkeleton';
 import { LiveStreams } from '../../../components/LiveStreams';
+
+// ECharts is ~2 MB: load it after the cards are on screen instead of blocking first paint.
+const SensorCharts = lazy(() =>
+  import('@/widgets/sensor-charts/ui/SensorCharts').then((m) => ({ default: m.SensorCharts })),
+);
 
 type DashboardLayoutProps = {
   config: DashboardPageConfig;
@@ -126,7 +131,9 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
               transition={{ delay: 0.1, duration: 0.45, ease: 'easeOut' }}
               className="flex-1"
             >
-              <SensorCharts type={config.key} history={history} isRefetching={isRefetching} />
+              <Suspense fallback={<SensorChartsSkeleton />}>
+                <SensorCharts type={config.key} history={history} isRefetching={isRefetching} />
+              </Suspense>
             </motion.section>
 
             <LiveStreams />

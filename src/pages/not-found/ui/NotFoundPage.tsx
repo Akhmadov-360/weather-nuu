@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/shared/config/routes';
 
 export default function NotFoundPage(): React.JSX.Element {

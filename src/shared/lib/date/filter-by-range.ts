@@ -1,4 +1,5 @@
-import type { WeatherHistoryItem } from '@/entities/weather/model/weather.types';
+/** Anything with an ISO timestamp can be filtered by range. */
+type Dated = { date: string };
 
 export type TimeRange = '1h' | '6h' | '24h' | '7d' | '30d' | '90d';
 
@@ -41,10 +42,10 @@ export function isValidTimestamp(dateStr: string): boolean {
   return !Number.isNaN(ts) && ts >= MIN_VALID_TS;
 }
 
-export function filterByTimeRange(
-  history: WeatherHistoryItem[],
+export function filterByTimeRange<T extends Dated>(
+  history: T[],
   range: TimeRange,
-): WeatherHistoryItem[] {
+): T[] {
   // Сначала убираем записи с заведомо некорректными датами
   const valid = history.filter((item) => isValidTimestamp(item.date));
   if (!valid.length) return [];
@@ -80,10 +81,10 @@ export function customRangeToHours(range: CustomDateRange): number {
   return Math.min(CUSTOM_RANGE_MAX_HOURS, Math.max(1, Math.ceil(ms / 3_600_000)));
 }
 
-export function filterByExactRange(
-  history: WeatherHistoryItem[],
+export function filterByExactRange<T extends Dated>(
+  history: T[],
   range: CustomDateRange,
-): WeatherHistoryItem[] {
+): T[] {
   const fromMs = range.from.getTime();
   // Inclusive of the whole `to` day if a bare date was passed (midnight).
   const toMs = range.to.getTime();
