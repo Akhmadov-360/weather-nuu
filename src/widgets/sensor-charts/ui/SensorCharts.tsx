@@ -27,7 +27,7 @@ import {
 } from "@/shared/lib/date/filter-by-range";
 import { CHART_GAP_THRESHOLD_MS, detectGaps, insertGapBreaks } from "@/shared/lib/date/insert-gap-breaks";
 import { useTheme } from "@/shared/hooks/useTheme";
-import { getSensorColor } from "@/shared/lib/chart/chart-colors";
+import { getChartTheme, getSensorColor } from "@/shared/lib/chart/chart-colors";
 import { echarts } from "../lib/echarts-core";
 import { buildChartOption, type ChartMode } from "../model/chart-option";
 import { aggregateSeries, rawSeries, summarize } from "../model/chart-series";
@@ -180,6 +180,7 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
         unit: units[activeSensor],
         // Re-read when the theme flips: the colours (and the CSS variables ECharts resolves) change with it.
         color: getSensorColor(activeSensor),
+        theme: getChartTheme(),
         chartMode,
         seriesData,
         gaps,
