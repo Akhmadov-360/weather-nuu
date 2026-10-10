@@ -178,10 +178,11 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
     const range: [number, number | null][] = []; // (max - min), stacked on min to draw the band
     for (const r of rows) {
       const ts = new Date(r.ts).getTime();
+      // Dust stats are absent on a backend that predates the dust fields: leave a gap instead of crashing.
       const stats = r[activeSensor];
-      avg.push([ts, stats.avg]);
-      min.push([ts, stats.min]);
-      range.push([ts, stats.min != null && stats.max != null ? stats.max - stats.min : null]);
+      avg.push([ts, stats?.avg ?? null]);
+      min.push([ts, stats?.min ?? null]);
+      range.push([ts, stats?.min != null && stats.max != null ? stats.max - stats.min : null]);
     }
     return { rows, avg, min, range };
   }, [chartMode, aggregateData, activeSensor]);
