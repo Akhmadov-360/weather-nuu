@@ -139,5 +139,18 @@
   "theme_dark": "Dark",
   "theme_system": "System",
   "error_boundary_title": "Something went wrong.",
-  "error_boundary_retry": "Try again"
+  "error_boundary_retry": "Try again",
+  "dust_no_sensor": "Sensor not installed",
+  "dust_no_sensor_hint": "This station has no dust sensor",
+  "dust_no_data": "No dust readings",
+  "dust_no_data_since": "Last reading: {{time}}",
+  "dust_no_data_never": "The dust sensor has not reported yet",
+  "dust_avg_10m": "10-minute average",
+  "dust_avg_24h": "24 h",
+  "dust_insufficient_24h": "24 h: not enough data",
+  "dust_who_guideline": "WHO guideline: up to {{value}} µg/m³ per day",
+  "aqi_label": "AQI",
+  "unit_ugm3": "µg/m³",
+  "gas_estimate_lpg": "estimate, LPG equivalent",
+  "gas_estimate": "estimate"
 }
