@@ -216,6 +216,13 @@ html:not(.dark) {
   --chart-tooltip-border: #E0DAD3;
   --chart-tooltip-text:   #1E2347;
   --chart-tooltip-label:  #666B8C;
+  /* Sky behind the time card, by phase of the day (top -> bottom of the card's upper part) */
+  --sky-dawn-from:    #FBE8DE;  --sky-dawn-to:    #EDE4F3;
+  --sky-morning-from: #FDF2DA;  --sky-morning-to: #FAF7F3;
+  --sky-day-from:     #EAF2FB;  --sky-day-to:     #FFFFFF;
+  --sky-evening-from: #FCE5C8;  --sky-evening-to: #F6E3E6;
+  --sky-dusk-from:    #E7DDF0;  --sky-dusk-to:    #E4E6F5;
+  --sky-night-from:   #DEE1F2;  --sky-night-to:   #EEF0FA;
 }
 
 /* PALETTE:dark */
@@ -273,6 +280,12 @@ html:not(.dark) {
   --chart-tooltip-border:  #2B3260;
   --chart-tooltip-text:    #EEF1FA;
   --chart-tooltip-label:   #8E96C0;
+  --sky-dawn-from:    #2A2150;  --sky-dawn-to:    #171B42;
+  --sky-morning-from: #2A2A3F;  --sky-morning-to: #171B42;
+  --sky-day-from:     #1E2B57;  --sky-day-to:     #151A3D;
+  --sky-evening-from: #3A2C45;  --sky-evening-to: #1B2049;
+  --sky-dusk-from:    #2A2150;  --sky-dusk-to:    #161A40;
+  --sky-night-from:   #0B0F26;  --sky-night-to:   #12173A;
 }
 
 /*

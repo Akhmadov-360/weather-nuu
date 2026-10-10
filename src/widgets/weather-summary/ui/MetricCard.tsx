@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { getSensorStatus } from '@/entities/weather/model/weather-thresholds';
 import type { ScaleSensor } from '@/entities/weather/model/weather.types';
 import { AnimateNumber } from '@/shared/ui/animate-number';
-import { StatusBadge } from '@/shared/ui/status-badge';
+import { StatusText } from '@/shared/ui/status-text';
 import { Slider } from '@/components/ui/slider';
 import { buildZoneGradient, getMarkerBorderClass, getZoneBgClass } from '@/shared/lib/sensor-format';
 import { SENSOR_RANGES } from '@/shared/lib/weather-ranges';
@@ -49,7 +49,7 @@ export function MetricCard({ sensor, label, value, unit }: MetricCardProps): Rea
       </div>
 
       <div className="mt-2">
-        <StatusBadge tone={status.tone}>{t(status.labelKey)}</StatusBadge>
+        <StatusText tone={status.tone}>{t(status.labelKey)}</StatusText>
       </div>
 
       {/* Range indicator: shadcn Slider, read-only — track paints the zone
