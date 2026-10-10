@@ -1,4 +1,4 @@
-import { Droplets, Gauge, ShieldCheck, SprayCan } from 'lucide-react';
+import { Droplets, Gauge } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { getSensorStatus } from '@/entities/weather/model/weather-thresholds';
@@ -9,7 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { buildZoneGradient, getMarkerBorderClass, getZoneBgClass } from '@/shared/lib/sensor-format';
 import { SENSOR_RANGES } from '@/shared/lib/weather-ranges';
 
-type MetricSensor = Exclude<ScaleSensor, 'temp'>;
+type MetricSensor = Extract<ScaleSensor, 'hum' | 'press'>;
 
 type MetricCardProps = {
   sensor: MetricSensor;
@@ -21,8 +21,6 @@ type MetricCardProps = {
 const METRIC_ICON: Record<MetricSensor, React.ElementType> = {
   hum:   Droplets,
   press: Gauge,
-  mq5:   ShieldCheck,
-  mq3:   SprayCan,
 };
 
 export function MetricCard({ sensor, label, value, unit }: MetricCardProps): React.JSX.Element {
