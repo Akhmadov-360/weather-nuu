@@ -139,5 +139,18 @@
   "theme_dark": "Тёмная",
   "theme_system": "Системная",
   "error_boundary_title": "Что-то пошло не так.",
-  "error_boundary_retry": "Попробовать снова"
+  "error_boundary_retry": "Попробовать снова",
+  "dust_no_sensor": "Датчик не установлен",
+  "dust_no_sensor_hint": "На этой станции нет датчика пыли",
+  "dust_no_data": "Нет показаний пыли",
+  "dust_no_data_since": "Последние показания: {{time}}",
+  "dust_no_data_never": "Датчик пыли пока ничего не передал",
+  "dust_avg_10m": "среднее за 10 мин",
+  "dust_avg_24h": "за 24 ч",
+  "dust_insufficient_24h": "за 24 ч: недостаточно данных",
+  "dust_who_guideline": "Ориентир ВОЗ: до {{value}} мкг/м³ за сутки",
+  "aqi_label": "AQI",
+  "unit_ugm3": "мкг/м³",
+  "gas_estimate_lpg": "оценка, эквивалент LPG",
+  "gas_estimate": "оценка"
 }

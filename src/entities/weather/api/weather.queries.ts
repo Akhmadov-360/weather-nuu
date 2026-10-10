@@ -123,6 +123,7 @@ export function useDustDayMeanQuery(type: WeatherPageType) {
     },
     enabled: SENSORS_BY_SOURCE[type].includes("pm25"),
     staleTime: 5 * 60_000,
+    refetchInterval: 5 * 60_000,
     retry: 1,
   });
 }

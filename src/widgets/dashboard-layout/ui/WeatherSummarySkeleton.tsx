@@ -4,7 +4,7 @@ const TILE_CLASS = "rounded-card border border-(--glass-border) bg-(--glass-surf
 
 export function WeatherSummarySkeleton(): React.JSX.Element {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-[minmax(240px,300px)_repeat(2,minmax(0,1fr))] lg:grid-rows-2">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-[minmax(240px,300px)_repeat(2,minmax(0,1fr))]">
       <div className={TILE_CLASS}>
         <Skeleton className="h-10 w-28 bg-white/10" />
         <Skeleton className="mt-3 h-4 w-20 bg-white/10" />
@@ -26,15 +26,13 @@ export function WeatherSummarySkeleton(): React.JSX.Element {
           <Skeleton className="h-9 w-24 bg-white/10" />
         </div>
       </div>
-      <div className={TILE_CLASS}>
-        <Skeleton className="h-4 w-16 bg-white/10" />
-        <Skeleton className="mt-3 h-7 w-20 bg-white/10" />
+      <div className={`${TILE_CLASS} sm:col-span-2 lg:col-span-2`}>
+        <Skeleton className="h-4 w-24 bg-white/10" />
+        <Skeleton className="mt-3 h-10 w-40 bg-white/10" />
         <Skeleton className="mt-4 h-2 w-full rounded-full bg-white/10" />
       </div>
-      <div className={TILE_CLASS}>
-        <Skeleton className="h-4 w-16 bg-white/10" />
-        <Skeleton className="mt-3 h-7 w-20 bg-white/10" />
-        <Skeleton className="mt-4 h-2 w-full rounded-full bg-white/10" />
+      <div className={`${TILE_CLASS} sm:col-span-2 lg:col-span-3`}>
+        <Skeleton className="h-10 w-full bg-white/10" />
       </div>
     </div>
   );

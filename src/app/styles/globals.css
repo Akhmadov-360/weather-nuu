@@ -249,6 +249,32 @@ html:not(.dark) {
   --chart-tooltip-label:  rgba(71, 85, 105, 0.70);
 }
 
+/*
+ * Air quality categories (US EPA colour order). `--aqi-<id>` is the fill, `-text`
+ * the text colour; text is tuned per theme to stay at 4.5:1 or better, so light
+ * mode gets darker greens/yellows and dark mode lighter reds/maroon.
+ * tests: src/app/styles/aqi-tokens.test.ts
+ */
+/* AQI:dark */
+.dark {
+  --aqi-good: #22c55e;                 --aqi-good-text: #4ade80;
+  --aqi-moderate: #eab308;             --aqi-moderate-text: #facc15;
+  --aqi-unhealthy_sensitive: #f97316;  --aqi-unhealthy_sensitive-text: #fb923c;
+  --aqi-unhealthy: #ef4444;            --aqi-unhealthy-text: #f87171;
+  --aqi-very_unhealthy: #a855f7;       --aqi-very_unhealthy-text: #c084fc;
+  --aqi-hazardous: #be123c;            --aqi-hazardous-text: #fda4af;
+}
+
+/* AQI:light */
+html:not(.dark) {
+  --aqi-good: #22c55e;                 --aqi-good-text: #15803d;
+  --aqi-moderate: #eab308;             --aqi-moderate-text: #a16207;
+  --aqi-unhealthy_sensitive: #f97316;  --aqi-unhealthy_sensitive-text: #c2410c;
+  --aqi-unhealthy: #ef4444;            --aqi-unhealthy-text: #b91c1c;
+  --aqi-very_unhealthy: #a855f7;       --aqi-very_unhealthy-text: #7e22ce;
+  --aqi-hazardous: #9f1239;            --aqi-hazardous-text: #7f1d1d;
+}
+
 /* ─── Custom utilities ───────────────────────────────────────── */
 @utility dash-bg {
   background:

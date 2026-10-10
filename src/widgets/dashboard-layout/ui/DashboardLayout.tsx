@@ -1,4 +1,4 @@
-import { useLatestWeatherQuery, useWeatherHistoryQuery } from '@/entities/weather/api/weather.queries';
+import { useDustDayMeanQuery, useLatestWeatherQuery, useWeatherHistoryQuery } from '@/entities/weather/api/weather.queries';
 import { useWeatherSocket } from '@/entities/weather/api/useWeatherSocket';
 import { computeFreshness } from '@/entities/weather/model/weather-freshness';
 import type { DashboardPageConfig } from '@/entities/weather/model/weather.types';
@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 
 import { SensorCharts } from '@/widgets/sensor-charts/ui/SensorCharts';
 import { TopBar } from '@/widgets/topbar/ui/TopBar';
+import { AirQualityCard } from '@/widgets/weather-summary/ui/AirQualityCard';
+import { GasStrip } from '@/widgets/weather-summary/ui/GasStrip';
 import { MetricCard } from '@/widgets/weather-summary/ui/MetricCard';
 import { TempHeroCard } from '@/widgets/weather-summary/ui/TempHeroCard';
 import { ArchiveDataBanner } from './ArchiveDataBanner';
@@ -31,19 +33,18 @@ const fadeUp: Variants = {
 };
 
 /**
- * One flat grid — time, temp hero and the 4 metric tiles are all siblings
- * of the same grid context, so row heights sync automatically (the tallest
- * cell in a row sets that row's height for every column). A {time, temp}
- * column next to an independent 2x2 metrics grid used to leave a dead gap
- * under whichever column was shorter, since each grid balanced its own
- * rows in isolation.
+ * One flat grid, so row heights sync (the tallest cell in a row sets that
+ * row's height for every column). On lg: row 1 time + humidity + pressure,
+ * row 2 temperature + air quality (two columns), row 3 the gas strip across
+ * all three. The card and the strip take the full width on narrower screens.
  */
 const summaryGridClass =
-  'grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-[minmax(240px,300px)_repeat(2,minmax(0,1fr))] lg:grid-rows-2';
+  'grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-[minmax(240px,300px)_repeat(2,minmax(0,1fr))]';
 
 export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Element {
   const latestQuery  = useLatestWeatherQuery(config.key);
   const historyQuery = useWeatherHistoryQuery(config.key);
+  const dustDayQuery = useDustDayMeanQuery(config.key);
   useWeatherSocket(config.key);
   const { t } = useTranslation();
 
@@ -104,8 +105,12 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
               <MetricCard sensor="hum" label={t('lbl_hum')} value={latest.hum} />
               <MetricCard sensor="press" label={t('lbl_press')} value={latest.press} />
               <TempHeroCard temp={latest.temp} history={history} />
-              <MetricCard sensor="mq5" label={t('lbl_mq5')} value={latest.mq5} />
-              <MetricCard sensor="mq3" label={t('lbl_mq3')} value={latest.mq3} />
+              <div className="sm:col-span-2 lg:col-span-2">
+                <AirQualityCard source={config.key} history={history} dayMean={dustDayQuery.data} />
+              </div>
+              <div className="sm:col-span-2 lg:col-span-3">
+                <GasStrip mq5={latest.mq5} mq3={latest.mq3} />
+              </div>
             </motion.div>
 
             {freshness !== 'live' && (

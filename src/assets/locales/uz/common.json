@@ -139,5 +139,18 @@
   "theme_dark": "Qorong'i",
   "theme_system": "Tizim",
   "error_boundary_title": "Nimadir noto'g'ri ketdi.",
-  "error_boundary_retry": "Qayta urinib ko'ring"
+  "error_boundary_retry": "Qayta urinib ko'ring",
+  "dust_no_sensor": "Datchik o'rnatilmagan",
+  "dust_no_sensor_hint": "Bu stansiyada chang datchigi yo'q",
+  "dust_no_data": "Chang ko'rsatkichlari yo'q",
+  "dust_no_data_since": "Oxirgi ko'rsatkich: {{time}}",
+  "dust_no_data_never": "Chang datchigi hali ma'lumot yubormagan",
+  "dust_avg_10m": "10 daqiqalik o'rtacha",
+  "dust_avg_24h": "24 soat uchun",
+  "dust_insufficient_24h": "24 soat uchun: ma'lumot yetarli emas",
+  "dust_who_guideline": "JSST ko'rsatmasi: sutkasiga {{value}} mkg/m³ gacha",
+  "aqi_label": "AQI",
+  "unit_ugm3": "mkg/m³",
+  "gas_estimate_lpg": "baho, LPG ekvivalenti",
+  "gas_estimate": "baho"
 }
