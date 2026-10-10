@@ -14,6 +14,8 @@ import { ThemeToggle } from './ThemeToggle';
 
 type TopBarProps = {
   titleKey: string;
+  /** Short name of the current section ("Аудитория"), used by the compact phone bar. */
+  sectionKey: string;
   switchPath: string;
   switchLabelKey: string;
 };
@@ -24,8 +26,31 @@ const SECTIONS = [
 ] as const;
 
 /** Vertical hairline between the compact settings triggers — replaces the old per-item pill borders. */
-function Divider(): React.JSX.Element {
-  return <span className="hidden h-5 w-px shrink-0 bg-(--glass-border) sm:block" aria-hidden />;
+function Divider({ className }: { className?: string }): React.JSX.Element {
+  return <span className={cn('h-5 w-px shrink-0 bg-(--glass-border)', className)} aria-hidden />;
+}
+
+/** Theme and language: the two settings that stay on every screen size. */
+function Settings(): React.JSX.Element {
+  return (
+    <div className="flex items-center gap-1 sm:gap-3">
+      <ThemeToggle />
+      {/* On phones the pill is gone, so the hairline sits between the two settings instead. */}
+      <Divider className="sm:hidden" />
+      <LanguageSwitcher />
+    </div>
+  );
+}
+
+/** Logo plus the university abbreviation; the full name is in the logo tooltip. */
+function Brand(): React.JSX.Element {
+  const { t } = useTranslation();
+  return (
+    <div className="flex shrink-0 items-center gap-2">
+      <Logo />
+      <span className="text-sm font-semibold tracking-wide text-primary-themed">{t('university_short')}</span>
+    </div>
+  );
 }
 
 /** The page title: only the text changes when the section does, the header around it stays. */
@@ -56,7 +81,8 @@ function Title({
   );
 }
 
-export function TopBar({ titleKey, switchPath, switchLabelKey }: TopBarProps): React.JSX.Element {
+export function TopBar({ titleKey, sectionKey, switchPath, switchLabelKey }: TopBarProps): React.JSX.Element {
+  const { t } = useTranslation();
   const isStickyVisible = useScrolledPast(110);
 
   return (
@@ -67,8 +93,16 @@ export function TopBar({ titleKey, switchPath, switchLabelKey }: TopBarProps): R
         transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
         className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
       >
+        {/* Phones: the university and the settings share the first row, the section tabs span the full width. */}
+        <div className="flex items-center justify-between sm:hidden">
+          <Brand />
+          <Settings />
+        </div>
+
         <div className="flex items-center gap-3">
-          <Logo />
+          <span className="hidden sm:block">
+            <Logo />
+          </span>
           <Title
             as="h1"
             titleKey={titleKey}
@@ -76,12 +110,12 @@ export function TopBar({ titleKey, switchPath, switchLabelKey }: TopBarProps): R
           />
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          <SectionSwitch id="header" className="flex-1 sm:hidden" />
-          <SwitchSectionLink to={switchPath} label={switchLabelKey} size="default" className="hidden sm:inline-flex" />
+        <SectionSwitch id="header" className="w-full sm:hidden" />
+
+        <div className="hidden items-center gap-3 sm:flex">
+          <SwitchSectionLink to={switchPath} label={switchLabelKey} size="default" />
           <Divider />
-          <ThemeToggle />
-          <LanguageSwitcher />
+          <Settings />
         </div>
       </motion.header>
 
@@ -104,26 +138,30 @@ export function TopBar({ titleKey, switchPath, switchLabelKey }: TopBarProps): R
               }}
             >
               <div className="flex items-center justify-between gap-2 sm:gap-3">
-                <div className="flex min-w-0 items-center gap-3">
+                {/* Phones: abbreviation and current section; the tabs are in the main header. */}
+                <div className="flex min-w-0 items-center gap-2 sm:hidden">
+                  <Brand />
+                  {/* Below 360 px there is no room for the section name next to the abbreviation. */}
+                  <span className="hidden text-muted-themed min-[360px]:inline" aria-hidden>
+                    ·
+                  </span>
+                  <span className="hidden truncate text-sm text-secondary-themed min-[360px]:inline">
+                    {t(sectionKey)}
+                  </span>
+                </div>
+                <div className="hidden min-w-0 items-center gap-3 sm:flex">
                   <Logo />
                   <Title
                     as="h2"
                     titleKey={titleKey}
-                    className="hidden truncate text-sm font-medium text-primary-themed sm:block sm:text-base"
+                    className="truncate text-sm font-medium text-primary-themed sm:text-base"
                   />
                 </div>
 
-                <div className="flex items-center gap-1 sm:gap-3">
-                  <SectionSwitch id="sticky" className="sm:hidden" />
-                  <SwitchSectionLink
-                    to={switchPath}
-                    label={switchLabelKey}
-                    size="sm"
-                    className="hidden sm:inline-flex"
-                  />
-                  <Divider />
-                  <ThemeToggle />
-                  <LanguageSwitcher />
+                <div className="flex items-center gap-3">
+                  <SwitchSectionLink to={switchPath} label={switchLabelKey} size="sm" className="hidden sm:inline-flex" />
+                  <Divider className="hidden sm:block" />
+                  <Settings />
                 </div>
               </div>
             </div>
@@ -146,7 +184,7 @@ function SectionSwitch({ id, className }: { id: string; className?: string }): R
     <nav
       aria-label={t('nav_sections')}
       className={cn(
-        'relative flex h-10 items-center rounded-full border border-(--glass-border) bg-(--glass-surface) p-0.5 backdrop-blur-md',
+        'relative flex h-11 items-center rounded-full border border-(--glass-border) bg-(--control-track) p-1',
         className,
       )}
     >
@@ -165,7 +203,7 @@ function SectionSwitch({ id, className }: { id: string; className?: string }): R
             {active ? (
               <motion.span
                 layoutId={`section-pill-${id}`}
-                className="absolute inset-0 -z-10 rounded-full bg-(--glass-surface-hover) shadow-sm"
+                className="absolute inset-0 -z-10 rounded-full bg-(--control-active) shadow-sm"
                 transition={{ type: 'spring', stiffness: 380, damping: 32 }}
               />
             ) : null}
@@ -203,8 +241,8 @@ function SwitchSectionLink({
       variant="ghost"
       className={cn(
         size === 'default'
-          ? 'h-10 gap-1.5 rounded-full border border-(--glass-border) bg-(--glass-surface) px-4 text-sm text-primary-themed backdrop-blur-md transition-colors hover:bg-(--glass-surface-hover)'
-          : 'h-9 gap-1.5 rounded-full border border-(--glass-border) bg-(--glass-surface) px-3 text-xs text-primary-themed backdrop-blur-md transition-colors hover:bg-(--glass-surface-hover) sm:px-4 sm:text-sm',
+          ? 'h-10 gap-1.5 rounded-full border border-(--glass-border) bg-(--glass-surface) px-4 text-sm text-primary-themed backdrop-blur-md transition-colors hover:bg-(--control-hover)'
+          : 'h-9 gap-1.5 rounded-full border border-(--glass-border) bg-(--glass-surface) px-3 text-xs text-primary-themed backdrop-blur-md transition-colors hover:bg-(--control-hover) sm:px-4 sm:text-sm',
         className,
       )}
     >

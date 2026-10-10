@@ -19,6 +19,7 @@ export function AppShell(): React.JSX.Element {
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <TopBar
           titleKey={config.titleKey}
+          sectionKey={config.navKey}
           switchPath={config.oppositePath}
           switchLabelKey={config.oppositeNavKey}
         />
