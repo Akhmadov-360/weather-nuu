@@ -15,6 +15,9 @@ const weatherRawSchema = z
     mq_5:       z.coerce.number().optional(),
     mq3:        z.coerce.number().optional(),
     mq_3:       z.coerce.number().optional(),
+    // Dust: null is meaningful ("no reading"), so no coercion; z.coerce turns null into 0.
+    pm25:       z.number().nullish(),
+    pm10:       z.number().nullish(),
     date:       z.string().optional(),
     recordedAt: z.string().optional(), // apps/api WS payload
     created_at: z.string().optional(),
@@ -109,6 +112,8 @@ function normalizeWeather(raw: WeatherRaw): WeatherLatest {
     press: raw.bmpPress ?? raw.bmp_press ?? raw.pressure ?? 0,
     mq5:   raw.mq5 ?? raw.mq_5 ?? 0,
     mq3:   raw.mq3 ?? raw.mq_3 ?? 0,
+    pm25:  raw.pm25 ?? null,
+    pm10:  raw.pm10 ?? null,
     date:  parseApiDate(rawDate),
   };
 }

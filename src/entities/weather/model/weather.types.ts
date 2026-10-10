@@ -1,6 +1,23 @@
 import type { WeatherPageType } from '@/shared/types/common';
 
-export type SensorType = 'temp' | 'hum' | 'press' | 'mq5' | 'mq3';
+export type SensorType = 'temp' | 'hum' | 'press' | 'mq5' | 'mq3' | 'pm25' | 'pm10';
+
+/** Sensors that have a fixed zone scale in SENSOR_RANGES (dust uses the air-quality standard instead). */
+export type ScaleSensor = Exclude<SensorType, 'pm25' | 'pm10'>;
+
+export function isScaleSensor(sensor: SensorType): sensor is ScaleSensor {
+  return sensor !== 'pm25' && sensor !== 'pm10';
+}
+
+/**
+ * What each source physically has. Only the Room device carries the dust
+ * sensor (Plantower PMS); Street's readings never include dust, so its
+ * charts and cards must not offer it.
+ */
+export const SENSORS_BY_SOURCE: Record<'room' | 'street', SensorType[]> = {
+  room: ['temp', 'hum', 'press', 'pm25', 'pm10', 'mq5', 'mq3'],
+  street: ['temp', 'hum', 'press', 'mq5', 'mq3'],
+};
 
 export type WeatherLatest = {
   temp: number;
@@ -8,6 +25,9 @@ export type WeatherLatest = {
   press: number;
   mq5: number;
   mq3: number;
+  /** Dust in µg/m³. `null` means no reading (no sensor on Street, or a failed read), never zero dust. */
+  pm25: number | null;
+  pm10: number | null;
   date: string;
 };
 
@@ -28,6 +48,9 @@ export type AggregateBucketRow = {
   press: MetricStats;
   mq5:   MetricStats;
   mq3:   MetricStats;
+  /** Absent when talking to a backend that predates the dust fields. */
+  pm25?: MetricStats;
+  pm10?: MetricStats;
 };
 export type AggregateBucketData = {
   source: 'room' | 'street';

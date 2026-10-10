@@ -49,6 +49,11 @@ export function getSensorStatus(sensor: SensorType, value: number | null): Metri
 
     case "mq3":
       return getZoneStatus("mq3", value);
+
+    case "pm25":
+    case "pm10":
+      // Placeholder until the air-quality scale is wired in (next task).
+      return { labelKey: "status_reference", tone: "neutral" };
   }
 }
 

@@ -21,6 +21,7 @@ export function getZoneBgClass(color: RangeZoneColor): string {
     case 'yellow': return 'bg-status-warning';
     case 'red':    return 'bg-status-critical';
     case 'blue':   return 'bg-status-info';
+    case 'gray':   return 'bg-slate-400';
   }
 }
 
@@ -47,6 +48,7 @@ const ZONE_COLOR_VAR: Record<RangeZoneColor, string> = {
   yellow: 'var(--status-warning)',
   red:    'var(--status-critical)',
   blue:   'var(--status-info)',
+  gray:   '#94a3b8',
 };
 
 /**

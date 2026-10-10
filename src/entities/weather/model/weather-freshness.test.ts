@@ -13,6 +13,8 @@ function point(msAgo: number, values: Partial<WeatherHistoryItem> = {}): Weather
     press: 962,
     mq5: 30,
     mq3: 3,
+    pm25: null,
+    pm10: null,
     ...values,
     date: new Date(NOW - msAgo).toISOString(),
   };

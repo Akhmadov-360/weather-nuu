@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Thermometer, Droplets, Wind, ShieldCheck, SprayCan } from 'lucide-react';
+import { Thermometer, Droplets, Wind, ShieldCheck, SprayCan, CloudFog, Cloudy } from 'lucide-react';
 
 import { SENSOR_ORDER } from '@/entities/weather/model/weather.constants';
 import type { SensorType } from '@/entities/weather/model/weather.types';
@@ -18,6 +18,8 @@ const SENSOR_ICONS: Record<SensorType, React.ReactNode> = {
   press: <Wind        className="h-4 w-4" />,
   mq5:   <ShieldCheck className="h-4 w-4" />,
   mq3:   <SprayCan    className="h-4 w-4" />,
+  pm25:  <CloudFog    className="h-4 w-4" />,
+  pm10:  <Cloudy      className="h-4 w-4" />,
 };
 
 export function ChartSelector({ active, onChange }: ChartSelectorProps): React.JSX.Element {
@@ -29,6 +31,8 @@ export function ChartSelector({ active, onChange }: ChartSelectorProps): React.J
     press: t('btn_press_short'),
     mq5:   t('btn_mq5_short'),
     mq3:   t('btn_mq3_short'),
+    pm25:  t('btn_pm25_short'),
+    pm10:  t('btn_pm10_short'),
   };
 
   return (

@@ -1,6 +1,6 @@
-import { SensorType } from "../../entities/weather/model/weather.types";
+import type { ScaleSensor } from "../../entities/weather/model/weather.types";
 
-export type RangeZoneColor = "green" | "yellow" | "red" | "blue";
+export type RangeZoneColor = "green" | "yellow" | "red" | "blue" | "gray";
 
 export type RangeZone = {
   from: number;
@@ -17,7 +17,7 @@ export type SensorRangeConfig = {
   zones: RangeZone[];
 };
 
-export const SENSOR_RANGES: Record<SensorType, SensorRangeConfig> = {
+export const SENSOR_RANGES: Record<ScaleSensor, SensorRangeConfig> = {
   temp: {
     min: 0,
     max: 40,

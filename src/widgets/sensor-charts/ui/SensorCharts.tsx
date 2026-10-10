@@ -14,6 +14,7 @@ import type {
   SensorType,
   WeatherHistoryItem,
 } from "@/entities/weather/model/weather.types";
+import { isScaleSensor } from "@/entities/weather/model/weather.types";
 import { ChartSelector } from "@/features/chart-selector/ui/ChartSelector";
 import { DateRangePicker } from "@/features/date-range-picker/ui/DateRangePicker";
 import { ExportMenu } from "@/features/export-data/ui/ExportMenu";
@@ -44,10 +45,14 @@ const SENSOR_UNITS: Record<SensorType, string> = {
   hum:   "%",
   press: "hPa",
   mq5:   "ppm",
-  mq3:   "мкг/м³",
+  mq3:   "ppm",
+  pm25:  "мкг/м³",
+  pm10:  "мкг/м³",
 };
 
 function buildThresholdLines(sensor: SensorType) {
+  // Dust has no SENSOR_RANGES entry; its lines come from the air-quality standard in the UI PR.
+  if (!isScaleSensor(sensor)) return [];
   const range = SENSOR_RANGES[sensor];
   return range.zones.slice(0, -1).map((zone) => ({
     yAxis: zone.to,
