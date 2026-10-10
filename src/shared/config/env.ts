@@ -1,15 +1,22 @@
+// Базовый адрес API. Локально это "/api" (Vite-прокси на localhost:8002, см.
+// vite.config.ts), для боевой сборки — полный адрес сервера (.env.production).
+// Если переменная не задана, остаётся боевой адрес, как было раньше.
+const API_BASE = (
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) || "https://weather.nuu.uz/api"
+).replace(/\/$/, "");
+
 export const ENV = {
   latestPollingMs: 10_000,
   historyPollingMs: 5 * 60_000, // 5 минут — полный refetch истории
 
   endpoints: {
     room: {
-      latest: "https://weather.nuu.uz/api/room/latest",
-      history: "https://weather.nuu.uz/api/room/all",
+      latest: `${API_BASE}/room/latest`,
+      history: `${API_BASE}/room/all`,
     },
     street: {
-      latest: "https://weather.nuu.uz/api/street/latest",
-      history: "https://weather.nuu.uz/api/street/all",
+      latest: `${API_BASE}/street/latest`,
+      history: `${API_BASE}/street/all`,
     },
   },
 

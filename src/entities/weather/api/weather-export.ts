@@ -25,7 +25,7 @@ export function buildExportUrl(
 ): string | null {
   if (!ENV.exportBaseUrl) return null;
 
-  const url = new URL(`${ENV.exportBaseUrl}/v1/export/${type}`);
+  const url = new URL(`${ENV.exportBaseUrl}/v1/export/${type}`, window.location.origin);
   url.searchParams.set('format', 'xlsx');
   url.searchParams.set('lang', normalizeExportLang(uiLang));
   if (range) {
@@ -53,7 +53,7 @@ export function buildByMonthsExportUrl(
   uiLang: string,
 ): string | null {
   if (!ENV.exportBaseUrl || months.length === 0) return null;
-  const url = new URL(`${ENV.exportBaseUrl}/v1/export/${type}/by-months`);
+  const url = new URL(`${ENV.exportBaseUrl}/v1/export/${type}/by-months`, window.location.origin);
   url.searchParams.set('months', months.slice().sort().join(','));
   url.searchParams.set('format', format);
   url.searchParams.set('lang', normalizeExportLang(uiLang));
