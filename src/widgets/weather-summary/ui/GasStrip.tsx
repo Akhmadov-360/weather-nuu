@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { getSensorStatus } from '@/entities/weather/model/weather-thresholds';
 import { AnimateNumber } from '@/shared/ui/animate-number';
-import { StatusBadge } from '@/shared/ui/status-badge';
+import { StatusText } from '@/shared/ui/status-text';
 
 type GasStripProps = {
   mq5: number | null | undefined;
@@ -52,14 +52,14 @@ export function GasStrip({ mq5, mq3 }: GasStripProps): React.JSX.Element {
         label={t('lbl_mq5')}
         note={t('gas_estimate_lpg')}
         value={mq5}
-        badge={<StatusBadge tone={mq5Status.tone}>{t(mq5Status.labelKey)}</StatusBadge>}
+        badge={<StatusText tone={mq5Status.tone}>{t(mq5Status.labelKey)}</StatusText>}
       />
       <Tile
         icon={Wine}
         label={t('lbl_mq3')}
         note={t('gas_estimate')}
         value={mq3}
-        badge={<StatusBadge tone={mq3Status.tone}>{t(mq3Status.labelKey)}</StatusBadge>}
+        badge={<StatusText tone={mq3Status.tone}>{t(mq3Status.labelKey)}</StatusText>}
       />
     </div>
   );
