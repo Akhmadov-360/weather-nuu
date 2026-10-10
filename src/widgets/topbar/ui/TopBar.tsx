@@ -25,7 +25,7 @@ type TopBarProps = {
 
 /** Vertical hairline between the compact settings triggers — replaces the old per-item pill borders. */
 function Divider(): React.JSX.Element {
-  return <span className="h-5 w-px shrink-0 bg-[var(--glass-border)]" aria-hidden />;
+  return <span className="h-5 w-px shrink-0 bg-(--glass-border)" aria-hidden />;
 }
 
 export function TopBar({ titleKey, switchPath, switchLabelKey }: TopBarProps): React.JSX.Element {
@@ -118,8 +118,8 @@ function SwitchSectionLink({
       variant="ghost"
       className={
         size === 'default'
-          ? 'h-10 gap-1.5 rounded-full border border-[var(--glass-border)] bg-[var(--glass-surface)] px-4 text-sm text-primary-themed backdrop-blur-md transition-colors hover:bg-[var(--glass-surface-hover)]'
-          : 'h-9 gap-1.5 rounded-full border border-[var(--glass-border)] bg-[var(--glass-surface)] px-3 text-xs text-primary-themed backdrop-blur-md transition-colors hover:bg-[var(--glass-surface-hover)] sm:px-4 sm:text-sm'
+          ? 'h-10 gap-1.5 rounded-full border border-(--glass-border) bg-(--glass-surface) px-4 text-sm text-primary-themed backdrop-blur-md transition-colors hover:bg-(--glass-surface-hover)'
+          : 'h-9 gap-1.5 rounded-full border border-(--glass-border) bg-(--glass-surface) px-3 text-xs text-primary-themed backdrop-blur-md transition-colors hover:bg-(--glass-surface-hover) sm:px-4 sm:text-sm'
       }
     >
       <Link to={to}>
@@ -154,7 +154,7 @@ function ThemeToggle({
           variant="ghost"
           size="icon-sm"
           aria-label={t('theme_toggle_label')}
-          className="h-9 w-9 rounded-full text-primary-themed transition-colors hover:bg-[var(--glass-surface-hover)]"
+          className="h-9 w-9 rounded-full text-primary-themed transition-colors hover:bg-(--glass-surface-hover)"
         >
           <AnimatePresence mode="wait" initial={false}>
             <motion.span

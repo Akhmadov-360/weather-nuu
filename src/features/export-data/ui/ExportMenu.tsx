@@ -60,7 +60,7 @@ export function ExportMenu({
             <Button
               variant="ghost"
               disabled
-              className="h-9 gap-1.5 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface-soft)] px-2.5 text-[11px] font-medium text-muted-themed sm:text-xs"
+              className="h-9 gap-1.5 rounded-xl border border-(--glass-border) bg-(--glass-surface-soft) px-2.5 text-[11px] font-medium text-muted-themed sm:text-xs"
             >
               <Download className="h-3.5 w-3.5" />
               {t('export_data')}
@@ -130,7 +130,7 @@ export function ExportMenu({
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="h-9 gap-1.5 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface-soft)] px-2.5 text-[11px] font-medium text-secondary-themed transition-colors hover:bg-[var(--glass-surface-hover)] hover:text-primary-themed sm:text-xs"
+            className="h-9 gap-1.5 rounded-xl border border-(--glass-border) bg-(--glass-surface-soft) px-2.5 text-[11px] font-medium text-secondary-themed transition-colors hover:bg-(--glass-surface-hover) hover:text-primary-themed sm:text-xs"
           >
             <Download className="h-3.5 w-3.5" />
             {t('export_data')}

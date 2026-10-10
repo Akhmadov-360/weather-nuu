@@ -21,7 +21,7 @@ export function LiveStreams(): React.JSX.Element | null {
   if (!streams.length) return null;
 
   return (
-    <section className="rounded-[28px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
+    <section className="rounded-panel border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
       <h3 className="mb-4 text-sm text-white/80">{t("live_streams")}</h3>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -33,12 +33,12 @@ export function MetricCard({ sensor, label, value, unit }: MetricCardProps): Rea
   const displayUnit = unit ?? range.unit;
 
   return (
-    <div className="flex h-full flex-col rounded-card border border-[var(--glass-border)] bg-[var(--glass-surface)] px-4 py-4 shadow-card backdrop-blur-md">
+    <div className="flex h-full flex-col rounded-card border border-(--glass-border) bg-(--glass-surface) px-4 py-4 shadow-card backdrop-blur-md">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 text-[10px] uppercase tracking-[0.2em] text-muted-themed sm:text-[11px]">
           {label}
         </div>
-        <div className="shrink-0 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface)] p-2 text-secondary-themed">
+        <div className="shrink-0 rounded-xl border border-(--glass-border) bg-(--glass-surface) p-2 text-secondary-themed">
           <Icon className="h-4 w-4" />
         </div>
       </div>
@@ -63,7 +63,7 @@ export function MetricCard({ sensor, label, value, unit }: MetricCardProps): Rea
           max={range.max}
           disabled
           className="data-disabled:opacity-100"
-          trackClassName="h-2 bg-transparent"
+          trackClassName="data-horizontal:h-2 bg-transparent"
           trackStyle={{ background: buildZoneGradient(range) }}
           rangeClassName="hidden"
           thumbClassName={`h-4 w-4 border-2 shadow-md disabled:opacity-100 ${getMarkerBorderClass(status.tone)}`}

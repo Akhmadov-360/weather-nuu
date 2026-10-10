@@ -4,7 +4,7 @@
 с цветовыми зонами нормы, интерактивные графики за любой период, экспорт данных,
 индикатор «датчик живой / данные устарели». Языки интерфейса: русский, узбекский, английский.
 
-**Стек:** React 19, TypeScript, Vite, TanStack Query, ECharts, Tailwind CSS **v3**,
+**Стек:** React 19, TypeScript, Vite, TanStack Query, ECharts, Tailwind CSS **v4**,
 shadcn/ui (Radix), i18next, React Router.
 
 Бэкенд — отдельный репозиторий `weather-backend`. Подробный технический отчёт по обеим частям:
@@ -81,9 +81,13 @@ src/
 
 ## Важно знать
 
-- **Tailwind здесь v3, а не v4.** Компоненты, сгенерированные `shadcn add`, нередко написаны под
-  v4 (`data-checked:`, `data-open:`, `var(--radius-md)`) — на v3 такие классы молча не работают.
-  Используйте v3-синтаксис: `data-[state=checked]:`, `rounded-md`. Проверяйте результат глазами.
+- **Tailwind v4.** Файла `tailwind.config.ts` нет: токены (цвета, радиусы, тени, шрифт) и свои
+  утилиты (`dash-bg`, `text-*-themed`) описаны в `src/app/styles/globals.css` (`@theme`, `@utility`),
+  тёмная тема — по классу `.dark` на `<html>`. Компоненты `shadcn add` написаны под v4 и работают как
+  есть. Минимальные браузеры: Chrome 111, Safari 16.4, Firefox 128.
+  Если у компонента shadcn есть вариант `data-horizontal:h-1`, а вы передаёте `h-2` через
+  `className`, победит вариант — передавайте `data-horizontal:h-2`.
+  Проверка «ничего не поехало» — `scripts/style-snapshot/` (снимок вычисленных стилей до/после).
 - Тесты лежат рядом с кодом (`*.test.ts`). Меняете логику в `entities/` или `shared/lib/` — добавьте или обновите тест.
 - Менеджер пакетов — **pnpm** (файл `pnpm-lock.yaml`). Не запускайте `npm install`.
 - Цвета и пороги зон нормы — в одном месте: `src/shared/lib/weather-ranges.ts`.

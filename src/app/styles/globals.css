@@ -1,9 +1,67 @@
+@import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
+/* Class-based dark mode: ThemeProvider toggles `.dark` on <html>. */
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design tokens exposed as Tailwind utilities. Every value is a `var(--x)`
+ * holding a FULL colour (oklch / hex / rgba), never a bare channel triplet —
+ * `inline` makes utilities read the variable directly so theme switching
+ * (.dark) and opacity modifiers (`bg-status-safe/10`) keep working.
+ */
+@theme inline {
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-destructive: var(--destructive);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-sensor-temp: var(--sensor-temp);
+  --color-sensor-hum: var(--sensor-hum);
+  --color-sensor-press: var(--sensor-press);
+  --color-sensor-mq5: var(--sensor-mq5);
+  --color-sensor-mq3: var(--sensor-mq3);
+
+  --color-status-safe: var(--status-safe);
+  --color-status-warning: var(--status-warning);
+  --color-status-critical: var(--status-critical);
+  --color-status-info: var(--status-info);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-panel: 28px;
+  --radius-card: 20px;
+
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-panel: 0 10px 40px rgba(15, 23, 42, 0.35);
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.18);
+  --shadow-glow: 0 0 12px rgba(74, 222, 128, 0.8);
+}
 
 /* ─── Shadcn tokens (oklch) ─────────────────────────────────────── */
 @layer base {
@@ -73,7 +131,7 @@
      * color-mix() opacity fallback for CSS-variable colors the way a
      * regular className can (--ring is a full `oklch(...)` value, not a
      * bare triplet, so the classic `<alpha-value>` trick isn't available
-     * either — see tailwind.config.ts). Plain CSS color-mix() sidesteps
+     * either — see the @theme block above). Plain CSS color-mix() sidesteps
      * both limitations directly.
      */
     outline-color: color-mix(in oklch, var(--ring) 50%, transparent);
@@ -191,18 +249,16 @@ html:not(.dark) {
   --chart-tooltip-label:  rgba(71, 85, 105, 0.70);
 }
 
-/* ─── Dashboard gradient utility ─────────────────────────────── */
-@layer utilities {
-  .dash-bg {
-    background:
-      radial-gradient(ellipse 80% 55% at 0% 0%,   var(--dash-accent-1) 0%, transparent 100%),
-      radial-gradient(ellipse 60% 40% at 100% 0%,  var(--dash-accent-2) 0%, transparent 100%),
-      radial-gradient(ellipse 50% 60% at 50% 100%, var(--dash-accent-3) 0%, transparent 100%),
-      var(--dash-base);
-  }
-
-  /* Semantic text utilities */
-  .text-primary-themed   { color: var(--text-primary); }
-  .text-secondary-themed { color: var(--text-secondary); }
-  .text-muted-themed     { color: var(--text-muted); }
+/* ─── Custom utilities ───────────────────────────────────────── */
+@utility dash-bg {
+  background:
+    radial-gradient(ellipse 80% 55% at 0% 0%,   var(--dash-accent-1) 0%, transparent 100%),
+    radial-gradient(ellipse 60% 40% at 100% 0%,  var(--dash-accent-2) 0%, transparent 100%),
+    radial-gradient(ellipse 50% 60% at 50% 100%, var(--dash-accent-3) 0%, transparent 100%),
+    var(--dash-base);
 }
+
+/* Semantic text utilities */
+@utility text-primary-themed   { color: var(--text-primary); }
+@utility text-secondary-themed { color: var(--text-secondary); }
+@utility text-muted-themed     { color: var(--text-muted); }

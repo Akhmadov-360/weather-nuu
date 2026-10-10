@@ -186,7 +186,7 @@ export function MonthPickerDialog({
             </RadioGroup>
           </div>
 
-          <DialogFooter className="-mx-0 -mb-0 flex-row items-center justify-between gap-2 rounded-none border-t-0 bg-transparent p-0 sm:flex-row sm:justify-between">
+          <DialogFooter className="mx-0 mb-0 flex-row items-center justify-between gap-2 rounded-none border-t-0 bg-transparent p-0 sm:flex-row sm:justify-between">
             <span className="text-xs text-muted-foreground">
               {selected.size === 0
                 ? t('export_pick_months_none')
