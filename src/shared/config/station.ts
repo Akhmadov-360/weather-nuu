@@ -8,4 +8,6 @@ export const STATION = {
   lat: 41.343,
   lon: 69.205,
   timeZone: 'Asia/Tashkent',
+  /** UTC+5 all year (Uzbekistan has no daylight saving time). */
+  utcOffsetMinutes: 300,
 } as const;
