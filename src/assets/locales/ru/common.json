@@ -20,7 +20,8 @@
   "empty_title": "Нет данных",
   "empty_description": "Проверьте подключение API и endpoint'ы.",
   "error_data": "Не удалось загрузить данные. Попробуйте снова.",
-  "current_weather": "Условия в помещении",
+  "current_weather_room": "Условия в помещении",
+  "current_weather_street": "Условия на улице",
   "indoor_comfortable": "Комфортно",
   "indoor_warm": "Тепло",
   "indoor_hot": "Жарко",
@@ -49,7 +50,6 @@
   "status_normal": "в норме",
   "status_low": "низкое",
   "status_high": "высокое",
-  "status_safe": "безопасно",
   "status_warning": "повышено",
   "status_reference": "справочно",
   "status_below_norm": "ниже нормы",
@@ -152,5 +152,7 @@
   "aqi_label": "AQI",
   "unit_ugm3": "мкг/м³",
   "gas_estimate_lpg": "оценка, эквивалент LPG",
-  "gas_estimate": "оценка"
+  "gas_estimate": "оценка",
+  "gas_status_ok": "в пределах нормы",
+  "gas_status_high": "высокий уровень"
 }

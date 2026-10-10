@@ -22,9 +22,9 @@ const HUM_RANGE = { min: 30, max: 60 };
  */
 function getZoneStatus(sensor: "mq5", value: number): MetricStatus {
   const [safe, warn] = SENSOR_RANGES[sensor].zones;
-  if (value <= safe!.to) return { labelKey: "status_safe", tone: "good" };
+  if (value <= safe!.to) return { labelKey: "gas_status_ok", tone: "good" };
   if (value <= warn!.to) return { labelKey: "status_warning", tone: "warn" };
-  return { labelKey: "status_high", tone: "bad" };
+  return { labelKey: "gas_status_high", tone: "bad" };
 }
 
 export function getSensorStatus(sensor: SensorType, value: number | null): MetricStatus {

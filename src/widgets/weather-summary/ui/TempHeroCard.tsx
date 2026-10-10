@@ -8,6 +8,7 @@ import type { WeatherHistoryItem } from '@/entities/weather/model/weather.types'
 import { formatSensorValue, getToneTextClass } from '@/shared/lib/sensor-format';
 
 type TempHeroCardProps = {
+  source: 'room' | 'street';
   temp: number;
   history?: WeatherHistoryItem[];
 };
@@ -34,7 +35,7 @@ function getMinMax(latest: number, history?: WeatherHistoryItem[]) {
   return { min: (latest - 2).toFixed(1), max: (latest + 2).toFixed(1) };
 }
 
-export function TempHeroCard({ temp, history }: TempHeroCardProps): React.JSX.Element {
+export function TempHeroCard({ source, temp, history }: TempHeroCardProps): React.JSX.Element {
   const { t } = useTranslation();
   const condition = getIndoorCondition(temp);
   const Icon = condition.icon;
@@ -54,7 +55,7 @@ export function TempHeroCard({ temp, history }: TempHeroCardProps): React.JSX.El
   return (
     <div className="flex h-full flex-col justify-between rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card backdrop-blur-md sm:p-5">
       <span className="text-[10px] uppercase tracking-[0.25em] text-muted-themed sm:text-xs">
-        {t('current_weather')}
+        {t(`current_weather_${source}`)}
       </span>
 
       <div className="mt-4 flex items-center gap-3 sm:gap-4">

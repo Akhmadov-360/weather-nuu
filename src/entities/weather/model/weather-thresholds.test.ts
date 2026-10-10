@@ -49,9 +49,10 @@ describe('getSensorStatus: gas sensors follow SENSOR_RANGES zones', () => {
   });
 
   it('returns the matching label keys', () => {
-    expect(getSensorStatus('mq5', 0).labelKey).toBe('status_safe');
+    // An uncalibrated estimate must never be labelled "safe": it is "within range", "elevated" or "high level".
+    expect(getSensorStatus('mq5', 0).labelKey).toBe('gas_status_ok');
     expect(getSensorStatus('mq5', 1500).labelKey).toBe('status_warning');
-    expect(getSensorStatus('mq5', 2500).labelKey).toBe('status_high');
+    expect(getSensorStatus('mq5', 2500).labelKey).toBe('gas_status_high');
   });
 });
 

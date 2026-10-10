@@ -20,7 +20,8 @@
   "empty_title": "No data",
   "empty_description": "Check your API connection and endpoints.",
   "error_data": "Failed to load data. Please try again.",
-  "current_weather": "Indoor conditions",
+  "current_weather_room": "Indoor conditions",
+  "current_weather_street": "Outdoor conditions",
   "indoor_comfortable": "Comfortable",
   "indoor_warm": "Warm",
   "indoor_hot": "Hot",
@@ -49,7 +50,6 @@
   "status_normal": "normal",
   "status_low": "low",
   "status_high": "high",
-  "status_safe": "safe",
   "status_warning": "elevated",
   "status_reference": "reference",
   "status_below_norm": "below normal",
@@ -152,5 +152,7 @@
   "aqi_label": "AQI",
   "unit_ugm3": "µg/m³",
   "gas_estimate_lpg": "estimate, LPG equivalent",
-  "gas_estimate": "estimate"
+  "gas_estimate": "estimate",
+  "gas_status_ok": "within range",
+  "gas_status_high": "high level"
 }
