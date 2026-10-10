@@ -109,7 +109,7 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
               <TimeDisplay freshness={freshness} />
               <MetricCard sensor="hum" label={t('lbl_hum')} value={latest.hum} />
               <MetricCard sensor="press" label={t('lbl_press')} value={latest.press} />
-              <TempHeroCard temp={latest.temp} history={history} />
+              <TempHeroCard source={config.key} temp={latest.temp} history={history} />
               <div className="sm:col-span-2 lg:col-span-2">
                 <AirQualityCard source={config.key} history={history} dayMean={dustDayQuery.data} />
               </div>

@@ -20,7 +20,8 @@
   "empty_title": "Ma'lumot yo'q",
   "empty_description": "API ulanishini va endpointlarni tekshiring.",
   "error_data": "Ma'lumotlarni yuklab bo'lmadi. Qayta urinib ko'ring.",
-  "current_weather": "Xona holati",
+  "current_weather_room": "Xona holati",
+  "current_weather_street": "Ko'cha holati",
   "indoor_comfortable": "Qulay",
   "indoor_warm": "Iliq",
   "indoor_hot": "Issiq",
@@ -49,7 +50,6 @@
   "status_normal": "me'yorda",
   "status_low": "past",
   "status_high": "yuqori",
-  "status_safe": "xavfsiz",
   "status_warning": "oshgan",
   "status_reference": "ma'lumotnoma",
   "status_below_norm": "me'yordan past",
@@ -152,5 +152,7 @@
   "aqi_label": "AQI",
   "unit_ugm3": "mkg/m³",
   "gas_estimate_lpg": "baho, LPG ekvivalenti",
-  "gas_estimate": "baho"
+  "gas_estimate": "baho",
+  "gas_status_ok": "me'yor doirasida",
+  "gas_status_high": "yuqori daraja"
 }
