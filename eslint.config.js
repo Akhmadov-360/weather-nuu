@@ -38,7 +38,11 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: ['@/entities/*', '@/features/*', '@/widgets/*', '@/pages/*', '@/app/*'],
+              group: [
+                '@/entities/*', '@/features/*', '@/widgets/*', '@/pages/*', '@/app/*',
+                // the same layers reached by a relative path
+                '**/entities/**', '**/features/**', '**/widgets/**', '**/pages/**', '**/app/**',
+              ],
               message: 'shared/lib/air-quality must stay pure: it cannot import from upper layers.',
             },
           ],

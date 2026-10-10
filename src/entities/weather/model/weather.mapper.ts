@@ -1,6 +1,20 @@
 import { z } from 'zod';
 import type { WeatherHistoryItem, WeatherLatest } from './weather.types';
 
+/**
+ * Dust is optional and must never break the rest of a reading. Null stays
+ * null ("no reading"; z.coerce would turn it into 0), numeric strings are
+ * converted, and anything unusable becomes null instead of failing the parse.
+ */
+const dustValue = z.unknown().transform((value): number | null => {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+});
+
 const weatherRawSchema = z
   .object({
     fused_temp: z.coerce.number().optional(),
@@ -15,9 +29,8 @@ const weatherRawSchema = z
     mq_5:       z.coerce.number().optional(),
     mq3:        z.coerce.number().optional(),
     mq_3:       z.coerce.number().optional(),
-    // Dust: null is meaningful ("no reading"), so no coercion; z.coerce turns null into 0.
-    pm25:       z.number().nullish(),
-    pm10:       z.number().nullish(),
+    pm25:       dustValue,
+    pm10:       dustValue,
     date:       z.string().optional(),
     recordedAt: z.string().optional(), // apps/api WS payload
     created_at: z.string().optional(),

@@ -57,6 +57,10 @@ describe('recentMean', () => {
     expect(recentMean(history(200, 40, 20 * 60_000), 'pm25', NOW)).toBeNull();
   });
 
+  it('counts a real zero as a reading (failed reads arrive as null: the backend stores the 0/0 pair as NULL)', () => {
+    expect(recentMean(history(60, 0), 'pm25', NOW)).toEqual({ mean: 0, count: 60 });
+  });
+
   it('ignores points older than the window', () => {
     const old = history(30, 1000, 11 * 60_000);
     const fresh = history(60, 40);

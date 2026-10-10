@@ -59,6 +59,23 @@ describe('mapWeatherLatest', () => {
     expect(result.pm10).toBeNull();
   });
 
+  it('accepts dust values sent as numeric strings', () => {
+    const result = mapWeatherLatest({ fusedTemp: 25, recordedAt: '2026-10-10T12:00:00.000Z', pm25: '38', pm10: '45' });
+    expect(result.pm25).toBe(38);
+    expect(result.pm10).toBe(45);
+  });
+
+  it.each(['abc', '', {}, true, [], Number.NaN])('turns malformed dust value %j into null', (garbage) => {
+    const result = mapWeatherLatest({ fusedTemp: 25, recordedAt: '2026-10-10T12:00:00.000Z', pm25: garbage, pm10: garbage });
+    expect(result.pm25).toBeNull();
+    expect(result.pm10).toBeNull();
+  });
+
+  it('a malformed dust value never takes down the other fields', () => {
+    const result = mapWeatherLatest({ fusedTemp: 21, hum: 40, bmpPress: 955, pm25: 'oops', recordedAt: '2026-10-10T12:00:00.000Z' });
+    expect([result.temp, result.hum, result.press, result.pm25]).toEqual([21, 40, 955, null]);
+  });
+
   it('coerces numeric strings', () => {
     expect(mapWeatherLatest({ fusedTemp: '23.5', hum: '40' }).temp).toBe(23.5);
   });
@@ -116,6 +133,11 @@ describe('mapWeatherHistory', () => {
   it('carries pm fields on every history item', () => {
     const items = mapWeatherHistory({ items: [{ ...row, pm25: 12, pm10: 20 }, { ...row, pm25: null, pm10: null }] });
     expect(items.map((i) => [i.pm25, i.pm10])).toEqual([[12, 20], [null, null]]);
+  });
+
+  it('one row with a malformed dust value does not fail the whole history', () => {
+    const items = mapWeatherHistory({ items: [{ ...row, pm25: 12 }, { ...row, pm25: 'garbage' }, { ...row, pm25: 30 }] });
+    expect(items.map((i) => i.pm25)).toEqual([12, null, 30]);
   });
 
   it('accepts an empty page', () => {
