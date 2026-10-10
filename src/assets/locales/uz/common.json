@@ -154,5 +154,22 @@
   "theme_switch_to_dark": "Qorong'i mavzuga o'tish",
   "theme_switch_to_light": "Yorug' mavzuga o'tish",
   "nav_sections": "Bo'limlar",
-  "university_short": "O'zMU"
+  "university_short": "O'zMU",
+  "phase_night": "tun",
+  "phase_dawn": "tong",
+  "phase_morning": "ertalab",
+  "phase_day": "kunduz",
+  "phase_evening": "kechqurun",
+  "phase_dusk": "shom",
+  "sunrise": "quyosh chiqishi",
+  "sunset": "quyosh botishi",
+  "time_station_zone": "Toshkent, UTC+5",
+  "strip_covered": "60 daqiqadan {{count}} tasida ma'lumot bor",
+  "strip_minute_ok": "ma'lumot bor",
+  "strip_minute_partial": "ma'lumot kam",
+  "strip_minute_gap": "ma'lumot yo'q",
+  "fresh_live_ago": "Ma'lumot {{seconds}} soniya oldin olindi",
+  "fresh_stale_ago": "{{minutes}} daqiqadan beri ma'lumot yo'q",
+  "fresh_offline": "Stansiya bilan aloqa yo'q",
+  "strip_covered_short": "{{count}}/60 daq"
 }

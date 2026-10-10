@@ -62,6 +62,21 @@ describe('skyState (Tashkent, 10 October 2026)', () => {
     expect(after.progress).toBeLessThan(0.05);
   });
 
+  it('reports where the arc of the visible body starts and ends', () => {
+    const day = skyState(local(12), LAT, LON, OFFSET)!;
+    expect(day.arcStart).toBe(day.sunrise);
+    expect(day.arcEnd).toBe(day.sunset);
+
+    const evening = skyState(local(21), LAT, LON, OFFSET)!;
+    expect(evening.luminary).toBe('moon');
+    expect(evening.arcStart).toBe(evening.sunset); // tonight's arc begins at today's sunset
+    expect(evening.arcEnd).toBeGreaterThan(local(24)); // and ends at tomorrow's sunrise
+
+    const small = skyState(local(2), LAT, LON, OFFSET)!;
+    expect(small.arcStart).toBeLessThan(local(0)); // yesterday's sunset
+    expect(small.arcEnd).toBe(small.sunrise);
+  });
+
   it('keeps the moon arc continuous across midnight', () => {
     const a = skyState(local(23, 59), LAT, LON, OFFSET)!;
     const b = skyState(local(24, 1), LAT, LON, OFFSET)!;

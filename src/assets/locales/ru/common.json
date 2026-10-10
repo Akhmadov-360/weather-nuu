@@ -154,5 +154,22 @@
   "theme_switch_to_dark": "Включить тёмную тему",
   "theme_switch_to_light": "Включить светлую тему",
   "nav_sections": "Разделы",
-  "university_short": "НУУз"
+  "university_short": "НУУз",
+  "phase_night": "ночь",
+  "phase_dawn": "рассвет",
+  "phase_morning": "утро",
+  "phase_day": "день",
+  "phase_evening": "вечер",
+  "phase_dusk": "сумерки",
+  "sunrise": "восход",
+  "sunset": "закат",
+  "time_station_zone": "Ташкент, UTC+5",
+  "strip_covered": "{{count}} из 60 минут с данными",
+  "strip_minute_ok": "данные идут",
+  "strip_minute_partial": "данных мало",
+  "strip_minute_gap": "данных нет",
+  "fresh_live_ago": "Данные получены {{seconds}} с назад",
+  "fresh_stale_ago": "Данных нет {{minutes}} мин",
+  "fresh_offline": "Нет связи со станцией",
+  "strip_covered_short": "{{count}}/60 мин"
 }

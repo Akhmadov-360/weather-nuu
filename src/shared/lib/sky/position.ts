@@ -8,6 +8,9 @@ export type SkyState = {
   sunset: number;
   /** The body that is up: the sun between sunrise and sunset, the moon otherwise. */
   luminary: 'sun' | 'moon';
+  /** Where the arc of that body starts and ends (ms): sunrise..sunset for the sun, sunset..next sunrise for the moon. */
+  arcStart: number;
+  arcEnd: number;
   /** Position along the arc of that body, 0 (rising) to 1 (setting). */
   progress: number;
   /** Moon phase, 0 new, 0.5 full, 1 new again (see suncalc). */
@@ -68,6 +71,8 @@ export function skyState(nowMs: number, lat: number, lon: number, utcOffsetMinut
     sunrise,
     sunset,
     luminary,
+    arcStart: from,
+    arcEnd: to,
     progress: Math.min(1, Math.max(0, (nowMs - from) / (to - from))),
     moonPhase: getMoonIllumination(now).phase,
   };

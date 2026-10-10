@@ -154,5 +154,22 @@
   "theme_switch_to_dark": "Switch to dark theme",
   "theme_switch_to_light": "Switch to light theme",
   "nav_sections": "Sections",
-  "university_short": "NUUz"
+  "university_short": "NUUz",
+  "phase_night": "night",
+  "phase_dawn": "dawn",
+  "phase_morning": "morning",
+  "phase_day": "day",
+  "phase_evening": "evening",
+  "phase_dusk": "dusk",
+  "sunrise": "sunrise",
+  "sunset": "sunset",
+  "time_station_zone": "Tashkent, UTC+5",
+  "strip_covered": "{{count}} of 60 minutes with data",
+  "strip_minute_ok": "data received",
+  "strip_minute_partial": "little data",
+  "strip_minute_gap": "no data",
+  "fresh_live_ago": "Data received {{seconds}} s ago",
+  "fresh_stale_ago": "No data for {{minutes}} min",
+  "fresh_offline": "No connection to the station",
+  "strip_covered_short": "{{count}}/60 min"
 }
