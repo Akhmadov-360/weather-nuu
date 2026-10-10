@@ -14,7 +14,7 @@ import type {
   SensorType,
   WeatherHistoryItem,
 } from "@/entities/weather/model/weather.types";
-import { isScaleSensor } from "@/entities/weather/model/weather.types";
+import { SENSORS_BY_SOURCE, isScaleSensor } from "@/entities/weather/model/weather.types";
 import { ChartSelector } from "@/features/chart-selector/ui/ChartSelector";
 import { DateRangePicker } from "@/features/date-range-picker/ui/DateRangePicker";
 import { ExportMenu } from "@/features/export-data/ui/ExportMenu";
@@ -30,6 +30,7 @@ import {
   type TimeRange,
 } from "@/shared/lib/date/filter-by-range";
 import { CHART_GAP_THRESHOLD_MS, detectGaps, insertGapBreaks } from "@/shared/lib/date/insert-gap-breaks";
+import { DEFAULT_STANDARD_ID, chartThresholds, getStandard } from "@/shared/lib/air-quality";
 import { SENSOR_RANGES } from "@/shared/lib/weather-ranges";
 import { SensorStatCard } from "./SensorStatCard";
 
@@ -40,26 +41,30 @@ type SensorChartsProps = {
   isRefetching?: boolean;
 };
 
+/** Dust units are translated (µg/m³ differs per language), so they are filled in by the component. */
 const SENSOR_UNITS: Record<SensorType, string> = {
   temp:  "°C",
   hum:   "%",
   press: "hPa",
   mq5:   "ppm",
   mq3:   "ppm",
-  pm25:  "мкг/м³",
-  pm10:  "мкг/м³",
+  pm25:  "",
+  pm10:  "",
 };
 
+/** Guide lines at the zone boundaries: SENSOR_RANGES for scale sensors, the air-quality standard for dust. */
+function thresholdValues(sensor: SensorType): number[] {
+  if (isScaleSensor(sensor)) return SENSOR_RANGES[sensor].zones.slice(0, -1).map((zone) => zone.to);
+  return chartThresholds(getStandard(DEFAULT_STANDARD_ID), sensor).map((th) => th.value);
+}
+
 function buildThresholdLines(sensor: SensorType) {
-  // Dust has no SENSOR_RANGES entry; its lines come from the air-quality standard in the UI PR.
-  if (!isScaleSensor(sensor)) return [];
-  const range = SENSOR_RANGES[sensor];
-  return range.zones.slice(0, -1).map((zone) => ({
-    yAxis: zone.to,
+  return thresholdValues(sensor).map((value) => ({
+    yAxis: value,
     lineStyle: { type: "dashed" as const, width: 1, opacity: 0.35 },
     label: {
       show: true,
-      formatter: String(zone.to),
+      formatter: String(value),
       fontSize: 10,
       color: "var(--chart-axis-label)",
       position: "end" as const,
@@ -106,11 +111,18 @@ function formatTooltipTs(ts: number): string {
 }
 
 export function SensorCharts({ type, history, isRefetching = false }: SensorChartsProps): React.JSX.Element {
-  const [activeSensor, setActiveSensor] = useState<SensorType>("temp");
+  const [selectedSensor, setActiveSensor] = useState<SensorType>("temp");
+  const sensors = SENSORS_BY_SOURCE[type];
+  // Navigating Room -> Street while a dust tab is open must fall back to a sensor Street actually has.
+  const activeSensor: SensorType = sensors.includes(selectedSensor) ? selectedSensor : "temp";
   const [activeRange, setActiveRange] = useState<TimeRange>("24h");
   const [customRange, setCustomRange] = useState<CustomDateRange | null>(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const { t } = useTranslation();
+  const units = useMemo<Record<SensorType, string>>(
+    () => ({ ...SENSOR_UNITS, pm25: t("unit_ugm3"), pm10: t("unit_ugm3") }),
+    [t],
+  );
 
   // The sensor's actual earliest recorded reading — used to disable
   // calendar dates before the sensor ever existed. Cached for 24h since
@@ -255,7 +267,7 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
 
   const option = useMemo((): EChartsOption => {
     const color      = SENSOR_COLORS[activeSensor];
-    const unit       = SENSOR_UNITS[activeSensor];
+    const unit       = units[activeSensor];
     const thresholds = buildThresholdLines(activeSensor);
 
     const firstTs = seriesData.at(0)?.[0]  ?? 0;
@@ -532,7 +544,7 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
         },
       ],
     };
-  }, [activeSensor, seriesData, gaps, chartMode, aggregatePoints, type, t]);
+  }, [activeSensor, seriesData, gaps, chartMode, aggregatePoints, type, t, units]);
 
   return (
     <div
@@ -586,7 +598,7 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
             />
           </div>
         </div>
-        <ChartSelector active={activeSensor} onChange={setActiveSensor} />
+        <ChartSelector sensors={sensors} active={activeSensor} onChange={setActiveSensor} />
       </div>
 
       {/* График. Empty/loading states share the same min-height as the chart
@@ -650,7 +662,7 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
           type="current"
           label={t("stat_current")}
           value={current}
-          unit={SENSOR_UNITS[activeSensor]}
+          unit={units[activeSensor]}
           hint={currentHint}
           tone={
             activeSensor === "temp"
@@ -658,9 +670,9 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
               : trend === "up" ? "warn" : trend === "down" ? "good" : "neutral"
           }
         />
-        <SensorStatCard type="min" label={t("stat_min")} value={min} unit={SENSOR_UNITS[activeSensor]} hint={t("for_period")} tone="neutral" />
-        <SensorStatCard type="max" label={t("stat_max")} value={max} unit={SENSOR_UNITS[activeSensor]} hint={t("for_period")} tone="neutral" />
-        <SensorStatCard type="avg" label={t("stat_avg")} value={avg} unit={SENSOR_UNITS[activeSensor]} hint={t(avgStatus.labelKey)} tone={avgStatus.tone} />
+        <SensorStatCard type="min" label={t("stat_min")} value={min} unit={units[activeSensor]} hint={t("for_period")} tone="neutral" />
+        <SensorStatCard type="max" label={t("stat_max")} value={max} unit={units[activeSensor]} hint={t("for_period")} tone="neutral" />
+        <SensorStatCard type="avg" label={t("stat_avg")} value={avg} unit={units[activeSensor]} hint={t(avgStatus.labelKey)} tone={avgStatus.tone} />
       </div>
     </div>
   );

@@ -1,13 +1,14 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Thermometer, Droplets, Wind, ShieldCheck, SprayCan, CloudFog, Cloudy } from 'lucide-react';
+import { Thermometer, Droplets, Wind, Flame, Wine, CloudFog, Cloudy } from 'lucide-react';
 
-import { SENSOR_ORDER } from '@/entities/weather/model/weather.constants';
 import type { SensorType } from '@/entities/weather/model/weather.types';
 import { cn } from '@/shared/lib/cn';
 import { SENSOR_COLORS } from '@/shared/lib/chart/chart-colors';
 
 type ChartSelectorProps = {
+  /** Tabs to offer, in order — what the current source physically has (SENSORS_BY_SOURCE). */
+  sensors: SensorType[];
   active: SensorType;
   onChange: (sensor: SensorType) => void;
 };
@@ -16,13 +17,13 @@ const SENSOR_ICONS: Record<SensorType, React.ReactNode> = {
   temp:  <Thermometer className="h-4 w-4" />,
   hum:   <Droplets    className="h-4 w-4" />,
   press: <Wind        className="h-4 w-4" />,
-  mq5:   <ShieldCheck className="h-4 w-4" />,
-  mq3:   <SprayCan    className="h-4 w-4" />,
+  mq5:   <Flame       className="h-4 w-4" />,
+  mq3:   <Wine        className="h-4 w-4" />,
   pm25:  <CloudFog    className="h-4 w-4" />,
   pm10:  <Cloudy      className="h-4 w-4" />,
 };
 
-export function ChartSelector({ active, onChange }: ChartSelectorProps): React.JSX.Element {
+export function ChartSelector({ sensors, active, onChange }: ChartSelectorProps): React.JSX.Element {
   const { t } = useTranslation();
 
   const MOBILE_LABELS: Record<SensorType, string> = {
@@ -41,7 +42,7 @@ export function ChartSelector({ active, onChange }: ChartSelectorProps): React.J
         className="flex w-max min-w-full items-center gap-1 rounded-2xl border p-1 backdrop-blur-xl"
         style={{ borderColor: 'var(--glass-border)', backgroundColor: 'var(--glass-surface-soft)' }}
       >
-        {SENSOR_ORDER.map((sensor) => {
+        {sensors.map((sensor) => {
           const isActive = active === sensor;
           return (
             <button

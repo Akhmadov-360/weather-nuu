@@ -1,4 +1,4 @@
-import type { DashboardPageConfig, SensorType } from "./weather.types";
+import type { DashboardPageConfig } from "./weather.types";
 import { ENV } from "@/shared/config/env";
 
 export const ROOM_CONFIG: DashboardPageConfig = {
@@ -24,5 +24,3 @@ export const STREET_CONFIG: DashboardPageConfig = {
     history: ENV.endpoints.street.history,
   },
 };
-
-export const SENSOR_ORDER: SensorType[] = ["temp", "hum", "press", "mq5", "mq3"];
