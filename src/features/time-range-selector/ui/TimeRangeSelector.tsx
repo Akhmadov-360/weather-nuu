@@ -43,7 +43,7 @@ export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps): 
               <motion.div
                 layoutId="time-range-active"
                 className="absolute inset-0 rounded-lg"
-                style={{ backgroundColor: 'var(--glass-surface-hover)' }}
+                style={{ backgroundColor: 'var(--control-active)' }}
                 transition={{ type: 'spring', stiffness: 280, damping: 24 }}
               />
             )}

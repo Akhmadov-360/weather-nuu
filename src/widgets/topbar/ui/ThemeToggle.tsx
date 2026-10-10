@@ -21,7 +21,7 @@ export function ThemeToggle(): React.JSX.Element {
       variant="ghost"
       size="icon-sm"
       aria-label={t(resolvedTheme === 'dark' ? 'theme_switch_to_light' : 'theme_switch_to_dark')}
-      className="h-10 w-10 rounded-full text-primary-themed transition-colors hover:bg-(--glass-surface-hover) sm:h-9 sm:w-9"
+      className="h-10 w-10 rounded-full text-primary-themed transition-colors hover:bg-(--control-hover) sm:h-9 sm:w-9"
       onClick={(event) => {
         // Keyboard activation reports (0, 0): spread from the button itself then.
         const rect = event.currentTarget.getBoundingClientRect();

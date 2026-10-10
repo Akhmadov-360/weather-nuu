@@ -18,6 +18,8 @@ const LANGUAGE_NAMES: Record<Language, string> = {
 
 /** Grace period so the menu does not close while the pointer crosses the gap to it. */
 const CLOSE_DELAY_MS = 120;
+/** Hover must rest this long before the menu opens, so a quick click does not flash it first. */
+const OPEN_DELAY_MS = 220;
 
 /**
  * The menu opens on hover (mouse) and on click, tap or keyboard. A single
@@ -34,14 +36,13 @@ export function LanguageSwitcher(): React.JSX.Element {
 
   useEffect(() => () => window.clearTimeout(closeTimer.current), []);
 
-  const openNow = () => {
+  // One timer for both directions: any new pointer movement replaces the pending open/close.
+  const schedule = (next: boolean, delay: number) => {
     window.clearTimeout(closeTimer.current);
-    setOpen(true);
+    closeTimer.current = window.setTimeout(() => setOpen(next), delay);
   };
-  const closeSoon = () => {
-    window.clearTimeout(closeTimer.current);
-    closeTimer.current = window.setTimeout(() => setOpen(false), CLOSE_DELAY_MS);
-  };
+  const openSoon = () => (open ? window.clearTimeout(closeTimer.current) : schedule(true, OPEN_DELAY_MS));
+  const closeSoon = () => schedule(false, CLOSE_DELAY_MS);
 
   return (
     <DropdownMenu
@@ -57,11 +58,13 @@ export function LanguageSwitcher(): React.JSX.Element {
         {/* No border/bg — matches ThemeToggle now that the group uses dividers, not per-item pills. */}
         <Button
           variant="ghost"
-          className="h-10 gap-1.5 rounded-full px-3 text-sm text-primary-themed transition-colors hover:bg-(--glass-surface-hover) sm:h-9 sm:px-2.5"
-          onPointerEnter={(event) => event.pointerType === 'mouse' && openNow()}
+          className="h-10 gap-1.5 rounded-full px-3 text-sm text-primary-themed transition-colors hover:bg-(--control-hover) sm:h-9 sm:px-2.5"
+          onPointerEnter={(event) => event.pointerType === 'mouse' && openSoon()}
           onPointerLeave={(event) => event.pointerType === 'mouse' && closeSoon()}
-          // A mouse click on an already hover-opened menu must not close it again.
+          // A mouse click on an already hover-opened menu must not close it again;
+          // a click before the hover delay has passed opens it right away (Radix).
           onPointerDown={(event) => {
+            window.clearTimeout(closeTimer.current);
             if (event.pointerType === 'mouse' && open) event.preventDefault();
           }}
         >
@@ -74,7 +77,7 @@ export function LanguageSwitcher(): React.JSX.Element {
       <DropdownMenuContent
         align="end"
         className="w-40"
-        onPointerEnter={(event) => event.pointerType === 'mouse' && openNow()}
+        onPointerEnter={(event) => event.pointerType === 'mouse' && openSoon()}
         onPointerLeave={(event) => event.pointerType === 'mouse' && closeSoon()}
       >
         {LANGUAGES.map((lang) => {
@@ -90,7 +93,7 @@ export function LanguageSwitcher(): React.JSX.Element {
               {active === lang ? (
                 <motion.span
                   layoutId="language-highlight"
-                  className="absolute inset-0 rounded-md bg-(--glass-surface-hover)"
+                  className="absolute inset-0 rounded-md bg-(--control-hover)"
                   transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 38 }}
                 />
               ) : null}

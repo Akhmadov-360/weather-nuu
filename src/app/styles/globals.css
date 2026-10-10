@@ -192,6 +192,11 @@
   /* Topbar sticky backdrop */
   --topbar-bg: rgba(15, 23, 42, 0.85);
 
+  /* Interactive controls: hover fill, active segment, segmented-control track */
+  --control-hover:  rgba(255, 255, 255, 0.08);
+  --control-active: rgba(255, 255, 255, 0.14);
+  --control-track:  rgba(255, 255, 255, 0.05);
+
   /* Semantic text */
   --text-primary:   rgba(255, 255, 255, 0.92);
   --text-secondary: rgba(148, 163, 184, 0.75);
@@ -229,6 +234,11 @@ html:not(.dark) {
   --glass-border:        rgba(15 23 42 / 0.09);
 
   --topbar-bg: rgba(238, 242, 255, 0.90);
+
+  /* Interactive controls: hover fill, active segment, segmented-control track */
+  --control-hover:  rgba(15, 23, 42, 0.06);
+  --control-active: #ffffff;
+  --control-track:  rgba(15, 23, 42, 0.06);
 
   /* Semantic text */
   --text-primary:   rgba(15, 23, 42, 0.92);
@@ -283,13 +293,28 @@ html:not(.dark) {
   animation: none;
   mix-blend-mode: normal;
 }
+/* To dark: the new theme spreads out from the click point... */
+::view-transition-old(root) { z-index: 0; }
 ::view-transition-new(root) {
   z-index: 1;
   animation: theme-reveal 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+/* ...to light: the same wave in reverse, the old theme closes in on the click point. */
+html[data-theme-dir='to-light']::view-transition-old(root) {
+  z-index: 2;
+  animation: theme-collapse 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+html[data-theme-dir='to-light']::view-transition-new(root) {
+  z-index: 1;
+  animation: none;
+}
 @keyframes theme-reveal {
   from { clip-path: circle(0 at var(--reveal-x) var(--reveal-y)); }
   to   { clip-path: circle(var(--reveal-r) at var(--reveal-x) var(--reveal-y)); }
+}
+@keyframes theme-collapse {
+  from { clip-path: circle(var(--reveal-r) at var(--reveal-x) var(--reveal-y)); }
+  to   { clip-path: circle(0 at var(--reveal-x) var(--reveal-y)); }
 }
 html.theme-switching *,
 html.theme-switching *::before,

@@ -90,11 +90,13 @@ export function ThemeProvider({ children }: PropsWithChildren) {
       root.style.setProperty('--reveal-r', `${revealRadius(x, y, window.innerWidth, window.innerHeight)}px`);
       // Without this, colour transitions on individual elements would run inside the new snapshot.
       root.classList.add('theme-switching');
+      root.dataset.themeDir = next === 'dark' ? 'to-dark' : 'to-light';
       running.current = true;
       const transition = document.startViewTransition(apply);
       void transition.finished.finally(() => {
         running.current = false;
         root.classList.remove('theme-switching');
+        delete root.dataset.themeDir;
       });
     },
     [resolvedTheme],
