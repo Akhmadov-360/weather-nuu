@@ -15,7 +15,7 @@ export function ErrorState({ message, onRetry }: ErrorStateProps): React.JSX.Ele
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center justify-center gap-4 rounded-panel border border-(--glass-border) bg-(--glass-surface) p-6 text-center backdrop-blur-xl"
+      className="flex flex-col items-center justify-center gap-4 rounded-panel border border-(--glass-border) bg-(--glass-surface) p-6 text-center"
     >
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-status-critical/10 text-status-critical">
         <AlertTriangle className="h-5 w-5" />
@@ -26,7 +26,7 @@ export function ErrorState({ message, onRetry }: ErrorStateProps): React.JSX.Ele
       {onRetry && (
         <Button
           onClick={onRetry}
-          className="rounded-full border border-(--glass-border) bg-(--glass-surface-hover) px-4 text-sm text-primary-themed backdrop-blur-md hover:bg-(--glass-surface-hover)"
+          className="rounded-full border border-(--glass-border) bg-(--glass-surface-hover) px-4 text-sm text-primary-themed hover:bg-(--glass-surface-hover)"
         >
           {t('error_boundary_retry')}
         </Button>

@@ -15,7 +15,7 @@ export function StreamCard({ title, url }: StreamCardProps) {
     <>
       <motion.div
         whileHover={{ scale: 1.02 }}
-        className="relative cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl"
+        className="relative cursor-pointer overflow-hidden rounded-2xl border border-(--glass-border) bg-(--glass-surface) shadow-card"
         onClick={() => setOpen(true)}
       >
         <div className="relative h-[200px] w-full sm:h-[240px]">
@@ -27,7 +27,7 @@ export function StreamCard({ title, url }: StreamCardProps) {
           </div>
         </div>
 
-        <div className="p-3 text-sm text-white/80">{title}</div>
+        <div className="p-3 text-sm text-secondary-themed">{title}</div>
       </motion.div>
 
       <StreamModal open={open} onClose={() => setOpen(false)} url={url} title={title} />

@@ -26,6 +26,8 @@ import {
   type TimeRange,
 } from "@/shared/lib/date/filter-by-range";
 import { CHART_GAP_THRESHOLD_MS, detectGaps, insertGapBreaks } from "@/shared/lib/date/insert-gap-breaks";
+import { useTheme } from "@/shared/hooks/useTheme";
+import { getSensorColor } from "@/shared/lib/chart/chart-colors";
 import { echarts } from "../lib/echarts-core";
 import { buildChartOption, type ChartMode } from "../model/chart-option";
 import { aggregateSeries, rawSeries, summarize } from "../model/chart-series";
@@ -58,6 +60,7 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
   const [customRange, setCustomRange] = useState<CustomDateRange | null>(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const { t } = useTranslation();
+  const { resolvedTheme } = useTheme();
   const units = useMemo<Record<SensorType, string>>(
     () => ({ ...SENSOR_UNITS, pm25: t("unit_ugm3"), pm10: t("unit_ugm3") }),
     [t],
@@ -175,19 +178,23 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
         sensor: activeSensor,
         source: type,
         unit: units[activeSensor],
+        // Re-read when the theme flips: the colours (and the CSS variables ECharts resolves) change with it.
+        color: getSensorColor(activeSensor),
         chartMode,
         seriesData,
         gaps,
         aggregatePoints,
         t,
       }),
-    [activeSensor, seriesData, gaps, chartMode, aggregatePoints, type, t, units],
+    // resolvedTheme is not read inside, but a theme flip must rebuild the option (new colours).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeSensor, seriesData, gaps, chartMode, aggregatePoints, type, t, units, resolvedTheme],
   );
 
 
   return (
     <div
-      className="relative flex h-full flex-col border p-3 backdrop-blur-xl sm:p-4 lg:p-5"
+      className="relative flex h-full flex-col border p-3 sm:p-4 lg:p-5"
       style={{
         borderRadius: "24px",
         backgroundColor: "var(--glass-surface)",
@@ -198,7 +205,7 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
       {/* Refetch indicator */}
       {isRefetching && (
         <motion.div
-          className="absolute inset-x-4 top-0 h-[2px] rounded-full bg-blue-500/70"
+          className="absolute inset-x-4 top-0 h-[2px] rounded-full bg-status-info/70"
           animate={{ opacity: [0.4, 1, 0.4] }}
           transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
         />

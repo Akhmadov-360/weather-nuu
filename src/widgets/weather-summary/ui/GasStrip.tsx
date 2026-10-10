@@ -20,7 +20,7 @@ type TileProps = {
 
 function Tile({ icon: Icon, label, note, value, badge }: TileProps): React.JSX.Element {
   return (
-    <div className="flex h-full items-center gap-4 rounded-card border border-(--glass-border) bg-(--glass-surface) px-4 py-3 shadow-card backdrop-blur-md sm:px-5">
+    <div className="flex h-full items-center gap-4 rounded-card border border-(--glass-border) bg-(--glass-surface) px-4 py-3 shadow-card sm:px-5">
       <div className="shrink-0 rounded-xl border border-(--glass-border) bg-(--glass-surface) p-2 text-secondary-themed">
         <Icon className="h-4 w-4" />
       </div>

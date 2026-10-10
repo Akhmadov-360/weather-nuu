@@ -197,10 +197,10 @@ html:not(.dark) {
 
   /* Data series */
   --sensor-temp:  #C4553B;
-  --sensor-hum:   #2B6CB0;
-  --sensor-press: #5A5BB5;
-  --sensor-pm25:  #8B4A9E;
-  --sensor-pm10:  #B7791F;
+  --sensor-hum:   #3A86C8;
+  --sensor-press: #41309A;
+  --sensor-pm25:  #9B3E9E;
+  --sensor-pm10:  #6B5110;
   --sensor-mq5:   #D9731A;
   --sensor-mq3:   #2F855A;
 
@@ -256,11 +256,11 @@ html:not(.dark) {
   --status-info:     #7DA7F0;
 
   --sensor-temp:  #F2866B;
-  --sensor-hum:   #6CA6EE;
-  --sensor-press: #9FA0F0;
-  --sensor-pm25:  #C58BDB;
-  --sensor-pm10:  #E0A646;
-  --sensor-mq5:   #F29B4B;
+  --sensor-hum:   #4A94EC;
+  --sensor-press: #CABCFF;
+  --sensor-pm25:  #E27FD0;
+  --sensor-pm10:  #B8860B;
+  --sensor-mq5:   #FFB45E;
   --sensor-mq3:   #58C48C;
 
   --panel-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.32);

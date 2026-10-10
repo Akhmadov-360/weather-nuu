@@ -15,7 +15,7 @@
 - Light is the primary theme; theme default stays "system".
 - Palette (light): paper `#F4F0EC`, surface `#FFFFFF`, surface-2 `#FAF7F3`, border `#E0DAD3`, ink `#1E2347`, ink-2 `#4B5075`, ink-3 `#666B8C`, brand `#232856`, link `#243978`, sand `#BEA587`, sand-ink `#7A6240`, status safe `#1F7A52` / warn `#94620A` / critical `#B0342C` / info `#2A5DA8`.
 - Palette (dark): paper `#0D1128`, surface `#151A3D`, surface-2 `#1B2149`, border `#2B3260`, ink `#EEF1FA`, ink-2 `#B4BBDD`, ink-3 `#8E96C0`, brand/link `#A5BCED`, sand `#D4BFA0`, status safe `#4CC38A` / warn `#E3A93B` / critical `#F27B72` / info `#7DA7F0`.
-- Series colours (light / dark): temperature `#C4553B`/`#F2866B`, humidity `#2B6CB0`/`#6CA6EE`, pressure `#5A5BB5`/`#9FA0F0`, PM2.5 `#8B4A9E`/`#C58BDB`, PM10 `#B7791F`/`#E0A646`, MQ-5 `#D9731A`/`#F29B4B`, MQ-3 `#2F855A`/`#58C48C`; they must stay distinguishable under colour-vision deficiency (checked in Task 4).
+- Series colours (light / dark), after the colour-vision check: temperature `#C4553B`/`#F2866B`, humidity `#3A86C8`/`#4A94EC`, pressure `#41309A`/`#CABCFF`, PM2.5 `#9B3E9E`/`#E27FD0`, PM10 `#6B5110`/`#B8860B`, MQ-5 `#D9731A`/`#FFB45E`, MQ-3 `#2F855A`/`#58C48C`; every pair stays at least 9.4 (CIE76 delta E) apart under protanopia, deuteranopia and tritanopia.
 - AQI category colours and their tests stay as they are (EPA meaning).
 - Contrast: text tokens at least 4.5:1 on the surface, data series and status marks at least 3:1.
 - `pnpm typecheck`, `pnpm lint` (0 errors), `pnpm test`, `pnpm build` pass after every task. Commits end with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.

@@ -2,7 +2,6 @@ import type { EChartsOption } from 'echarts';
 import type { TFunction } from 'i18next';
 
 import type { SensorType } from '@/entities/weather/model/weather.types';
-import { SENSOR_COLORS } from '@/shared/lib/chart/chart-colors';
 import type { ChartGap } from '@/shared/lib/date/insert-gap-breaks';
 import type { WeatherPageType } from '@/shared/types/common';
 import {
@@ -19,6 +18,8 @@ export type ChartOptionInput = {
   sensor: SensorType;
   source: WeatherPageType;
   unit: string;
+  /** Series colour in the current theme (see getSensorColor). */
+  color: string;
   chartMode: ChartMode;
   seriesData: Point[];
   gaps: ChartGap[];
@@ -45,13 +46,13 @@ export function buildChartOption({
   sensor: activeSensor,
   source: type,
   unit,
+  color,
   chartMode,
   seriesData,
   gaps,
   aggregatePoints,
   t,
 }: ChartOptionInput): EChartsOption {
-  const color      = SENSOR_COLORS[activeSensor];
   const thresholds = buildThresholdLines(activeSensor);
 
   const firstTs = seriesData.at(0)?.[0]  ?? 0;

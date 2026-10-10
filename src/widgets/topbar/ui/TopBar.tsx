@@ -241,8 +241,8 @@ function SwitchSectionLink({
       variant="ghost"
       className={cn(
         size === 'default'
-          ? 'h-10 gap-1.5 rounded-full border border-(--glass-border) bg-(--glass-surface) px-4 text-sm text-primary-themed backdrop-blur-md transition-colors hover:bg-(--control-hover)'
-          : 'h-9 gap-1.5 rounded-full border border-(--glass-border) bg-(--glass-surface) px-3 text-xs text-primary-themed backdrop-blur-md transition-colors hover:bg-(--control-hover) sm:px-4 sm:text-sm',
+          ? 'h-10 gap-1.5 rounded-full border border-(--glass-border) bg-(--glass-surface) px-4 text-sm text-primary-themed transition-colors hover:bg-(--control-hover)'
+          : 'h-9 gap-1.5 rounded-full border border-(--glass-border) bg-(--glass-surface) px-3 text-xs text-primary-themed transition-colors hover:bg-(--control-hover) sm:px-4 sm:text-sm',
         className,
       )}
     >

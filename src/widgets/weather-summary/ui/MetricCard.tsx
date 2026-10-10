@@ -31,7 +31,7 @@ export function MetricCard({ sensor, label, value, unit }: MetricCardProps): Rea
   const displayUnit = unit ?? range.unit;
 
   return (
-    <div className="flex h-full flex-col rounded-card border border-(--glass-border) bg-(--glass-surface) px-4 py-4 shadow-card backdrop-blur-md">
+    <div className="flex h-full flex-col rounded-card border border-(--glass-border) bg-(--glass-surface) px-4 py-4 shadow-card">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 text-[10px] uppercase tracking-[0.2em] text-muted-themed sm:text-[11px]">
           {label}
