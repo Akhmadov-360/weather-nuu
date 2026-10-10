@@ -52,6 +52,7 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",
     "vite": "^6.2.1",
+    "vite-imagetools": "^12.0.1",
     "vitest": "^4.1.11"
   },
   "packageManager": "pnpm@10.33.0",
