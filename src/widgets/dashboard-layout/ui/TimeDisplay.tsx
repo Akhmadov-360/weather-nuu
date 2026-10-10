@@ -45,7 +45,7 @@ export function TimeDisplay({ freshness = 'live' }: TimeDisplayProps): React.JSX
   );
 
   return (
-    <div className="flex h-full flex-col justify-between rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card backdrop-blur-md sm:p-5">
+    <div className="flex h-full flex-col justify-between rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card sm:p-5">
       <div>
         <div className="text-5xl font-semibold tracking-tight text-primary-themed sm:text-6xl">
           {time}

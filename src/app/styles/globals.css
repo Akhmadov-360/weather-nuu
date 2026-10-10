@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import "@fontsource-variable/onest";
 
 /* Class-based dark mode: ThemeProvider toggles `.dark` on <html>. */
 @custom-variant dark (&:is(.dark *));
@@ -56,72 +56,72 @@
   --radius-panel: 28px;
   --radius-card: 20px;
 
-  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Onest Variable", ui-sans-serif, system-ui, sans-serif;
 
-  --shadow-panel: 0 10px 40px rgba(15, 23, 42, 0.35);
-  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.18);
+  --shadow-panel: var(--panel-shadow);
+  --shadow-card: var(--card-shadow);
   --shadow-glow: 0 0 12px rgba(74, 222, 128, 0.8);
 }
 
 /* ─── Shadcn tokens (oklch) ─────────────────────────────────────── */
 @layer base {
   :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
+    --background: #F4F0EC;
+    --foreground: #1E2347;
+    --card: #FFFFFF;
+    --card-foreground: #1E2347;
+    --popover: #FFFFFF;
+    --popover-foreground: #1E2347;
+    --primary: #232856;
+    --primary-foreground: #FFFFFF;
+    --secondary: #FAF7F3;
+    --secondary-foreground: #1E2347;
+    --muted: #EEE9E3;
+    --muted-foreground: #666B8C;
+    --accent: #EEE9E3;
+    --accent-foreground: #1E2347;
+    --destructive: #B0342C;
+    --border: #E0DAD3;
+    --input: #E0DAD3;
+    --ring: #243978;
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --sidebar: #FAF7F3;
+    --sidebar-foreground: #1E2347;
+    --sidebar-primary: #232856;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #EEE9E3;
+    --sidebar-accent-foreground: #1E2347;
+    --sidebar-border: #E0DAD3;
+    --sidebar-ring: #243978;
   }
 
   .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --background: #0D1128;
+    --foreground: #EEF1FA;
+    --card: #151A3D;
+    --card-foreground: #EEF1FA;
+    --popover: #151A3D;
+    --popover-foreground: #EEF1FA;
+    --primary: #A5BCED;
+    --primary-foreground: #0D1128;
+    --secondary: #1B2149;
+    --secondary-foreground: #EEF1FA;
+    --muted: #1B2149;
+    --muted-foreground: #8E96C0;
+    --accent: #1E2552;
+    --accent-foreground: #EEF1FA;
+    --destructive: #F27B72;
+    --border: #2B3260;
+    --input: #2B3260;
+    --ring: #A5BCED;
+    --sidebar: #151A3D;
+    --sidebar-foreground: #EEF1FA;
+    --sidebar-primary: #A5BCED;
+    --sidebar-primary-foreground: #0D1128;
+    --sidebar-accent: #1E2552;
+    --sidebar-accent-foreground: #EEF1FA;
+    --sidebar-border: #2B3260;
+    --sidebar-ring: #A5BCED;
   }
 
   * {
@@ -138,125 +138,141 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Equal-width digits: values and statistics do not jitter when they update. */
+    font-variant-numeric: tabular-nums;
   }
   html {
     @apply font-sans;
   }
 }
 
-/* ─── Dashboard design tokens ────────────────────────────────────── */
-
-/* Sensor palette — hex для ECharts и style={} */
-:root {
-  --sensor-temp:  #ef4444;
-  --sensor-hum:   #3b82f6;
-  --sensor-press: #6366f1;
-  --sensor-mq5:   #f59e0b;
-  --sensor-mq3:   #22c55e;
-}
-
-/*
- * Status accent tokens — единственный источник правды для "норма /
- * предупреждение / критично / инфо" везде: status-badge, range-bar,
- * иконки, ECharts threshold-линии. Не зависят от темы (акцентный
- * цвет остаётся собой что на светлом, что на тёмном фоне) — меняется
- * только фон/текст вокруг него через сами Tailwind-классы (/10, /20…).
+/* ─── Dashboard design tokens ────────────────────────────────────────
+ * Palette taken from nuu.uz: warm paper, indigo, sand. Light is the primary
+ * theme, dark keeps the same hues on deep indigo. Text, status and series
+ * colours are plain hex values so palette-tokens.test.ts can check their
+ * contrast against the card surface.
  */
-:root {
-  --status-safe:     #10b981; /* emerald-500 */
-  --status-warning:  #f59e0b; /* amber-500 */
-  --status-critical: #ef4444; /* red-500 */
-  --status-info:     #3b82f6; /* blue-500 */
-}
 
-/* ── DARK THEME (default, ThemeProvider устанавливает .dark) ──── */
-.dark {
-  /* Gradient background */
-  --dash-base:     #0f172a;
-  --dash-accent-1: rgba(99, 102, 241, 0.12);
-  --dash-accent-2: rgba(14, 165, 233, 0.08);
-  --dash-accent-3: rgba(139, 92, 246, 0.06);
-
-  /*
-   * Glass surface — slate-800 tint, not a flat white overlay. At 5% white
-   * (the old value) cards were nearly indistinguishable from --dash-base
-   * since the background gradient is itself very subtle; a slate-toned
-   * surface reads as a distinct card while staying translucent enough
-   * for backdrop-blur to still pick up the gradient underneath.
-   */
-  --glass-surface:       rgba(30, 41, 59, 0.55);  /* slate-800 @ 55% */
-  --glass-surface-hover: rgba(30, 41, 59, 0.72);
-  --glass-surface-soft:  rgba(30, 41, 59, 0.35);
-  --glass-border:        rgba(51, 65, 85, 0.5);   /* slate-700 @ 50% */
-
-  /* Topbar sticky backdrop */
-  --topbar-bg: rgba(15, 23, 42, 0.85);
-
-  /* Interactive controls: hover fill, active segment, segmented-control track */
-  --control-hover:  rgba(255, 255, 255, 0.08);
-  --control-active: rgba(255, 255, 255, 0.14);
-  --control-track:  rgba(255, 255, 255, 0.05);
-
-  /* Semantic text */
-  --text-primary:   rgba(255, 255, 255, 0.92);
-  --text-secondary: rgba(148, 163, 184, 0.75);
-  --text-muted:     rgba(100, 116, 139, 0.90);
-
-  /* Shadows — заметны на тёмном фоне */
-  --panel-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 12px 40px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.25);
-  --card-shadow:  0 0 0 1px rgba(255,255,255,0.06), 0 6px 20px rgba(0,0,0,0.30);
-
-  /* ECharts */
-  --chart-axis-label:      rgba(255, 255, 255, 0.45);
-  --chart-grid-line:       rgba(255, 255, 255, 0.05);
-  --chart-axis-line:       rgba(255, 255, 255, 0.08);
-  --chart-tooltip-bg:      rgba(15, 23, 42, 0.95);
-  --chart-tooltip-border:  rgba(255, 255, 255, 0.10);
-  --chart-tooltip-text:    rgba(255, 255, 255, 0.92);
-  --chart-tooltip-label:   rgba(148, 163, 184, 0.70);
-}
-
-/* ── LIGHT THEME ─────────────────────────────────────────────── */
+/* PALETTE:light */
 html:not(.dark) {
-  /* Gradient background */
-  --dash-base:     #eef2ff;
-  --dash-accent-1: rgba(99, 102, 241, 0.10);
-  --dash-accent-2: rgba(14, 165, 233, 0.07);
-  --dash-accent-3: rgba(139, 92, 246, 0.06);
+  /* Page and surfaces: cards are solid, depth comes from border and shadow */
+  --paper:        #F4F0EC;
+  --surface:      #FFFFFF;
+  --surface-2:    #FAF7F3;
+  --border-color: #E0DAD3;
 
-  /*
-   * Glass — максимально непрозрачный белый + усиленная тень,
-   * иначе фон "просвечивает" сквозь backdrop-blur и текст нечитаем.
-   */
-  --glass-surface:       rgba(255 255 255 / 0.90);
-  --glass-surface-hover: rgba(255 255 255 / 0.97);
-  --glass-surface-soft:  rgba(255 255 255 / 0.75);
-  --glass-border:        rgba(15 23 42 / 0.09);
+  --dash-base:     #F4F0EC;
+  --dash-accent-1: transparent;
+  --dash-accent-2: transparent;
+  --dash-accent-3: transparent;
 
-  --topbar-bg: rgba(238, 242, 255, 0.90);
+  --glass-surface:       var(--surface);
+  --glass-surface-hover: var(--surface-2);
+  --glass-surface-soft:  var(--surface-2);
+  --glass-border:        var(--border-color);
+
+  --topbar-bg: rgba(244, 240, 236, 0.92);
 
   /* Interactive controls: hover fill, active segment, segmented-control track */
-  --control-hover:  rgba(15, 23, 42, 0.06);
-  --control-active: #ffffff;
-  --control-track:  rgba(15, 23, 42, 0.06);
+  --control-hover:  #EEE9E3;
+  --control-active: #FFFFFF;
+  --control-track:  #EAE5DF;
 
-  /* Semantic text */
-  --text-primary:   rgba(15, 23, 42, 0.92);
-  --text-secondary: rgba(51, 65, 85, 0.78);
-  --text-muted:     rgba(71, 85, 105, 0.68);
+  /* Text */
+  --text-primary:   #1E2347;
+  --text-secondary: #4B5075;
+  --text-muted:     #666B8C;
 
-  /* Shadows — мягкие на светлом фоне */
-  --panel-shadow: 0 0 0 1px rgba(15,23,42,0.07), 0 8px 32px rgba(15,23,42,0.10), 0 2px 8px rgba(15,23,42,0.06);
-  --card-shadow:  0 0 0 1px rgba(15,23,42,0.06), 0 4px 16px rgba(15,23,42,0.07);
+  /* Brand */
+  --brand:    #232856;
+  --link:     #243978;
+  --sand:     #BEA587;
+  --sand-ink: #7A6240;
+
+  /* Status */
+  --status-safe:     #1F7A52;
+  --status-warning:  #94620A;
+  --status-critical: #B0342C;
+  --status-info:     #2A5DA8;
+
+  /* Data series */
+  --sensor-temp:  #C4553B;
+  --sensor-hum:   #3A86C8;
+  --sensor-press: #41309A;
+  --sensor-pm25:  #9B3E9E;
+  --sensor-pm10:  #6B5110;
+  --sensor-mq5:   #D9731A;
+  --sensor-mq3:   #2F855A;
+
+  /* Shadows: soft indigo-tinted */
+  --panel-shadow: 0 1px 2px rgba(35, 40, 86, 0.06), 0 10px 28px rgba(35, 40, 86, 0.08);
+  --card-shadow:  0 1px 2px rgba(35, 40, 86, 0.06), 0 6px 20px rgba(35, 40, 86, 0.07);
 
   /* ECharts */
-  --chart-axis-label:     rgba(30, 41, 59, 0.55);
-  --chart-grid-line:      rgba(15, 23, 42, 0.06);
-  --chart-axis-line:      rgba(15, 23, 42, 0.10);
-  --chart-tooltip-bg:     rgba(255, 255, 255, 0.98);
-  --chart-tooltip-border: rgba(15, 23, 42, 0.10);
-  --chart-tooltip-text:   rgba(15, 23, 42, 0.92);
-  --chart-tooltip-label:  rgba(71, 85, 105, 0.70);
+  --chart-axis-label:     rgba(30, 35, 71, 0.60);
+  --chart-grid-line:      rgba(35, 40, 86, 0.07);
+  --chart-axis-line:      rgba(35, 40, 86, 0.14);
+  --chart-tooltip-bg:     #FFFFFF;
+  --chart-tooltip-border: #E0DAD3;
+  --chart-tooltip-text:   #1E2347;
+  --chart-tooltip-label:  #666B8C;
+}
+
+/* PALETTE:dark */
+.dark {
+  --paper:        #0D1128;
+  --surface:      #151A3D;
+  --surface-2:    #1B2149;
+  --border-color: #2B3260;
+
+  --dash-base:     #0D1128;
+  --dash-accent-1: transparent;
+  --dash-accent-2: transparent;
+  --dash-accent-3: transparent;
+
+  --glass-surface:       var(--surface);
+  --glass-surface-hover: var(--surface-2);
+  --glass-surface-soft:  var(--surface-2);
+  --glass-border:        var(--border-color);
+
+  --topbar-bg: rgba(13, 17, 40, 0.90);
+
+  --control-hover:  #1E2552;
+  --control-active: #2A3263;
+  --control-track:  #10153A;
+
+  --text-primary:   #EEF1FA;
+  --text-secondary: #B4BBDD;
+  --text-muted:     #8E96C0;
+
+  --brand:    #A5BCED;
+  --link:     #A5BCED;
+  --sand:     #D4BFA0;
+  --sand-ink: #D4BFA0;
+
+  --status-safe:     #4CC38A;
+  --status-warning:  #E3A93B;
+  --status-critical: #F27B72;
+  --status-info:     #7DA7F0;
+
+  --sensor-temp:  #F2866B;
+  --sensor-hum:   #4A94EC;
+  --sensor-press: #CABCFF;
+  --sensor-pm25:  #E27FD0;
+  --sensor-pm10:  #B8860B;
+  --sensor-mq5:   #FFB45E;
+  --sensor-mq3:   #58C48C;
+
+  --panel-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.32);
+  --card-shadow:  0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.28);
+
+  --chart-axis-label:      rgba(238, 241, 250, 0.60);
+  --chart-grid-line:       rgba(165, 188, 237, 0.08);
+  --chart-axis-line:       rgba(165, 188, 237, 0.16);
+  --chart-tooltip-bg:      #151A3D;
+  --chart-tooltip-border:  #2B3260;
+  --chart-tooltip-text:    #EEF1FA;
+  --chart-tooltip-label:   #8E96C0;
 }
 
 /*

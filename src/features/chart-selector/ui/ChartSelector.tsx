@@ -4,7 +4,6 @@ import { Thermometer, Droplets, Wind, Flame, Wine, CloudFog, Cloudy } from 'luci
 
 import type { SensorType } from '@/entities/weather/model/weather.types';
 import { cn } from '@/shared/lib/cn';
-import { SENSOR_COLORS } from '@/shared/lib/chart/chart-colors';
 
 type ChartSelectorProps = {
   /** Tabs to offer, in order — what the current source physically has (SENSORS_BY_SOURCE). */
@@ -39,7 +38,7 @@ export function ChartSelector({ sensors, active, onChange }: ChartSelectorProps)
   return (
     <div className="relative w-full overflow-x-auto pb-1">
       <div
-        className="flex w-max min-w-full items-center gap-1 rounded-2xl border p-1 backdrop-blur-xl"
+        className="flex w-max min-w-full items-center gap-1 rounded-2xl border p-1"
         style={{ borderColor: 'var(--glass-border)', backgroundColor: 'var(--glass-surface-soft)' }}
       >
         {sensors.map((sensor) => {
@@ -57,12 +56,12 @@ export function ChartSelector({ sensors, active, onChange }: ChartSelectorProps)
                 <motion.div
                   layoutId="chart-selector-active"
                   className="absolute inset-0 rounded-xl"
-                  style={{ backgroundColor: `${SENSOR_COLORS[sensor]}22` }}
+                  style={{ backgroundColor: `color-mix(in srgb, var(--sensor-${sensor}) 14%, transparent)` }}
                   transition={{ type: 'spring', stiffness: 260, damping: 22 }}
                 />
               ) : null}
 
-              <span className="relative z-10 shrink-0" style={{ color: SENSOR_COLORS[sensor] }}>
+              <span className="relative z-10 shrink-0" style={{ color: `var(--sensor-${sensor})` }}>
                 {SENSOR_ICONS[sensor]}
               </span>
 

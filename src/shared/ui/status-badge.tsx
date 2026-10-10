@@ -12,7 +12,7 @@ const toneVariants = cva('px-2.5 py-1 text-[11px] font-medium tracking-wide', {
       good:    'border-status-safe/30     bg-status-safe/10     text-status-safe',
       warn:    'border-status-warning/30  bg-status-warning/10  text-status-warning',
       bad:     'border-status-critical/30 bg-status-critical/10 text-status-critical',
-      neutral: 'border-slate-300/40 bg-slate-100/60 text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-400',
+      neutral: 'border-(--glass-border) bg-(--control-track) text-secondary-themed',
     },
   },
   defaultVariants: { tone: 'neutral' },

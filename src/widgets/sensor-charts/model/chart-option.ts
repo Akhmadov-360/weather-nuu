@@ -2,7 +2,7 @@ import type { EChartsOption } from 'echarts';
 import type { TFunction } from 'i18next';
 
 import type { SensorType } from '@/entities/weather/model/weather.types';
-import { SENSOR_COLORS } from '@/shared/lib/chart/chart-colors';
+import type { ChartTheme } from '@/shared/lib/chart/chart-colors';
 import type { ChartGap } from '@/shared/lib/date/insert-gap-breaks';
 import type { WeatherPageType } from '@/shared/types/common';
 import {
@@ -19,6 +19,10 @@ export type ChartOptionInput = {
   sensor: SensorType;
   source: WeatherPageType;
   unit: string;
+  /** Series colour in the current theme (see getSensorColor). */
+  color: string;
+  /** Resolved chart chrome colours (see getChartTheme). */
+  theme: ChartTheme;
   chartMode: ChartMode;
   seriesData: Point[];
   gaps: ChartGap[];
@@ -26,7 +30,7 @@ export type ChartOptionInput = {
   t: TFunction;
 };
 
-function buildThresholdLines(sensor: SensorType) {
+function buildThresholdLines(sensor: SensorType, theme: ChartTheme) {
   return thresholdValues(sensor).map((value) => ({
     yAxis: value,
     lineStyle: { type: 'dashed' as const, width: 1, opacity: 0.35 },
@@ -34,7 +38,7 @@ function buildThresholdLines(sensor: SensorType) {
       show: true,
       formatter: String(value),
       fontSize: 10,
-      color: 'var(--chart-axis-label)',
+      color: theme.axisLabel,
       position: 'end' as const,
     },
   }));
@@ -45,14 +49,15 @@ export function buildChartOption({
   sensor: activeSensor,
   source: type,
   unit,
+  color,
+  theme,
   chartMode,
   seriesData,
   gaps,
   aggregatePoints,
   t,
 }: ChartOptionInput): EChartsOption {
-  const color      = SENSOR_COLORS[activeSensor];
-  const thresholds = buildThresholdLines(activeSensor);
+  const thresholds = buildThresholdLines(activeSensor, theme);
 
   const firstTs = seriesData.at(0)?.[0]  ?? 0;
   const lastTs  = seriesData.at(-1)?.[0] ?? 0;
@@ -77,7 +82,7 @@ export function buildChartOption({
       itemSize: 14,
       itemGap: 10,
       iconStyle: {
-        borderColor: "var(--chart-axis-label)",
+        borderColor: theme.axisLabel,
         opacity: 0.55,
       },
       emphasis: {
@@ -112,8 +117,8 @@ export function buildChartOption({
         lineStyle:  { opacity: 0.25, width: 1 },
         crossStyle: { opacity: 0.20, width: 1 },
       },
-      backgroundColor: "var(--chart-tooltip-bg)",
-      borderColor:     "var(--chart-tooltip-border)",
+      backgroundColor: theme.tooltipBg,
+      borderColor:     theme.tooltipBorder,
       borderWidth: 1,
       padding: [10, 14],
       extraCssText: "border-radius: 12px; backdrop-filter: blur(12px);",
@@ -168,11 +173,11 @@ export function buildChartOption({
 
     xAxis: {
       type: "time",
-      axisLine:  { lineStyle: { color: "var(--chart-axis-line)" } },
+      axisLine:  { lineStyle: { color: theme.axisLine } },
       axisTick:  { show: false },
       splitLine: { show: false },
       axisLabel: {
-        color: "var(--chart-axis-label)",
+        color: theme.axisLabel,
         fontSize: 11,
         margin: 10,
         hideOverlap: true,
@@ -184,10 +189,10 @@ export function buildChartOption({
     yAxis: {
       type: "value",
       scale: true,
-      splitLine: { lineStyle: { color: "var(--chart-grid-line)" } },
+      splitLine: { lineStyle: { color: theme.gridLine } },
       axisLine:  { show: false },
       axisTick:  { show: false },
-      axisLabel: { color: "var(--chart-axis-label)", fontSize: 11 },
+      axisLabel: { color: theme.axisLabel, fontSize: 11 },
     },
 
     dataZoom: [
@@ -199,7 +204,7 @@ export function buildChartOption({
         height: 18,
         bottom: 4,
         borderColor: "transparent",
-        backgroundColor: "var(--glass-surface-soft)",
+        backgroundColor: theme.surfaceSoft,
         fillerColor: `${color}28`,
         handleSize: 0,
         moveHandleSize: 0,
@@ -207,7 +212,7 @@ export function buildChartOption({
           const ts = new Date(valStr).getTime();
           return Number.isNaN(ts) ? "" : formatTooltipTs(ts);
         },
-        textStyle: { color: "var(--chart-axis-label)", fontSize: 10 },
+        textStyle: { color: theme.axisLabel, fontSize: 10 },
       },
     ],
 
@@ -273,7 +278,7 @@ export function buildChartOption({
         },
         itemStyle: {
           color,
-          borderColor: "var(--glass-surface)",
+          borderColor: theme.surface,
           borderWidth: 2,
         },
         areaStyle: {
@@ -320,7 +325,7 @@ export function buildChartOption({
         markArea: gaps.length
           ? {
               silent: true,
-              itemStyle: { color: "var(--glass-surface-hover)", opacity: 0.6 },
+              itemStyle: { color: theme.surfaceHover, opacity: 0.6 },
               label: { show: false },
               data: gaps.map((gap) => [{ xAxis: gap.fromTs }, { xAxis: gap.toTs }]),
             }

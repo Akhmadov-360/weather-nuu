@@ -53,7 +53,7 @@ export function TempHeroCard({ source, temp, history }: TempHeroCardProps): Reac
           : t('temp_delta_below', { value: delta.toFixed(1) });
 
   return (
-    <div className="flex h-full flex-col justify-between rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card backdrop-blur-md sm:p-5">
+    <div className="flex h-full flex-col justify-between rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card sm:p-5">
       <span className="text-[10px] uppercase tracking-[0.25em] text-muted-themed sm:text-xs">
         {t(`current_weather_${source}`)}
       </span>

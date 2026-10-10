@@ -16,7 +16,7 @@ export function GlassPanel({ children, className }: GlassPanelProps): React.JSX.
   return (
     <div
       className={cn(
-        'rounded-panel border border-(--glass-border) bg-(--glass-surface) shadow-panel backdrop-blur-xl',
+        'rounded-panel border border-(--glass-border) bg-(--glass-surface) shadow-panel',
         className,
       )}
     >

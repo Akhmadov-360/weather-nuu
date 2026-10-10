@@ -39,7 +39,7 @@ function buildGradient(): string {
 const GRADIENT = buildGradient();
 
 const CARD_CLASS =
-  'flex h-full flex-col rounded-card border border-(--glass-border) bg-(--glass-surface) px-4 py-4 shadow-card backdrop-blur-md sm:p-5';
+  'flex h-full flex-col rounded-card border border-(--glass-border) bg-(--glass-surface) px-4 py-4 shadow-card sm:p-5';
 
 function CardHeader({ label }: { label: string }): React.JSX.Element {
   return (
