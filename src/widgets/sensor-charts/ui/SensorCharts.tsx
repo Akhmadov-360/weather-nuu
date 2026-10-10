@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import type { EChartsOption } from "echarts";
 import ReactECharts from "echarts-for-react";
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
@@ -10,28 +9,25 @@ import { useWeatherHistoryCustomRangeQuery, useWeatherHistoryRangeQuery } from "
 import { getSensorStatus, getTempDeltaFromNorm } from "@/entities/weather/model/weather-thresholds";
 import type {
   AggregateBucketData,
-  AggregateBucketRow,
   SensorType,
   WeatherHistoryItem,
 } from "@/entities/weather/model/weather.types";
-import { SENSORS_BY_SOURCE, isScaleSensor } from "@/entities/weather/model/weather.types";
+import { SENSORS_BY_SOURCE } from "@/entities/weather/model/weather.types";
 import { ChartSelector } from "@/features/chart-selector/ui/ChartSelector";
 import { DateRangePicker } from "@/features/date-range-picker/ui/DateRangePicker";
 import { ExportMenu } from "@/features/export-data/ui/ExportMenu";
 import { TimeRangeSelector } from "@/features/time-range-selector/ui/TimeRangeSelector";
 import type { WeatherPageType } from "@/shared/types/common";
-import { SENSOR_COLORS } from "@/shared/lib/chart/chart-colors";
 import {
   CLIENT_ONLY_RANGES,
   filterByExactRange,
   filterByTimeRange,
-  isValidTimestamp,
   type CustomDateRange,
   type TimeRange,
 } from "@/shared/lib/date/filter-by-range";
 import { CHART_GAP_THRESHOLD_MS, detectGaps, insertGapBreaks } from "@/shared/lib/date/insert-gap-breaks";
-import { DEFAULT_STANDARD_ID, chartThresholds, getStandard } from "@/shared/lib/air-quality";
-import { SENSOR_RANGES } from "@/shared/lib/weather-ranges";
+import { buildChartOption, type ChartMode } from "../model/chart-option";
+import { aggregateSeries, rawSeries, summarize } from "../model/chart-series";
 import { SensorStatCard } from "./SensorStatCard";
 
 type SensorChartsProps = {
@@ -51,64 +47,6 @@ const SENSOR_UNITS: Record<SensorType, string> = {
   pm25:  "",
   pm10:  "",
 };
-
-/** Guide lines at the zone boundaries: SENSOR_RANGES for scale sensors, the air-quality standard for dust. */
-function thresholdValues(sensor: SensorType): number[] {
-  if (isScaleSensor(sensor)) return SENSOR_RANGES[sensor].zones.slice(0, -1).map((zone) => zone.to);
-  return chartThresholds(getStandard(DEFAULT_STANDARD_ID), sensor).map((th) => th.value);
-}
-
-function buildThresholdLines(sensor: SensorType) {
-  return thresholdValues(sensor).map((value) => ({
-    yAxis: value,
-    lineStyle: { type: "dashed" as const, width: 1, opacity: 0.35 },
-    label: {
-      show: true,
-      formatter: String(value),
-      fontSize: 10,
-      color: "var(--chart-axis-label)",
-      position: "end" as const,
-    },
-  }));
-}
-
-/*
- * Адаптивный formatter оси X.
- * Ключевое: проверяем не только длительность диапазона (spanMs),
- * но и пересечение календарных дней — данные могут быть < 24ч
- * но охватывать два дня (напр. 9 мая 17:00 → 10 мая 10:00).
- * В этом случае метки без даты ("17:00", "10:00") непонятны.
- */
-function makeAxisFormatter(firstTs: number, lastTs: number) {
-  const DAY = 86_400_000;
-  const spanMs = lastTs - firstTs;
-
-  const firstDate = new Date(firstTs);
-  const lastDate  = new Date(lastTs);
-  const crossesDay =
-    firstDate.getDate()  !== lastDate.getDate()  ||
-    firstDate.getMonth() !== lastDate.getMonth() ||
-    firstDate.getFullYear() !== lastDate.getFullYear();
-
-  return (val: number) => {
-    const d  = new Date(val);
-    const hh = d.getHours().toString().padStart(2, "0");
-    const mn = d.getMinutes().toString().padStart(2, "0");
-    const dd = d.getDate().toString().padStart(2, "0");
-    const mo = (d.getMonth() + 1).toString().padStart(2, "0");
-
-    if (spanMs > DAY * 7)       return `${dd}.${mo}`;           // > 7 дней → только дата
-    if (spanMs > DAY || crossesDay) return `${dd}.${mo}\n${hh}:${mn}`; // > 1 дня или разные дни → дата + время
-    return `${hh}:${mn}`;                                       // внутри одного дня → только время
-  };
-}
-
-function formatTooltipTs(ts: number): string {
-  return new Intl.DateTimeFormat(undefined, {
-    day: "2-digit", month: "2-digit",
-    hour: "2-digit", minute: "2-digit",
-  }).format(new Date(ts));
-}
 
 export function SensorCharts({ type, history, isRefetching = false }: SensorChartsProps): React.JSX.Element {
   const [selectedSensor, setActiveSensor] = useState<SensorType>("temp");
@@ -160,7 +98,6 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
    *                as a line for avg plus a shaded min–max band, so
    *                short outliers stay visible even after downsampling.
    */
-  type ChartMode = "raw" | "aggregate";
   const chartMode: ChartMode = useMemo(() => {
     if (customRange) return customRangeQuery.mode;
     return isClientRange ? "raw" : "aggregate";
@@ -182,33 +119,16 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
   }, [chartMode, customRange, customRangeQuery.rawQuery.data, history, activeRange]);
 
   // Aggregate-mode series — avg line + optional (min,max) band, indexed by activeSensor.
-  const aggregatePoints = useMemo(() => {
-    if (chartMode !== "aggregate" || !aggregateData) return null;
-    const rows = aggregateData.items.filter((r: AggregateBucketRow) => r.count > 0);
-    const avg: [number, number | null][] = [];
-    const min: [number, number | null][] = [];
-    const range: [number, number | null][] = []; // (max - min), stacked on min to draw the band
-    for (const r of rows) {
-      const ts = new Date(r.ts).getTime();
-      // Dust stats are absent on a backend that predates the dust fields: leave a gap instead of crashing.
-      const stats = r[activeSensor];
-      avg.push([ts, stats?.avg ?? null]);
-      min.push([ts, stats?.min ?? null]);
-      range.push([ts, stats?.min != null && stats.max != null ? stats.max - stats.min : null]);
-    }
-    return { rows, avg, min, range };
-  }, [chartMode, aggregateData, activeSensor]);
+  const aggregatePoints = useMemo(
+    () => (chartMode === "aggregate" && aggregateData ? aggregateSeries(aggregateData.items, activeSensor) : null),
+    [chartMode, aggregateData, activeSensor],
+  );
 
   // Raw-mode series — every reading, with detected offline gaps.
-  const rawPoints = useMemo(() => {
-    if (chartMode !== "raw") return [];
-    return rangedHistory
-      .filter((item) => isValidTimestamp(item.date))
-      .map((item) => [
-        new Date(item.date).getTime(),
-        item[activeSensor] ?? null,
-      ] as [number, number | null]);
-  }, [chartMode, rangedHistory, activeSensor]);
+  const rawPoints = useMemo(
+    () => (chartMode === "raw" ? rawSeries(rangedHistory, activeSensor) : []),
+    [chartMode, rangedHistory, activeSensor],
+  );
 
   const gaps = useMemo(
     () => (chartMode === "raw" ? detectGaps(rawPoints, CHART_GAP_THRESHOLD_MS) : []),
@@ -229,24 +149,7 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
     [seriesData],
   );
 
-  const current = values.at(-1) ?? null;
-  const prev    = values.at(-2) ?? null;
-
-  const trend =
-    current != null && prev != null
-      ? current > prev ? "up" : current < prev ? "down" : "stable"
-      : "stable";
-
-  const { min, max, avg } = useMemo(() => {
-    if (!values.length) return { min: null, max: null, avg: null };
-    let lo = values[0], hi = values[0], sum = 0;
-    for (const v of values) {
-      if (v < lo) lo = v;
-      if (v > hi) hi = v;
-      sum += v;
-    }
-    return { min: lo, max: hi, avg: sum / values.length };
-  }, [values]);
+  const { min, max, avg, current, trend } = useMemo(() => summarize(values), [values]);
 
   const avgStatus     = getSensorStatus(activeSensor, avg);
   const currentStatus = getSensorStatus(activeSensor, current);
@@ -265,286 +168,21 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
           ? `↓ ${t("trend_falling")}`
           : t("trend_stable");
 
-  const option = useMemo((): EChartsOption => {
-    const color      = SENSOR_COLORS[activeSensor];
-    const unit       = units[activeSensor];
-    const thresholds = buildThresholdLines(activeSensor);
+  const option = useMemo(
+    () =>
+      buildChartOption({
+        sensor: activeSensor,
+        source: type,
+        unit: units[activeSensor],
+        chartMode,
+        seriesData,
+        gaps,
+        aggregatePoints,
+        t,
+      }),
+    [activeSensor, seriesData, gaps, chartMode, aggregatePoints, type, t, units],
+  );
 
-    const firstTs = seriesData.at(0)?.[0]  ?? 0;
-    const lastTs  = seriesData.at(-1)?.[0] ?? 0;
-    const axisFormatter = makeAxisFormatter(firstTs, lastTs);
-
-    return {
-      animationDuration: 300,
-      animationEasing: "cubicOut",
-      grid: {
-        left: 8,
-        // Правый отступ для endLabel — на мобильных чуть меньше
-        right: 56,
-        // +20 под toolbox-иконки (reset zoom / save as image) в правом верхнем углу
-        top: 36,
-        bottom: 50,
-        containLabel: true,
-      },
-
-      toolbox: {
-        right: 8,
-        top: 0,
-        itemSize: 14,
-        itemGap: 10,
-        iconStyle: {
-          borderColor: "var(--chart-axis-label)",
-          opacity: 0.55,
-        },
-        emphasis: {
-          iconStyle: { borderColor: color, opacity: 1 },
-        },
-        feature: {
-          // Возвращает dataZoom к 0–100% после ручного зума/панорамирования —
-          // без этого единственный способ вернуться к полному виду — заново
-          // выбрать тот же диапазон в TimeRangeSelector.
-          restore: { title: t("chart_reset_zoom") },
-          saveAsImage: {
-            title: t("chart_save_image"),
-            name: `${type}-${activeSensor}-${new Date().toISOString().slice(0, 10)}`,
-            // No explicit backgroundColor — canvas fillStyle can't resolve
-            // CSS custom properties (var(--x) is a cascade-time construct,
-            // not something the 2D context understands), so a literal
-            // theme token here would silently no-op. Leaving it unset
-            // exports a transparent PNG instead, which is the standard,
-            // theme-safe default for canvas chart exports.
-            pixelRatio: 2,
-          },
-        },
-      },
-
-      tooltip: {
-        trigger: "axis",
-        triggerOn: "mousemove|click|mousewheel",
-        axisPointer: {
-          type: "cross",
-          snap: true,
-          animation: false,
-          lineStyle:  { opacity: 0.25, width: 1 },
-          crossStyle: { opacity: 0.20, width: 1 },
-        },
-        backgroundColor: "var(--chart-tooltip-bg)",
-        borderColor:     "var(--chart-tooltip-border)",
-        borderWidth: 1,
-        padding: [10, 14],
-        extraCssText: "border-radius: 12px; backdrop-filter: blur(12px);",
-        formatter: (params: unknown) => {
-          const arr = Array.isArray(params) ? params : [params];
-          const first = arr[0] as { value?: [number, number | null] } | undefined;
-          if (!first?.value) return "";
-          const [ts, val] = first.value;
-          const fmt = (n: number | null | undefined) =>
-            typeof n === "number"
-              ? Number.isInteger(n) ? String(n) : n.toFixed(2)
-              : "—";
-
-          // Aggregate-mode tooltip: pull the corresponding bucket by ts so
-          // we can also show min/max/count — those are what distinguish a
-          // calm hourly avg from one that spiked hard and mean-reverted.
-          if (chartMode === "aggregate" && aggregatePoints) {
-            const bucket = aggregatePoints.rows.find((r) => new Date(r.ts).getTime() === ts);
-            const stats = bucket?.[activeSensor];
-            const rows: [string, string][] = [];
-            if (stats) {
-              rows.push([t("stat_avg"), `${fmt(stats.avg)} ${unit}`]);
-              rows.push([t("stat_min"), `${fmt(stats.min)} ${unit}`]);
-              rows.push([t("stat_max"), `${fmt(stats.max)} ${unit}`]);
-            }
-            if (bucket) rows.push([t("stat_count"), String(bucket.count)]);
-            return `
-              <div style="min-width:180px;">
-                <div style="margin-bottom:6px;font-size:11px;color:var(--chart-tooltip-label)">
-                  ${formatTooltipTs(ts)}
-                </div>
-                ${rows.map(([k, v]) => `
-                  <div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--chart-tooltip-text);line-height:1.7">
-                    <span style="opacity:0.7">${k}</span>
-                    <span style="font-weight:600">${v}</span>
-                  </div>`).join("")}
-              </div>`;
-          }
-
-          return `
-            <div style="min-width:140px;">
-              <div style="margin-bottom:6px;font-size:11px;color:var(--chart-tooltip-label)">
-                ${formatTooltipTs(ts)}
-              </div>
-              <div style="font-size:18px;font-weight:700;color:var(--chart-tooltip-text);line-height:1.2">
-                ${fmt(val)}
-                <span style="font-size:12px;font-weight:400;opacity:0.7;margin-left:2px">${unit}</span>
-              </div>
-            </div>`;
-        },
-      },
-
-      xAxis: {
-        type: "time",
-        axisLine:  { lineStyle: { color: "var(--chart-axis-line)" } },
-        axisTick:  { show: false },
-        splitLine: { show: false },
-        axisLabel: {
-          color: "var(--chart-axis-label)",
-          fontSize: 11,
-          margin: 10,
-          hideOverlap: true,
-          lineHeight: 16,
-          formatter: axisFormatter,
-        },
-      },
-
-      yAxis: {
-        type: "value",
-        scale: true,
-        splitLine: { lineStyle: { color: "var(--chart-grid-line)" } },
-        axisLine:  { show: false },
-        axisTick:  { show: false },
-        axisLabel: { color: "var(--chart-axis-label)", fontSize: 11 },
-      },
-
-      dataZoom: [
-        // Пинч / скролл колёсиком — работает на тач и десктоп
-        { type: "inside", throttle: 40 },
-        // Слайдер — только на не-мобильных (достаточно места)
-        {
-          type: "slider",
-          height: 18,
-          bottom: 4,
-          borderColor: "transparent",
-          backgroundColor: "var(--glass-surface-soft)",
-          fillerColor: `${color}28`,
-          handleSize: 0,
-          moveHandleSize: 0,
-          labelFormatter: (_: number, valStr: string) => {
-            const ts = new Date(valStr).getTime();
-            return Number.isNaN(ts) ? "" : formatTooltipTs(ts);
-          },
-          textStyle: { color: "var(--chart-axis-label)", fontSize: 10 },
-        },
-      ],
-
-      series: [
-        // In aggregate mode the min–max band is drawn first, underneath
-        // the avg line, so short-lived outliers stay visible: a bucket
-        // whose avg looks calm but whose max spiked hard shows up as a
-        // sudden widening of the band. Two stacked "invisible" lines are
-        // the standard ECharts pattern for a shaded confidence band — the
-        // first line sits at min with no stroke, the second's stacked
-        // value is (max - min) so its area style ends up filling the
-        // vertical gap between the two.
-        ...(chartMode === "aggregate" && aggregatePoints
-          ? [
-              {
-                name: "__min",
-                type: "line" as const,
-                data: aggregatePoints.min,
-                stack: "band",
-                lineStyle: { opacity: 0 },
-                symbol: "none",
-                tooltip: { show: false },
-                silent: true,
-                z: 0,
-              },
-              {
-                name: "__range",
-                type: "line" as const,
-                data: aggregatePoints.range,
-                stack: "band",
-                lineStyle: { opacity: 0 },
-                symbol: "none",
-                areaStyle: { color, opacity: 0.18 },
-                tooltip: { show: false },
-                silent: true,
-                z: 0,
-              },
-            ]
-          : []),
-        {
-          name: t(`btn_${activeSensor}`),
-          type: "line",
-          // Safety net when a caller ends up throwing tens of thousands of
-          // raw points at ECharts — LTTB (Largest-Triangle-Three-Buckets)
-          // downsamples to what actually fits the viewport while preserving
-          // the shape of the line, so spikes don't get flattened by a naïve
-          // stride-based sampler. Kicks in only when there's enough data
-          // to warrant it; below that ECharts renders untouched.
-          // Disabled in aggregate mode — every bucket is already visually
-          // meaningful, an extra downsample would lose the point of it.
-          sampling: chartMode === "raw" ? "lttb" : undefined,
-          progressive: 5_000,
-          progressiveThreshold: 20_000,
-          smooth: 0.4,
-          showSymbol: false,
-          z: 1,
-          lineStyle: {
-            width: 2.5,
-            color,
-            shadowBlur: 8,
-            shadowColor: `${color}50`,
-            shadowOffsetY: 2,
-          },
-          itemStyle: {
-            color,
-            borderColor: "var(--glass-surface)",
-            borderWidth: 2,
-          },
-          areaStyle: {
-            color: {
-              type: "linear",
-              x: 0, y: 0, x2: 0, y2: 1,
-              colorStops: [
-                { offset: 0, color: `${color}44` },
-                { offset: 1, color: `${color}04` },
-              ],
-            },
-          },
-          emphasis: { focus: "series" },
-          // Плашка с текущим значением в конце линии
-          endLabel: {
-            show: true,
-            valueAnimation: false,
-            formatter: (params: unknown) => {
-              const p = params as { value?: [number, number | null] };
-              const v = p?.value?.[1];
-              if (typeof v !== "number") return "";
-              // Same precision as the tooltip (.toFixed(2)) — at 1 decimal,
-              // consecutive close readings (30.18 → 30.24) both round to
-              // "30.2" and the label looks frozen even though the value is
-              // actually ticking underneath.
-              return `${Number.isInteger(v) ? String(v) : v.toFixed(2)} ${unit}`;
-            },
-            color,
-            fontWeight: "bold",
-            fontSize: 12,
-            padding: [3, 8],
-            backgroundColor: `${color}18`,
-            borderRadius: 8,
-            borderColor: `${color}55`,
-            borderWidth: 1,
-          },
-          data: seriesData,
-          markLine: thresholds.length
-            ? { silent: true, symbol: ["none", "none"], data: thresholds }
-            : undefined,
-          // Shades the same offline stretches the line already breaks at —
-          // makes "sensor was down here" readable at a glance instead of
-          // only visible as an absence of line.
-          markArea: gaps.length
-            ? {
-                silent: true,
-                itemStyle: { color: "var(--glass-surface-hover)", opacity: 0.6 },
-                label: { show: false },
-                data: gaps.map((gap) => [{ xAxis: gap.fromTs }, { xAxis: gap.toTs }]),
-              }
-            : undefined,
-        },
-      ],
-    };
-  }, [activeSensor, seriesData, gaps, chartMode, aggregatePoints, type, t, units]);
 
   return (
     <div
