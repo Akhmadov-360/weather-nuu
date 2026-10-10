@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 // Куда проксировать запросы /api в режиме разработки. По умолчанию — локальный
@@ -34,4 +34,8 @@ export default defineConfig({
     },
   },
   server: { proxy },
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.ts'],
+  },
 });
