@@ -12,7 +12,7 @@ const FRESHNESS_STYLE: Record<FreshnessState, { badgeClass: string; dotClass: st
   stale:   { badgeClass: 'border-status-warning/20 bg-status-warning/10 text-status-warning', dotClass: 'bg-status-warning', pulse: false, labelKey: 'stale' },
   // Calm/neutral, not alarming — offline sensors are an expected state
   // (e.g. nobody in the building over summer), not an error.
-  offline: { badgeClass: 'border-[var(--glass-border)] bg-[var(--glass-surface-hover)] text-muted-themed', dotClass: 'bg-[var(--text-muted)]', pulse: false, labelKey: 'offline' },
+  offline: { badgeClass: 'border-(--glass-border) bg-(--glass-surface-hover) text-muted-themed', dotClass: 'bg-(--text-muted)', pulse: false, labelKey: 'offline' },
 };
 
 export function TimeDisplay({ freshness = 'live' }: TimeDisplayProps): React.JSX.Element {
@@ -45,7 +45,7 @@ export function TimeDisplay({ freshness = 'live' }: TimeDisplayProps): React.JSX
   );
 
   return (
-    <div className="flex h-full flex-col justify-between rounded-card border border-[var(--glass-border)] bg-[var(--glass-surface)] p-4 shadow-card backdrop-blur-md sm:p-5">
+    <div className="flex h-full flex-col justify-between rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card backdrop-blur-md sm:p-5">
       <div>
         <div className="text-5xl font-semibold tracking-tight text-primary-themed sm:text-6xl">
           {time}

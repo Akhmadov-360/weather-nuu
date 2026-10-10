@@ -52,13 +52,13 @@ export function TempHeroCard({ temp, history }: TempHeroCardProps): React.JSX.El
           : t('temp_delta_below', { value: delta.toFixed(1) });
 
   return (
-    <div className="flex h-full flex-col justify-between rounded-card border border-[var(--glass-border)] bg-[var(--glass-surface)] p-4 shadow-card backdrop-blur-md sm:p-5">
+    <div className="flex h-full flex-col justify-between rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card backdrop-blur-md sm:p-5">
       <span className="text-[10px] uppercase tracking-[0.25em] text-muted-themed sm:text-xs">
         {t('current_weather')}
       </span>
 
       <div className="mt-4 flex items-center gap-3 sm:gap-4">
-        <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-surface)] p-3 sm:p-4">
+        <div className="rounded-2xl border border-(--glass-border) bg-(--glass-surface) p-3 sm:p-4">
           <Icon className="h-10 w-10 text-yellow-500 dark:text-yellow-300 sm:h-12 sm:w-12" />
         </div>
 
@@ -72,11 +72,11 @@ export function TempHeroCard({ temp, history }: TempHeroCardProps): React.JSX.El
       </div>
 
       <div className="mt-5 flex flex-wrap gap-2 text-xs text-secondary-themed sm:text-sm">
-        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--glass-border)] bg-[var(--glass-surface)] px-3 py-1.5">
+        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-(--glass-border) bg-(--glass-surface) px-3 py-1.5">
           <span className="text-status-info">↓</span>
           <span>{min}°C</span>
         </div>
-        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--glass-border)] bg-[var(--glass-surface)] px-3 py-1.5">
+        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-(--glass-border) bg-(--glass-surface) px-3 py-1.5">
           <span className="text-status-warning">↑</span>
           <span>{max}°C</span>
         </div>

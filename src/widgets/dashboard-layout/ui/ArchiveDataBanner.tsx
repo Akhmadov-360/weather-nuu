@@ -23,8 +23,8 @@ export function ArchiveDataBanner({ lastSeenDate }: ArchiveDataBannerProps): Rea
   }).format(new Date(lastSeenDate));
 
   return (
-    <div className="flex items-start gap-3 rounded-card border border-[var(--glass-border)] bg-[var(--glass-surface)] p-4 shadow-card backdrop-blur-md">
-      <div className="shrink-0 rounded-xl border border-[var(--glass-border)] bg-[var(--glass-surface-hover)] p-2 text-muted-themed">
+    <div className="flex items-start gap-3 rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card backdrop-blur-md">
+      <div className="shrink-0 rounded-xl border border-(--glass-border) bg-(--glass-surface-hover) p-2 text-muted-themed">
         <History className="h-4 w-4" />
       </div>
       <div className="min-w-0">
