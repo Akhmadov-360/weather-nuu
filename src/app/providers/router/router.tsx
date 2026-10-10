@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Navigate, createBrowserRouter } from 'react-router-dom';
 import { ROUTES } from '@/shared/config/routes';
 import { PageLoader } from '@/shared/ui/page-loader';
+import { AppShell } from './AppShell';
 
 const DashboardRoomPage = lazy(() => import('@/pages/dashboard-room/ui/DashboardRoomPage'));
 const DashboardStreetPage = lazy(() => import('@/pages/dashboard-street/ui/DashboardStreetPage'));
@@ -17,12 +18,12 @@ export const appRouter = createBrowserRouter([
     element: <Navigate to={ROUTES.room} replace />,
   },
   {
-    path: ROUTES.room,
-    element: withSuspense(<DashboardRoomPage />),
-  },
-  {
-    path: ROUTES.street,
-    element: withSuspense(<DashboardStreetPage />),
+    // The header lives in the shell, so it stays mounted when the page changes.
+    element: <AppShell />,
+    children: [
+      { path: ROUTES.room, element: withSuspense(<DashboardRoomPage />) },
+      { path: ROUTES.street, element: withSuspense(<DashboardStreetPage />) },
+    ],
   },
   {
     path: '*',

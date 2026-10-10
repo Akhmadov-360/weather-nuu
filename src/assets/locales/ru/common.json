@@ -134,10 +134,6 @@
   "chart_loading": "Загружаем историю…",
   "chart_reset_zoom": "Сбросить масштаб",
   "chart_save_image": "Сохранить как изображение",
-  "theme_toggle_label": "Сменить тему",
-  "theme_light": "Светлая",
-  "theme_dark": "Тёмная",
-  "theme_system": "Системная",
   "error_boundary_title": "Что-то пошло не так.",
   "error_boundary_retry": "Попробовать снова",
   "dust_no_sensor": "Датчик не установлен",
@@ -154,5 +150,8 @@
   "gas_estimate_lpg": "оценка, эквивалент LPG",
   "gas_estimate": "оценка",
   "gas_status_ok": "в пределах нормы",
-  "gas_status_high": "высокий уровень"
+  "gas_status_high": "высокий уровень",
+  "theme_switch_to_dark": "Включить тёмную тему",
+  "theme_switch_to_light": "Включить светлую тему",
+  "nav_sections": "Разделы"
 }

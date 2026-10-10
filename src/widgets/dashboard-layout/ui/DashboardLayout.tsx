@@ -9,7 +9,6 @@ import { motion, type Variants } from 'framer-motion';
 import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { TopBar } from '@/widgets/topbar/ui/TopBar';
 import { AirQualityCard } from '@/widgets/weather-summary/ui/AirQualityCard';
 import { GasStrip } from '@/widgets/weather-summary/ui/GasStrip';
 import { MetricCard } from '@/widgets/weather-summary/ui/MetricCard';
@@ -63,16 +62,8 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
   const freshness = history ? computeFreshness(history) : 'live';
 
   return (
-    <main className="relative min-h-screen overflow-hidden text-primary-themed">
-      <BackgroundLayer />
-
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-        <TopBar
-          titleKey={config.titleKey}
-          switchPath={config.oppositePath}
-          switchLabelKey={config.oppositeNavKey}
-        />
-
+    <main className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col">
         {isInitialLoading ? (
           <div className="mt-6 flex flex-1 flex-col gap-6">
             <motion.div variants={fadeUp} initial="hidden" animate="visible">
@@ -142,8 +133,4 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
       </div>
     </main>
   );
-}
-
-function BackgroundLayer(): React.JSX.Element {
-  return <div className="dash-bg absolute inset-0" />;
 }
