@@ -1,9 +1,7 @@
 import type { WeatherPageType } from '@/shared/types/common';
+import type { ScaleSensor, SensorType } from '@/shared/types/sensor';
 
-export type SensorType = 'temp' | 'hum' | 'press' | 'mq5' | 'mq3' | 'pm25' | 'pm10';
-
-/** Sensors that have a fixed zone scale in SENSOR_RANGES (dust uses the air-quality standard instead). */
-export type ScaleSensor = Exclude<SensorType, 'pm25' | 'pm10'>;
+export type { ScaleSensor, SensorType };
 
 export function isScaleSensor(sensor: SensorType): sensor is ScaleSensor {
   return sensor !== 'pm25' && sensor !== 'pm10';

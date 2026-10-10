@@ -1,8 +1,9 @@
 import { DEFAULT_STANDARD_ID, categorize, categoryTone, getStandard } from "@/shared/lib/air-quality";
 import { SENSOR_RANGES } from "@/shared/lib/weather-ranges";
+import type { MetricTone } from "@/shared/types/sensor";
 import type { SensorType } from "./weather.types";
 
-export type MetricTone = "good" | "warn" | "bad" | "neutral";
+export type { MetricTone };
 
 export type MetricStatus = {
   labelKey: string;

@@ -1,4 +1,4 @@
-import type { MetricTone } from '@/entities/weather/model/weather-thresholds';
+import type { MetricTone } from '@/shared/types/sensor';
 import type { RangeZoneColor, SensorRangeConfig } from '@/shared/lib/weather-ranges';
 
 export function formatSensorValue(value: number | null | undefined): string {

@@ -1,4 +1,4 @@
-import type { ScaleSensor } from "../../entities/weather/model/weather.types";
+import type { ScaleSensor } from "@/shared/types/sensor";
 
 export type RangeZoneColor = "green" | "yellow" | "red" | "blue" | "gray";
 
