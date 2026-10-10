@@ -1,3 +1,4 @@
+import { DEFAULT_STANDARD_ID, categorize, categoryTone, getStandard } from "@/shared/lib/air-quality";
 import { SENSOR_RANGES } from "@/shared/lib/weather-ranges";
 import type { SensorType } from "./weather.types";
 
@@ -18,7 +19,7 @@ const HUM_RANGE = { min: 30, max: 60 };
  * exactly the bug this replaced: mq5/mq3 had their own hand-picked
  * thresholds here that drifted away from SENSOR_RANGES over time).
  */
-function getZoneStatus(sensor: "mq5" | "mq3", value: number): MetricStatus {
+function getZoneStatus(sensor: "mq5", value: number): MetricStatus {
   const [safe, warn] = SENSOR_RANGES[sensor].zones;
   if (value <= safe!.to) return { labelKey: "status_safe", tone: "good" };
   if (value <= warn!.to) return { labelKey: "status_warning", tone: "warn" };
@@ -48,12 +49,15 @@ export function getSensorStatus(sensor: SensorType, value: number | null): Metri
       return getZoneStatus("mq5", value);
 
     case "mq3":
-      return getZoneStatus("mq3", value);
+      // MQ-3 is an uncalibrated alcohol-vapour estimate: there is no norm to judge it against.
+      return { labelKey: "status_reference", tone: "neutral" };
 
     case "pm25":
-    case "pm10":
-      // Placeholder until the air-quality scale is wired in (next task).
-      return { labelKey: "status_reference", tone: "neutral" };
+    case "pm10": {
+      const category = categorize(getStandard(DEFAULT_STANDARD_ID), sensor, value);
+      if (!category) return { labelKey: "status_reference", tone: "neutral" };
+      return { labelKey: `aqi_cat_${category}`, tone: categoryTone(category) };
+    }
   }
 }
 

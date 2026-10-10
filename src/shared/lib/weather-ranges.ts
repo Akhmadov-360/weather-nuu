@@ -64,13 +64,10 @@ export const SENSOR_RANGES: Record<ScaleSensor, SensorRangeConfig> = {
   },
   mq3: {
     min: 0,
-    max: 1500,
-    unit: "мкг/м³",
+    max: 500,
+    unit: "ppm",
     normLabelKey: "range_mq3_norm",
-    zones: [
-      { from: 0, to: 100, color: "green", labelKey: "range_mq3_ok" },
-      { from: 100, to: 500, color: "yellow", labelKey: "range_mq3_warn" },
-      { from: 500, to: 1500, color: "red", labelKey: "range_mq3_bad" },
-    ],
+    // Uncalibrated alcohol-vapour estimate: no norm exists, so one neutral zone.
+    zones: [{ from: 0, to: 500, color: "gray", labelKey: "range_mq3_ref" }],
   },
 };
