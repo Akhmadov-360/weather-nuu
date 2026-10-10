@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import "@fontsource-variable/onest";
 
 /* Class-based dark mode: ThemeProvider toggles `.dark` on <html>. */
 @custom-variant dark (&:is(.dark *));
@@ -56,7 +56,7 @@
   --radius-panel: 28px;
   --radius-card: 20px;
 
-  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Onest Variable", ui-sans-serif, system-ui, sans-serif;
 
   --shadow-panel: 0 10px 40px rgba(15, 23, 42, 0.35);
   --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.18);
@@ -138,6 +138,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Equal-width digits: values and statistics do not jitter when they update. */
+    font-variant-numeric: tabular-nums;
   }
   html {
     @apply font-sans;
