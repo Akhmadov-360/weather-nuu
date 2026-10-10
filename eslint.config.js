@@ -27,4 +27,27 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // The air-quality scale module must stay pure and portable: the map and
+    // other projects take it as-is, so it may not reach into app layers or
+    // UI frameworks.
+    files: ['src/shared/lib/air-quality/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/entities/*', '@/features/*', '@/widgets/*', '@/pages/*', '@/app/*'],
+              message: 'shared/lib/air-quality must stay pure: it cannot import from upper layers.',
+            },
+          ],
+          paths: ['react', 'react-dom', 'react-i18next', 'i18next'].map((name) => ({
+            name,
+            message: 'shared/lib/air-quality must stay framework-free so it can be reused elsewhere.',
+          })),
+        },
+      ],
+    },
+  },
 );
