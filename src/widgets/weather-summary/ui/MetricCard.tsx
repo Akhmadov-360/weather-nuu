@@ -63,7 +63,7 @@ export function MetricCard({ sensor, label, value, unit }: MetricCardProps): Rea
           max={range.max}
           disabled
           className="data-disabled:opacity-100"
-          trackClassName="h-2 bg-transparent"
+          trackClassName="data-horizontal:h-2 bg-transparent"
           trackStyle={{ background: buildZoneGradient(range) }}
           rangeClassName="hidden"
           thumbClassName={`h-4 w-4 border-2 shadow-md disabled:opacity-100 ${getMarkerBorderClass(status.tone)}`}
