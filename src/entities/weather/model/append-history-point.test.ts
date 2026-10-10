@@ -9,6 +9,8 @@ function point(n: number): WeatherHistoryItem {
     press: 962,
     mq5: 30,
     mq3: 3,
+    pm25: null,
+    pm10: null,
     date: new Date(Date.UTC(2026, 9, 10, 0, 0, 0) + n * 5000).toISOString(),
   };
 }

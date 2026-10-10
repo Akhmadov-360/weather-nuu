@@ -8,7 +8,7 @@ import {
 } from './filter-by-range';
 
 function item(date: string): WeatherHistoryItem {
-  return { temp: 24, hum: 38, press: 962, mq5: 30, mq3: 3, date };
+  return { temp: 24, hum: 38, press: 962, mq5: 30, mq3: 3, pm25: null, pm10: null, date };
 }
 
 describe('isValidTimestamp', () => {

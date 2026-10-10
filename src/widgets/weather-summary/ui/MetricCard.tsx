@@ -2,14 +2,14 @@ import { Droplets, Gauge, ShieldCheck, SprayCan } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { getSensorStatus } from '@/entities/weather/model/weather-thresholds';
-import type { SensorType } from '@/entities/weather/model/weather.types';
+import type { ScaleSensor } from '@/entities/weather/model/weather.types';
 import { AnimateNumber } from '@/shared/ui/animate-number';
 import { StatusBadge } from '@/shared/ui/status-badge';
 import { Slider } from '@/components/ui/slider';
 import { buildZoneGradient, getMarkerBorderClass, getZoneBgClass } from '@/shared/lib/sensor-format';
 import { SENSOR_RANGES } from '@/shared/lib/weather-ranges';
 
-type MetricSensor = Exclude<SensorType, 'temp'>;
+type MetricSensor = Exclude<ScaleSensor, 'temp'>;
 
 type MetricCardProps = {
   sensor: MetricSensor;

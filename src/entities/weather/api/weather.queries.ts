@@ -4,7 +4,8 @@ import { ENV } from "@/shared/config/env";
 import { CLIENT_ONLY_RANGES, RANGE_TO_HOURS, type CustomDateRange, type TimeRange } from "@/shared/lib/date/filter-by-range";
 import type { WeatherPageType } from "@/shared/types/common";
 import { appendHistoryPoint } from "../model/append-history-point";
-import type { WeatherHistoryItem, WeatherLatest } from "../model/weather.types";
+import { dayMeanFromAggregate } from "../model/dust";
+import { SENSORS_BY_SOURCE, type WeatherHistoryItem, type WeatherLatest } from "../model/weather.types";
 
 /**
  * Threshold at which we switch from raw pagination to bucketed aggregation
@@ -103,4 +104,25 @@ export function useWeatherHistoryCustomRangeQuery(
   });
 
   return { mode, rawQuery, aggregateQuery };
+}
+
+/**
+ * 24 h PM2.5 mean for the dust card's secondary line. Uses the server
+ * aggregate instead of the live cache, which is trimmed to ~4 h. Only the
+ * Room device has a dust sensor, so Street never fires the request. A failed
+ * request leaves the data empty and the card falls back to "not enough
+ * data" without touching the 10-minute block.
+ */
+export function useDustDayMeanQuery(type: WeatherPageType) {
+  return useQuery({
+    queryKey: ["weather", type, "dust-day"],
+    queryFn: async () => {
+      const to = new Date();
+      const from = new Date(to.getTime() - 24 * 60 * 60 * 1000);
+      return dayMeanFromAggregate(await getWeatherAggregate(type, { from, to }), "pm25");
+    },
+    enabled: SENSORS_BY_SOURCE[type].includes("pm25"),
+    staleTime: 5 * 60_000,
+    retry: 1,
+  });
 }

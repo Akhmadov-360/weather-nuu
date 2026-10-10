@@ -38,7 +38,7 @@ describe('getSensorStatus: pressure and missing values', () => {
 
 describe('getSensorStatus: gas sensors follow SENSOR_RANGES zones', () => {
   // The badge and the slider zones must never disagree: both come from SENSOR_RANGES.
-  it.each(['mq5', 'mq3'] as const)('%s: badge changes exactly at the zone boundaries', (sensor) => {
+  it.each(['mq5'] as const)('%s: badge changes exactly at the zone boundaries', (sensor) => {
     const [safe, warn] = SENSOR_RANGES[sensor].zones;
 
     expect(getSensorStatus(sensor, safe!.from).tone).toBe('good');
@@ -52,6 +52,38 @@ describe('getSensorStatus: gas sensors follow SENSOR_RANGES zones', () => {
     expect(getSensorStatus('mq5', 0).labelKey).toBe('status_safe');
     expect(getSensorStatus('mq5', 1500).labelKey).toBe('status_warning');
     expect(getSensorStatus('mq5', 2500).labelKey).toBe('status_high');
+  });
+});
+
+describe('getSensorStatus: dust follows the air-quality scale', () => {
+  it.each([
+    [8, 'aqi_cat_good', 'good'],
+    [9.09, 'aqi_cat_good', 'good'],
+    [20, 'aqi_cat_moderate', 'warn'],
+    [37, 'aqi_cat_unhealthy_sensitive', 'warn'],
+    [60, 'aqi_cat_unhealthy', 'bad'],
+    [130, 'aqi_cat_very_unhealthy', 'bad'],
+    [300, 'aqi_cat_hazardous', 'bad'],
+  ] as const)('pm25 %s µg/m³ → %s / %s', (value, labelKey, tone) => {
+    expect(getSensorStatus('pm25', value)).toEqual({ labelKey, tone });
+  });
+
+  it.each([
+    [40, 'aqi_cat_good', 'good'],
+    [200, 'aqi_cat_unhealthy_sensitive', 'warn'],
+    [500, 'aqi_cat_hazardous', 'bad'],
+  ] as const)('pm10 %s µg/m³ → %s / %s', (value, labelKey, tone) => {
+    expect(getSensorStatus('pm10', value)).toEqual({ labelKey, tone });
+  });
+
+  it.each([null, Number.NaN, -1])('pm25 %s is shown as reference, not as a category', (value) => {
+    expect(getSensorStatus('pm25', value)).toEqual({ labelKey: 'status_reference', tone: 'neutral' });
+  });
+});
+
+describe('getSensorStatus: MQ-3 has no norm', () => {
+  it.each([0, 100, 900])('%s ppm is reference only', (value) => {
+    expect(getSensorStatus('mq3', value)).toEqual({ labelKey: 'status_reference', tone: 'neutral' });
   });
 });
 

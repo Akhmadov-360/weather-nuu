@@ -21,6 +21,8 @@ describe('mapWeatherLatest', () => {
       press: 962.1,
       mq5: 30,
       mq3: 3,
+      pm25: null,
+      pm10: null,
       date: '2026-10-10T12:00:00.000Z',
     });
   });
@@ -39,12 +41,47 @@ describe('mapWeatherLatest', () => {
     expect(result.date).toBe(new Date('2025-10-05T10:15:00').toISOString());
   });
 
+  it('maps pm25 and pm10 from the new payload', () => {
+    const result = mapWeatherLatest({ fusedTemp: 25, recordedAt: '2026-10-10T12:00:00.000Z', pm25: 38, pm10: 45 });
+    expect(result.pm25).toBe(38);
+    expect(result.pm10).toBe(45);
+  });
+
+  it('keeps null dust values as null, not 0 (Street has no dust sensor)', () => {
+    const result = mapWeatherLatest({ fusedTemp: 18, recordedAt: '2026-10-10T12:00:00.000Z', pm25: null, pm10: null });
+    expect(result.pm25).toBeNull();
+    expect(result.pm10).toBeNull();
+  });
+
+  it('treats a payload without dust fields (old backend) as no dust reading', () => {
+    const result = mapWeatherLatest({ fusedTemp: 18, recordedAt: '2026-10-10T12:00:00.000Z' });
+    expect(result.pm25).toBeNull();
+    expect(result.pm10).toBeNull();
+  });
+
+  it('accepts dust values sent as numeric strings', () => {
+    const result = mapWeatherLatest({ fusedTemp: 25, recordedAt: '2026-10-10T12:00:00.000Z', pm25: '38', pm10: '45' });
+    expect(result.pm25).toBe(38);
+    expect(result.pm10).toBe(45);
+  });
+
+  it.each(['abc', '', {}, true, [], Number.NaN])('turns malformed dust value %j into null', (garbage) => {
+    const result = mapWeatherLatest({ fusedTemp: 25, recordedAt: '2026-10-10T12:00:00.000Z', pm25: garbage, pm10: garbage });
+    expect(result.pm25).toBeNull();
+    expect(result.pm10).toBeNull();
+  });
+
+  it('a malformed dust value never takes down the other fields', () => {
+    const result = mapWeatherLatest({ fusedTemp: 21, hum: 40, bmpPress: 955, pm25: 'oops', recordedAt: '2026-10-10T12:00:00.000Z' });
+    expect([result.temp, result.hum, result.press, result.pm25]).toEqual([21, 40, 955, null]);
+  });
+
   it('coerces numeric strings', () => {
     expect(mapWeatherLatest({ fusedTemp: '23.5', hum: '40' }).temp).toBe(23.5);
   });
 
   it('falls back to 0 and the epoch for missing fields', () => {
-    expect(mapWeatherLatest({})).toEqual({ temp: 0, hum: 0, press: 0, mq5: 0, mq3: 0, date: EPOCH });
+    expect(mapWeatherLatest({})).toEqual({ temp: 0, hum: 0, press: 0, mq5: 0, mq3: 0, pm25: null, pm10: null, date: EPOCH });
   });
 
   it('turns corrupted pre-2020 dates (firmware bug) into the epoch sentinel', () => {
@@ -91,6 +128,16 @@ describe('mapWeatherHistory', () => {
 
   it('accepts { items: [...] } (new backend page)', () => {
     expect(mapWeatherHistory({ items: [row, row, row] })).toHaveLength(3);
+  });
+
+  it('carries pm fields on every history item', () => {
+    const items = mapWeatherHistory({ items: [{ ...row, pm25: 12, pm10: 20 }, { ...row, pm25: null, pm10: null }] });
+    expect(items.map((i) => [i.pm25, i.pm10])).toEqual([[12, 20], [null, null]]);
+  });
+
+  it('one row with a malformed dust value does not fail the whole history', () => {
+    const items = mapWeatherHistory({ items: [{ ...row, pm25: 12 }, { ...row, pm25: 'garbage' }, { ...row, pm25: 30 }] });
+    expect(items.map((i) => i.pm25)).toEqual([12, null, 30]);
   });
 
   it('accepts an empty page', () => {
