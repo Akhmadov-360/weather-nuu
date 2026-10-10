@@ -44,6 +44,7 @@ pnpm dev
 | `pnpm dev` | dev-сервер с горячей перезагрузкой, http://localhost:5173 |
 | `pnpm typecheck` | проверка типов (обязательна перед PR) |
 | `pnpm lint` | ESLint |
+| `pnpm test` | модульные тесты (Vitest); `pnpm test:watch` — режим наблюдения |
 | `pnpm build` | проверка типов + боевая сборка в `dist/` |
 | `pnpm preview` | посмотреть собранную версию |
 
@@ -83,6 +84,7 @@ src/
 - **Tailwind здесь v3, а не v4.** Компоненты, сгенерированные `shadcn add`, нередко написаны под
   v4 (`data-checked:`, `data-open:`, `var(--radius-md)`) — на v3 такие классы молча не работают.
   Используйте v3-синтаксис: `data-[state=checked]:`, `rounded-md`. Проверяйте результат глазами.
+- Тесты лежат рядом с кодом (`*.test.ts`). Меняете логику в `entities/` или `shared/lib/` — добавьте или обновите тест.
 - Менеджер пакетов — **pnpm** (файл `pnpm-lock.yaml`). Не запускайте `npm install`.
 - Цвета и пороги зон нормы — в одном месте: `src/shared/lib/weather-ranges.ts`.
 - Все строки интерфейса — в `src/assets/locales/{ru,uz,en}/common.json`; добавляя текст,
