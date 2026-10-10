@@ -152,5 +152,6 @@
   "gas_status_ok": "within range",
   "gas_status_high": "high level",
   "theme_switch_to_dark": "Switch to dark theme",
-  "theme_switch_to_light": "Switch to light theme"
+  "theme_switch_to_light": "Switch to light theme",
+  "nav_sections": "Sections"
 }

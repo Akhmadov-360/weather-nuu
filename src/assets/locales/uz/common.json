@@ -152,5 +152,6 @@
   "gas_status_ok": "me'yor doirasida",
   "gas_status_high": "yuqori daraja",
   "theme_switch_to_dark": "Qorong'i mavzuga o'tish",
-  "theme_switch_to_light": "Yorug' mavzuga o'tish"
+  "theme_switch_to_light": "Yorug' mavzuga o'tish",
+  "nav_sections": "Bo'limlar"
 }
