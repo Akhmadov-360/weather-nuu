@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import ReactECharts from "echarts-for-react";
+import ReactEChartsCore from "echarts-for-react/lib/core";
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -26,6 +26,7 @@ import {
   type TimeRange,
 } from "@/shared/lib/date/filter-by-range";
 import { CHART_GAP_THRESHOLD_MS, detectGaps, insertGapBreaks } from "@/shared/lib/date/insert-gap-breaks";
+import { echarts } from "../lib/echarts-core";
 import { buildChartOption, type ChartMode } from "../model/chart-option";
 import { aggregateSeries, rawSeries, summarize } from "../model/chart-series";
 import { SensorStatCard } from "./SensorStatCard";
@@ -272,7 +273,7 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
           // Адаптивная высота: мобайл → планшет → десктоп
           className="min-h-[220px] w-full flex-1 sm:min-h-[300px] lg:min-h-[360px]"
         >
-          <ReactECharts
+          <ReactEChartsCore
             // Remount (full re-render, not merge) whenever the sensor OR
             // the selected time window changes — otherwise ECharts keeps
             // the old dataZoom window/axis extent from merge-mode updates
@@ -285,6 +286,7 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
                 ? `custom:${customRange.from.toISOString()}_${customRange.to.toISOString()}`
                 : activeRange
             }`}
+            echarts={echarts}
             option={option}
             notMerge={false}
             lazyUpdate
