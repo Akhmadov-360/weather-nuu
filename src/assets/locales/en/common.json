@@ -134,10 +134,6 @@
   "chart_loading": "Loading historical data…",
   "chart_reset_zoom": "Reset zoom",
   "chart_save_image": "Save as image",
-  "theme_toggle_label": "Change theme",
-  "theme_light": "Light",
-  "theme_dark": "Dark",
-  "theme_system": "System",
   "error_boundary_title": "Something went wrong.",
   "error_boundary_retry": "Try again",
   "dust_no_sensor": "Sensor not installed",
@@ -154,5 +150,7 @@
   "gas_estimate_lpg": "estimate, LPG equivalent",
   "gas_estimate": "estimate",
   "gas_status_ok": "within range",
-  "gas_status_high": "high level"
+  "gas_status_high": "high level",
+  "theme_switch_to_dark": "Switch to dark theme",
+  "theme_switch_to_light": "Switch to light theme"
 }

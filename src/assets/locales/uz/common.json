@@ -134,10 +134,6 @@
   "chart_loading": "Tarix yuklanmoqda…",
   "chart_reset_zoom": "Masshtabni tiklash",
   "chart_save_image": "Rasm sifatida saqlash",
-  "theme_toggle_label": "Mavzuni o'zgartirish",
-  "theme_light": "Yorug'",
-  "theme_dark": "Qorong'i",
-  "theme_system": "Tizim",
   "error_boundary_title": "Nimadir noto'g'ri ketdi.",
   "error_boundary_retry": "Qayta urinib ko'ring",
   "dust_no_sensor": "Datchik o'rnatilmagan",
@@ -154,5 +150,7 @@
   "gas_estimate_lpg": "baho, LPG ekvivalenti",
   "gas_estimate": "baho",
   "gas_status_ok": "me'yor doirasida",
-  "gas_status_high": "yuqori daraja"
+  "gas_status_high": "yuqori daraja",
+  "theme_switch_to_dark": "Qorong'i mavzuga o'tish",
+  "theme_switch_to_light": "Yorug' mavzuga o'tish"
 }
