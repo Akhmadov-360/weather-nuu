@@ -126,8 +126,8 @@ export function TemperatureCard({ source, temp, history }: TemperatureCardProps)
           </StatusText>
         </div>
         <div className="mt-auto pt-3 text-xs text-muted-themed">
-          {t('temp_minmax_day')}: <span className="text-secondary-themed">▾ {format(min)}°</span>{' '}
-          <span className="text-secondary-themed">▴ {format(max)}°</span>
+          {t('temp_minmax_day')}: <span className="font-medium text-(--status-info)">▾ {format(min)}°</span>{' '}
+          <span className="font-medium text-(--status-critical)">▴ {format(max)}°</span>
         </div>
       </div>
     </div>
