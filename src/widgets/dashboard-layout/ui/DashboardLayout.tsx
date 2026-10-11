@@ -1,6 +1,8 @@
 import { useDustDayMeanQuery, useLatestWeatherQuery, useWeatherHistoryQuery } from '@/entities/weather/api/weather.queries';
 import { useWeatherSocket } from '@/entities/weather/api/useWeatherSocket';
 import { computeFreshness } from '@/entities/weather/model/weather-freshness';
+import type { ConnectionState } from '@/entities/weather/model/connection';
+import { ConnectionProvider, useConnectionState } from '@/entities/weather/model/connection-context';
 import type { DashboardPageConfig } from '@/entities/weather/model/weather.types';
 import { GlassPanel } from '@/shared/ui/glass-panel';
 import { EmptyState } from '@/shared/ui/empty-state';
@@ -16,7 +18,7 @@ import { TimeCard } from '@/widgets/time-card/ui/TimeCard';
 import { HumidityCard } from '@/widgets/weather-summary/ui/HumidityCard';
 import { PressureCard } from '@/widgets/weather-summary/ui/PressureCard';
 import { TemperatureCard } from '@/widgets/weather-summary/ui/TemperatureCard';
-import { ArchiveDataBanner } from './ArchiveDataBanner';
+import { ConnectionBanner } from './ConnectionBanner';
 import { SensorChartsSkeleton } from './SensorChartsSkeleton';
 import { WeatherSummarySkeleton } from './WeatherSummarySkeleton';
 import { previewNow } from '@/widgets/time-card/model/station-time';
@@ -66,6 +68,14 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
   const latest  = latestQuery.data;
   const history = historyQuery.data;
   const freshness = history ? computeFreshness(history) : 'live';
+  const measured = useConnectionState(history, latestQuery.isError && latestQuery.data !== undefined);
+  // Development aid: `?conn=archive` or `?conn=delayed` shows those states without waiting for the station to go quiet.
+  const forced = import.meta.env.DEV ? searchParams.get('conn') : null;
+  const forcedAgeMs = forced === 'archive' ? 3 * 3_600_000 + 12 * 60_000 : 4 * 60_000;
+  const connection: ConnectionState =
+    forced === 'archive' || forced === 'delayed'
+      ? { ...measured, level: forced, ageMs: forcedAgeMs, lastSeenMs: Date.now() - forcedAgeMs }
+      : measured;
 
   return (
     <main className="flex flex-1 flex-col">
@@ -101,7 +111,9 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
           </div>
 
         ) : (
-          <div className="mt-6 flex flex-1 flex-col gap-6">
+          <ConnectionProvider value={connection}>
+          <div className="mt-6 flex flex-1 flex-col gap-6" data-conn={connection.level}>
+            <ConnectionBanner connection={connection} />
             <motion.div variants={fadeUp} initial="hidden" animate="visible" className={summaryGridClass}>
               <TimeCard history={history} freshness={freshness} now={pinnedNow} />
               <HumidityCard value={latest.hum} />
@@ -114,12 +126,6 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
                 <GasStrip mq5={latest.mq5} mq3={latest.mq3} />
               </div>
             </motion.div>
-
-            {freshness !== 'live' && (
-              <motion.div variants={fadeUp} initial="hidden" animate="visible">
-                <ArchiveDataBanner lastSeenDate={history[history.length - 1]!.date} />
-              </motion.div>
-            )}
 
             <motion.section
               variants={fadeUp}
@@ -135,6 +141,7 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
 
             <LiveStreams />
           </div>
+          </ConnectionProvider>
         )}
       </div>
     </main>

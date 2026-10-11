@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 
 import { pressureTendency, type TendencyKind } from '@/entities/weather/model/pressure-tendency';
 import type { WeatherHistoryItem } from '@/entities/weather/model/weather.types';
+import { useConnection } from '@/entities/weather/model/connection-context';
 import { isobarRings } from '../model/isobars';
+import { AgeMark } from './AgeMark';
 
 type PressureCardProps = {
   value: number | null | undefined;
@@ -44,7 +46,11 @@ function directionOf(kind: TendencyKind): 'up' | 'down' | 'flat' {
  */
 export function PressureCard({ value, history }: PressureCardProps): React.JSX.Element {
   const { t } = useTranslation();
-  const tendency = useMemo(() => pressureTendency(history, Date.now()), [history]);
+  const { level, lastSeenMs } = useConnection();
+  const archive = level === 'archive';
+  // In archive mode the trend is read as of the last reading, not against an empty "now".
+  const referenceMs = archive && lastSeenMs !== null ? lastSeenMs : null;
+  const tendency = useMemo(() => pressureTendency(history, referenceMs ?? Date.now()), [history, referenceMs]);
   const geometry = useMemo(
     () => (value == null || Number.isNaN(value) ? null : isobarRings(value, tendency?.delta ?? null)),
     [value, tendency],
@@ -54,7 +60,7 @@ export function PressureCard({ value, history }: PressureCardProps): React.JSX.E
   const direction = tendency ? directionOf(tendency.kind) : 'flat';
   const Arrow = direction === 'up' ? ArrowUp : direction === 'down' ? ArrowDown : ArrowRight;
   const rippleSeconds = tendency ? Math.min(16, Math.max(4, 24 / Math.max(1, Math.abs(tendency.delta)))) : 0;
-  const rippling = tendency !== null && tendency.kind !== 'steady';
+  const rippling = !archive && tendency !== null && tendency.kind !== 'steady';
   const unit = t('unit_hpa');
 
   const current = geometry?.current;
@@ -64,7 +70,7 @@ export function PressureCard({ value, history }: PressureCardProps): React.JSX.E
     <div className="relative h-full min-h-[236px] overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) shadow-card sm:min-h-[250px]">
       {geometry ? (
         <svg
-          className="press-isobars pointer-events-none absolute -right-8 top-1/2 h-[330px] w-[330px] -translate-y-1/2 sm:right-0 sm:h-[360px] sm:w-[360px]"
+          className="vc-live press-isobars pointer-events-none absolute -right-8 top-1/2 h-[330px] w-[330px] -translate-y-1/2 sm:right-0 sm:h-[360px] sm:w-[360px]"
           viewBox="0 0 340 340"
           aria-hidden
         >
@@ -151,8 +157,8 @@ export function PressureCard({ value, history }: PressureCardProps): React.JSX.E
       ) : null}
 
       <div className="relative z-10 flex h-full flex-col p-4 sm:p-5">
-        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-themed">{t('lbl_press')}</div>
-        <div className="mt-2 text-[44px] leading-none font-semibold tracking-tight text-primary-themed [font-variant-numeric:proportional-nums] sm:text-5xl">
+        <div className="flex flex-wrap items-baseline gap-x-2"><div className="text-[11px] uppercase tracking-[0.14em] text-muted-themed">{t('lbl_press')}</div><AgeMark /></div>
+        <div className="vc-live mt-2 text-[44px] leading-none font-semibold tracking-tight text-primary-themed [font-variant-numeric:proportional-nums] sm:text-5xl">
           {value == null ? '—' : formatValue(value)}
           <span className="ml-1 text-base font-normal tracking-normal text-muted-themed">{unit}</span>
         </div>

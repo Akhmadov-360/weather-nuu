@@ -15,7 +15,9 @@ import {
   type CategoryId,
 } from '@/shared/lib/air-quality';
 import { ROUTES } from '@/shared/config/routes';
+import { useConnection } from '@/entities/weather/model/connection-context';
 import { AnimateNumber } from '@/shared/ui/animate-number';
+import { AgeMark } from './AgeMark';
 import { DustField, NoSensorArt, SettledDust, SilentLens } from './DustVisuals';
 
 type AirQualityCardProps = {
@@ -52,7 +54,12 @@ function Shell({ art, children }: { art?: React.ReactNode; children: React.React
 }
 
 function CardHeader({ label }: { label: string }): React.JSX.Element {
-  return <div className="min-w-0 text-[11px] uppercase tracking-[0.14em] text-muted-themed">{label}</div>;
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-2">
+      <div className="min-w-0 text-[11px] uppercase tracking-[0.14em] text-muted-themed">{label}</div>
+      <AgeMark />
+    </div>
+  );
 }
 
 function CategoryBadge({ category, label }: { category: CategoryId; label: string }): React.JSX.Element {
@@ -92,6 +99,7 @@ function SecondaryLine({ name, reading }: { name: string; reading: DustReading }
 
 export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps): React.JSX.Element {
   const { t, i18n } = useTranslation();
+  const archive = useConnection().level === 'archive';
   const model = buildDustCardModel({ source, history, dayMean });
   const label = t('lbl_pm25');
 
@@ -147,10 +155,10 @@ export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps
   const category = pm25.category;
 
   return (
-    <Shell art={<DustField pm25={pm25.mean} pm10={pm10?.mean ?? null} colorVar={category ? categoryTextCssVar(category) : '--status-info'} />}>
+    <Shell art={archive ? <SettledDust /> : <DustField pm25={pm25.mean} pm10={pm10?.mean ?? null} colorVar={category ? categoryTextCssVar(category) : '--status-info'} />}>
       <CardHeader label={label} />
 
-      <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
+      <div className="vc-live mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
         <div className="flex items-end gap-1.5">
           <span className="text-[44px] leading-none font-semibold tracking-tight text-primary-themed [font-variant-numeric:proportional-nums] sm:text-5xl">
             <AnimateNumber value={pm25.mean} fractionDigits={1} />
@@ -171,7 +179,7 @@ export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps
       </div>
       <div className="mt-1.5 text-xs text-muted-themed">{t('dust_avg_10m')}</div>
 
-      <div className="mt-4">
+      <div className="vc-live mt-4">
         <Slider
           value={[Math.min(Math.max(pm25.mean, 0), BAR_MAX)]}
           min={0}
