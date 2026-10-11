@@ -1,5 +1,6 @@
-import { CloudFog } from 'lucide-react';
+import { ArrowRight, CloudFog, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
 import { Slider } from '@/components/ui/slider';
 import { buildDustCardModel, type DustReading } from '@/entities/weather/model/dust-card';
@@ -13,7 +14,9 @@ import {
   zoneStops,
   type CategoryId,
 } from '@/shared/lib/air-quality';
+import { ROUTES } from '@/shared/config/routes';
 import { AnimateNumber } from '@/shared/ui/animate-number';
+import { DustField, NoSensorArt, SettledDust, SilentLens } from './DustVisuals';
 
 type AirQualityCardProps = {
   source: 'room' | 'street';
@@ -38,8 +41,15 @@ function buildGradient(): string {
 }
 const GRADIENT = buildGradient();
 
-const CARD_CLASS =
-  'flex h-full flex-col rounded-card border border-(--glass-border) bg-(--glass-surface) px-4 py-4 shadow-card sm:p-5';
+/** The card frame: `art` sits behind the content, which stays above it. */
+function Shell({ art, children }: { art?: React.ReactNode; children: React.ReactNode }): React.JSX.Element {
+  return (
+    <div className="relative h-full overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) shadow-card">
+      {art}
+      <div className="relative z-10 flex h-full flex-col px-4 py-4 sm:p-5">{children}</div>
+    </div>
+  );
+}
 
 function CardHeader({ label }: { label: string }): React.JSX.Element {
   return (
@@ -94,11 +104,18 @@ export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps
 
   if (model.kind === 'no_sensor') {
     return (
-      <div className={CARD_CLASS}>
+      <Shell art={<NoSensorArt />}>
         <CardHeader label={label} />
         <div className="mt-6 text-lg font-semibold text-primary-themed">{t('dust_no_sensor')}</div>
-        <div className="mt-1 text-sm text-muted-themed">{t('dust_no_sensor_hint')}</div>
-      </div>
+        <div className="mt-1 max-w-sm text-sm text-muted-themed">{t('dust_no_sensor_hint')}</div>
+        <Link
+          to={ROUTES.room}
+          className="mt-auto inline-flex w-fit items-center gap-2 rounded-full border border-(--status-info)/60 px-4 py-2 text-sm text-(--status-info) transition-colors hover:bg-(--status-info)/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--status-info)"
+        >
+          {t('dust_go_room')}
+          <ArrowRight className="h-4 w-4" aria-hidden />
+        </Link>
+      </Shell>
     );
   }
 
@@ -112,13 +129,24 @@ export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps
         }).format(new Date(model.lastSeen))
       : null;
     return (
-      <div className={CARD_CLASS}>
+      <Shell
+        art={
+          <>
+            <SettledDust />
+            <SilentLens className="pointer-events-none absolute -right-6 top-1/2 hidden h-52 w-52 -translate-y-1/2 sm:block" />
+          </>
+        }
+      >
         <CardHeader label={label} />
         <div className="mt-6 text-lg font-semibold text-primary-themed">{t('dust_no_data')}</div>
         <div className="mt-1 text-sm text-muted-themed">
           {since ? t('dust_no_data_since', { time: since }) : t('dust_no_data_never')}
         </div>
-      </div>
+        <div className="mt-auto inline-flex w-fit items-center gap-2 rounded-lg bg-(--control-track) px-3 py-1.5 text-sm text-secondary-themed">
+          <WifiOff className="h-4 w-4" aria-hidden />
+          {t('dust_sensor_silent')}
+        </div>
+      </Shell>
     );
   }
 
@@ -126,7 +154,7 @@ export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps
   const category = pm25.category;
 
   return (
-    <div className={CARD_CLASS}>
+    <Shell art={<DustField pm25={pm25.mean} pm10={pm10?.mean ?? null} colorVar={category ? categoryCssVar(category) : '--status-info'} />}>
       <CardHeader label={label} />
 
       <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
@@ -181,6 +209,6 @@ export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps
       {WHO_PM25_DAILY != null ? (
         <div className="mt-3 text-[11px] text-muted-themed">{t('dust_who_guideline', { value: WHO_PM25_DAILY })}</div>
       ) : null}
-    </div>
+    </Shell>
   );
 }

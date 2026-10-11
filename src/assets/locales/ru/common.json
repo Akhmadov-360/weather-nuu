@@ -191,5 +191,7 @@
   "press_prev_title": "3 часа назад: {{value}} гПа",
   "temp_minmax_day": "за сутки",
   "temp_min_title": "Минимум за сутки: {{value}}°",
-  "temp_max_title": "Максимум за сутки: {{value}}°"
+  "temp_max_title": "Максимум за сутки: {{value}}°",
+  "dust_sensor_silent": "Датчик молчит",
+  "dust_go_room": "Перейти в «Аудитория»"
 }
