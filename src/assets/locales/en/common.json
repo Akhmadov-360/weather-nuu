@@ -191,5 +191,7 @@
   "press_prev_title": "3 hours ago: {{value}} hPa",
   "temp_minmax_day": "last 24 h",
   "temp_min_title": "24 h minimum: {{value}}°",
-  "temp_max_title": "24 h maximum: {{value}}°"
+  "temp_max_title": "24 h maximum: {{value}}°",
+  "dust_sensor_silent": "Sensor is silent",
+  "dust_go_room": "Go to Classroom"
 }

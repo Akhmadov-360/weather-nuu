@@ -191,5 +191,7 @@
   "press_prev_title": "3 soat oldin: {{value}} gPa",
   "temp_minmax_day": "sutka davomida",
   "temp_min_title": "Sutkalik minimum: {{value}}°",
-  "temp_max_title": "Sutkalik maksimum: {{value}}°"
+  "temp_max_title": "Sutkalik maksimum: {{value}}°",
+  "dust_sensor_silent": "Datchik jim",
+  "dust_go_room": "«Auditoriya» sahifasiga o‘tish"
 }
