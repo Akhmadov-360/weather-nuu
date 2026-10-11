@@ -61,3 +61,41 @@ export function temperatureTint(temp: number, theme: 'light' | 'dark'): { from: 
     ? { from: hslToHex(h, s, 90), to: hslToHex(h, s * 0.5, 97) }
     : { from: hslToHex(h, s * 0.8, 20), to: hslToHex(h, s * 0.6, 12) };
 }
+
+const MERCURY: Record<'light' | 'dark', [number, string][]> = {
+  light: [
+    [-20, '#2B6CB0'],
+    [5, '#3A86C8'],
+    [15, '#B8860B'],
+    [25, '#D9731A'],
+    [40, '#B0342C'],
+  ],
+  dark: [
+    [-20, '#6CA6EE'],
+    [5, '#7FB5E8'],
+    [15, '#E0B84A'],
+    [25, '#F29B4B'],
+    [40, '#F2866B'],
+  ],
+};
+
+const hexChannel = (hex: string, i: number) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
+
+/** Colour of the mercury: cold blue to hot red, clamped to the −20…40 °C scale, and always visible on the card surface. */
+export function thermometerColor(temp: number, theme: 'light' | 'dark'): string {
+  const stops = MERCURY[theme];
+  const t = Math.min(stops[stops.length - 1]![0], Math.max(stops[0]![0], temp));
+  for (let i = 0; i < stops.length - 1; i++) {
+    const [t0, c0] = stops[i]!;
+    const [t1, c1] = stops[i + 1]!;
+    if (t <= t1) {
+      const k = (t - t0) / (t1 - t0);
+      const channel = (n: number) =>
+        Math.round(lerp(hexChannel(c0, n), hexChannel(c1, n), k))
+          .toString(16)
+          .padStart(2, '0');
+      return `#${channel(0)}${channel(1)}${channel(2)}`;
+    }
+  }
+  return stops[stops.length - 1]![1];
+}

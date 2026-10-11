@@ -351,6 +351,25 @@ html.theme-switching *::after {
   transition: none !important;
 }
 
+/* ─── Value cards: water drift and pressure ripples ──────────────────── */
+@keyframes hum-wave-drift {
+  to { transform: translateX(-50%); }
+}
+.hum-wave-a { animation: hum-wave-drift 9s linear infinite; }
+.hum-wave-b { animation: hum-wave-drift 6s linear infinite reverse; }
+
+/* Rings expand from the centre when pressure rises; the card reverses the animation when it falls. */
+@keyframes press-ripple {
+  from { transform: scale(0.25); opacity: 0.45; }
+  to   { transform: scale(1.05); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hum-wave-a, .hum-wave-b { animation: none; }
+  /* the ripples carry their animation inline, hence !important */
+  .press-ripple { animation: none !important; opacity: 0 !important; }
+}
+
 /* ─── Custom utilities ───────────────────────────────────────── */
 @utility dash-bg {
   background:

@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-const TILE_CLASS = "rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card";
+const TILE_CLASS = "min-h-[120px] rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card";
 
 export function WeatherSummarySkeleton(): React.JSX.Element {
   return (
