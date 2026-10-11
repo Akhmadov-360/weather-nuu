@@ -39,11 +39,11 @@ describe('pressureTendency', () => {
   });
 
   it('is null when the recent window has too few readings', () => {
-    expect(pressureTendency([...run(960, 3 * HOUR), ...run(962, 0, 9)], NOW)).toBeNull();
+    expect(pressureTendency([...run(960, 3 * HOUR), ...run(962, 0, 2)], NOW)).toBeNull();
   });
 
   it('is null when the window three hours ago has too few readings', () => {
-    expect(pressureTendency([...run(960, 3 * HOUR, 9), ...run(962, 0)], NOW)).toBeNull();
+    expect(pressureTendency([...run(960, 3 * HOUR, 2), ...run(962, 0)], NOW)).toBeNull();
   });
 
   it('is null for an empty history', () => {

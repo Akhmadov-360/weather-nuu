@@ -105,7 +105,7 @@ export function HumidityCard({ value }: HumidityCardProps): React.JSX.Element {
       {/* Level flag: the value, at the surface, left of the zone words */}
       {value != null ? (
         <div
-          className="absolute right-[5.25rem] flex translate-y-1/2 items-center transition-[bottom] duration-1000 ease-out motion-reduce:transition-none"
+          className="absolute right-[6.5rem] flex translate-y-1/2 items-center transition-[bottom] duration-1000 ease-out motion-reduce:transition-none"
           style={{ bottom: at(percent) }}
           title={flagTitle}
         >

@@ -359,6 +359,16 @@ html.theme-switching *::after {
 .hum-wave-b { animation: hum-wave-drift 6s linear infinite reverse; }
 
 /* Rings expand from the centre when pressure rises; the card reverses the animation when it falls. */
+/* Rings fade out towards the text column; later and softer on phones, where the text is wider relative to the card. */
+.press-isobars {
+  mask-image: linear-gradient(to right, transparent 38%, #000 62%);
+}
+@media (min-width: 640px) {
+  .press-isobars {
+    mask-image: linear-gradient(to right, transparent 22%, #000 46%);
+  }
+}
+
 @keyframes press-ripple {
   from { transform: scale(0.25); opacity: 0.45; }
   to   { transform: scale(1.05); opacity: 0; }

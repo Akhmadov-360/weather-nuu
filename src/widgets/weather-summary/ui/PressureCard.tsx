@@ -64,7 +64,7 @@ export function PressureCard({ value, history }: PressureCardProps): React.JSX.E
     <div className="relative h-full min-h-[236px] overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) shadow-card sm:min-h-[250px]">
       {geometry ? (
         <svg
-          className="pointer-events-none absolute -right-8 top-1/2 h-[330px] w-[330px] -translate-y-1/2 sm:right-0 sm:h-[360px] sm:w-[360px]"
+          className="press-isobars pointer-events-none absolute -right-8 top-1/2 h-[330px] w-[330px] -translate-y-1/2 sm:right-0 sm:h-[360px] sm:w-[360px]"
           viewBox="0 0 340 340"
           aria-hidden
         >
@@ -134,23 +134,16 @@ export function PressureCard({ value, history }: PressureCardProps): React.JSX.E
             </>
           ) : null}
 
-          {/* Ring numbers, level with their rings, along the horizontal to the right of the centre */}
+          {/* Ring numbers on the upward ray, where neighbouring rings are far enough apart (about 23 units) to be read; rings that leave the card get none */}
           {paths
-            .filter((ring) => ring.labelled)
+            .filter((ring) => ring.labelled && ring.r <= 112 && Math.abs(ring.r - (current?.r ?? -99)) > 14)
             .map((ring) => (
-              <text
-                key={`label-${ring.level}`}
-                x={CX + ring.r + 4}
-                y={CY + 3}
-                fontSize={10}
-                fill="var(--text-muted)"
-                opacity={ring.level === current?.level ? 0 : 1}
-              >
+              <text key={`label-${ring.level}`} x={CX + 5} y={CY - ring.r + 3.5} fontSize={10} fill="var(--text-muted)">
                 {ring.level}
               </text>
             ))}
-          {current ? (
-            <text x={CX + current.r + 4} y={CY + 4} fontSize={11} fontWeight={600} fill="var(--text-primary)">
+          {current && current.r <= 118 ? (
+            <text x={CX + 5} y={CY - current.r + 3.5} fontSize={11} fontWeight={600} fill="var(--text-primary)">
               {Math.round(current.level)}
             </text>
           ) : null}

@@ -13,8 +13,8 @@ const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
 /** Each side of the comparison is a 15-minute mean, so single noisy readings do not decide the trend. */
 const WINDOW_MS = 15 * MINUTE_MS;
-/** Fewer readings than this (a healthy device sends about 180 in 15 minutes) is not a basis for a trend. */
-const MIN_READINGS = 10;
+/** Fewer readings than this is not a basis for a trend (a live device sends ~180 per window, 5-minute archive data 3). */
+const MIN_READINGS = 3;
 
 function windowMean(history: WeatherHistoryItem[], fromMs: number, toMs: number): number | null {
   let sum = 0;
