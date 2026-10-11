@@ -1,6 +1,5 @@
 import { useDustDayMeanQuery, useLatestWeatherQuery, useWeatherHistoryQuery } from '@/entities/weather/api/weather.queries';
 import { useWeatherSocket } from '@/entities/weather/api/useWeatherSocket';
-import { computeFreshness } from '@/entities/weather/model/weather-freshness';
 import type { ConnectionState } from '@/entities/weather/model/connection';
 import { ConnectionProvider, useConnectionState } from '@/entities/weather/model/connection-context';
 import type { DashboardPageConfig } from '@/entities/weather/model/weather.types';
@@ -67,7 +66,6 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
 
   const latest  = latestQuery.data;
   const history = historyQuery.data;
-  const freshness = history ? computeFreshness(history) : 'live';
   const measured = useConnectionState(history, latestQuery.isError && latestQuery.data !== undefined);
   // Development aid: `?conn=archive` or `?conn=delayed` shows those states without waiting for the station to go quiet.
   const forced = import.meta.env.DEV ? searchParams.get('conn') : null;
@@ -115,7 +113,7 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
           <div className="mt-6 flex flex-1 flex-col gap-6" data-conn={connection.level}>
             <ConnectionBanner connection={connection} />
             <motion.div variants={fadeUp} initial="hidden" animate="visible" className={summaryGridClass}>
-              <TimeCard history={history} freshness={freshness} now={pinnedNow} />
+              <TimeCard history={history} now={pinnedNow} />
               <HumidityCard value={latest.hum} />
               <PressureCard value={latest.press} history={history} />
               <TemperatureCard source={config.key} temp={latest.temp} history={history} />
