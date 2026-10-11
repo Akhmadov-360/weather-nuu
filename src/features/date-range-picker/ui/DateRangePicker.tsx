@@ -6,7 +6,9 @@ import { ru, uz, enUS } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import type { CustomDateRange } from '@/shared/lib/date/filter-by-range';
 
 const CALENDAR_LOCALES = { ru, uz, en: enUS } as const;
@@ -37,6 +39,7 @@ export function DateRangePicker({
   onOpenChange,
 }: DateRangePickerProps): React.JSX.Element {
   const { t, i18n } = useTranslation();
+  const isPhone = useMediaQuery('(max-width: 639px)');
   const [openInternal, setOpenInternal] = useState(false);
   const open = openProp ?? openInternal;
   const setOpen = (next: boolean) => {
@@ -55,36 +58,64 @@ export function DateRangePicker({
     ...(toDate ? [{ after: toDate }] : []),
   ];
 
+  const triggerClass =
+    'h-9 gap-1.5 rounded-xl border border-(--glass-border) bg-(--glass-surface-soft) px-2.5 text-[11px] font-medium text-secondary-themed transition-colors hover:bg-(--glass-surface-hover) hover:text-primary-themed sm:text-xs';
+
+  const handleSelect = (range: DateRange | undefined) => {
+    if (range?.from && range.to) {
+      onChange({ from: range.from, to: range.to });
+      setOpen(false);
+    } else if (!range) {
+      onChange(null);
+    }
+  };
+
+  const calendar = (months: number, className?: string) => (
+    <Calendar
+      mode="range"
+      numberOfMonths={months}
+      locale={calendarLocale}
+      selected={selected}
+      defaultMonth={value?.to}
+      startMonth={fromDate}
+      endMonth={toDate}
+      disabled={disabledMatchers}
+      onSelect={handleSelect}
+      className={className}
+    />
+  );
+
+  // On a phone the calendar is a bottom sheet with one large month: two months do not fit a popover that narrow.
+  if (isPhone) {
+    return (
+      <>
+        <Button variant="ghost" className={triggerClass} onClick={() => setOpen(true)}>
+          <CalendarIcon className="h-3.5 w-3.5" />
+          {label}
+        </Button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="max-sm:fixed max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-2xl gap-2 p-3 pb-6">
+            <DialogHeader>
+              <DialogTitle>{t('range_custom')}</DialogTitle>
+              <DialogDescription>{t('range_pick_hint')}</DialogDescription>
+            </DialogHeader>
+            {calendar(1, 'mx-auto w-full bg-transparent [--cell-size:2.75rem]')}
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          className="h-9 gap-1.5 rounded-xl border border-(--glass-border) bg-(--glass-surface-soft) px-2.5 text-[11px] font-medium text-secondary-themed transition-colors hover:bg-(--glass-surface-hover) hover:text-primary-themed sm:text-xs"
-        >
+        <Button variant="ghost" className={triggerClass}>
           <CalendarIcon className="h-3.5 w-3.5" />
           {label}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-auto p-2">
-        <Calendar
-          mode="range"
-          numberOfMonths={2}
-          locale={calendarLocale}
-          selected={selected}
-          defaultMonth={value?.to}
-          startMonth={fromDate}
-          endMonth={toDate}
-          disabled={disabledMatchers}
-          onSelect={(range) => {
-            if (range?.from && range.to) {
-              onChange({ from: range.from, to: range.to });
-              setOpen(false);
-            } else if (!range) {
-              onChange(null);
-            }
-          }}
-        />
+        {calendar(2)}
       </PopoverContent>
     </Popover>
   );

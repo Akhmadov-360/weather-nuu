@@ -1,9 +1,8 @@
-import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Thermometer, Droplets, Wind, Flame, Wine, CloudFog, Cloudy } from 'lucide-react';
 
+import RubberSegment from '@/components/ui/rubber-segment';
 import type { SensorType } from '@/entities/weather/model/weather.types';
-import { cn } from '@/shared/lib/cn';
 
 type ChartSelectorProps = {
   /** Tabs to offer, in order — what the current source physically has (SENSORS_BY_SOURCE). */
@@ -12,69 +11,53 @@ type ChartSelectorProps = {
   onChange: (sensor: SensorType) => void;
 };
 
-const SENSOR_ICONS: Record<SensorType, React.ReactNode> = {
-  temp:  <Thermometer className="h-4 w-4" />,
-  hum:   <Droplets    className="h-4 w-4" />,
-  press: <Wind        className="h-4 w-4" />,
-  mq5:   <Flame       className="h-4 w-4" />,
-  mq3:   <Wine        className="h-4 w-4" />,
-  pm25:  <CloudFog    className="h-4 w-4" />,
-  pm10:  <Cloudy      className="h-4 w-4" />,
+const SENSOR_ICONS: Record<SensorType, React.ElementType> = {
+  temp: Thermometer,
+  hum: Droplets,
+  press: Wind,
+  mq5: Flame,
+  mq3: Wine,
+  pm25: CloudFog,
+  pm10: Cloudy,
 };
 
+/**
+ * One tab per sensor. On phones the row scrolls sideways and shows short
+ * names; the thumb can be dragged between tabs as well as tapped.
+ */
 export function ChartSelector({ sensors, active, onChange }: ChartSelectorProps): React.JSX.Element {
   const { t } = useTranslation();
 
-  const MOBILE_LABELS: Record<SensorType, string> = {
-    temp:  t('btn_temp_short'),
-    hum:   t('btn_hum_short'),
-    press: t('btn_press_short'),
-    mq5:   t('btn_mq5_short'),
-    mq3:   t('btn_mq3_short'),
-    pm25:  t('btn_pm25_short'),
-    pm10:  t('btn_pm10_short'),
-  };
+  const items = sensors.map((sensor) => {
+    const Icon = SENSOR_ICONS[sensor];
+    return {
+      value: sensor,
+      icon: <Icon className="h-4 w-4 shrink-0" style={{ color: `var(--sensor-${sensor})` }} aria-hidden />,
+      label: (
+        <>
+          <span className="sm:hidden">{t(`btn_${sensor}_short`)}</span>
+          <span className="hidden sm:inline">{t(`btn_${sensor}`)}</span>
+        </>
+      ),
+    };
+  });
 
   return (
     <div className="relative w-full overflow-x-auto pb-1">
-      <div
-        className="flex w-max min-w-full items-center gap-1 rounded-2xl border p-1"
-        style={{ borderColor: 'var(--glass-border)', backgroundColor: 'var(--glass-surface-soft)' }}
-      >
-        {sensors.map((sensor) => {
-          const isActive = active === sensor;
-          return (
-            <button
-              key={sensor}
-              onClick={() => onChange(sensor)}
-              className={cn(
-                'relative flex min-w-[82px] flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-medium transition-all sm:min-w-[110px] sm:px-4 sm:text-sm',
-                isActive ? 'text-primary-themed' : 'text-muted-themed hover:text-secondary-themed',
-              )}
-            >
-              {isActive ? (
-                <motion.div
-                  layoutId="chart-selector-active"
-                  className="absolute inset-0 rounded-xl"
-                  style={{ backgroundColor: `color-mix(in srgb, var(--sensor-${sensor}) 14%, transparent)` }}
-                  transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-                />
-              ) : null}
-
-              <span className="relative z-10 shrink-0" style={{ color: `var(--sensor-${sensor})` }}>
-                {SENSOR_ICONS[sensor]}
-              </span>
-
-              <span className="relative z-10 whitespace-nowrap sm:hidden">
-                {MOBILE_LABELS[sensor]}
-              </span>
-              <span className="relative z-10 hidden whitespace-nowrap sm:inline">
-                {t(`btn_${sensor}`)}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      <RubberSegment
+        aria-label={t('chart_history_title')}
+        items={items}
+        value={active}
+        onChange={(next) => onChange(next as SensorType)}
+        size="lg"
+        radius={16}
+        inset={4}
+        trackColor="var(--glass-surface-soft)"
+        thumbColor="var(--control-active)"
+        textColor="var(--text-muted)"
+        activeTextColor="var(--text-primary)"
+        className="w-max min-w-full border border-(--glass-border) [&>button]:min-w-[84px] sm:[&>button]:min-w-[110px]"
+      />
     </div>
   );
 }

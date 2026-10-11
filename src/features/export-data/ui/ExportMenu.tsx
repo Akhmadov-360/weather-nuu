@@ -21,6 +21,7 @@ import {
 import type { WeatherPageType } from '@/shared/types/common';
 import type { CustomDateRange } from '@/shared/lib/date/filter-by-range';
 import { ENV } from '@/shared/config/env';
+import { ExportChip } from './ExportChip';
 import { MonthPickerDialog } from './MonthPickerDialog';
 
 type ExportMenuProps = {
@@ -73,43 +74,33 @@ export function ExportMenu({
   }
 
   /**
-   * A toast that updates in place with a running "downloaded X.X MB /
-   * Y.Y MB" indicator. `toast.promise` doesn't natively support
-   * progress, so we drive a single toast id manually: show `loading`
-   * with the current byte count, then swap to `success` / `error` on
-   * completion. The `bytes` helper hides the total-unknown case so
-   * streaming responses (no Content-Length) still get a live counter.
+   * The download is shown as a chip inside a toast with a fixed id: the same
+   * toast is updated as the file streams in, then turns into "saved" or, on
+   * failure, into a retry button that runs the whole download again.
    */
-  const runDownloadWithProgress = (
-    url: string,
-    filename: string,
-  ) => {
-    const toastId = toast.loading(t('export_toast_preparing'));
+  const runDownloadWithProgress = (url: string, filename: string) => {
+    const toastId = `export:${filename}`;
     const fmtMB = (n: number) => `${(n / 1024 / 1024).toFixed(1)} MB`;
+    const show = (status: 'running' | 'done' | 'error', progress?: string, duration = Infinity) =>
+      toast.custom(
+        () => <ExportChip status={status} filename={filename} progress={progress} onRetry={() => runDownloadWithProgress(url, filename)} />,
+        { id: toastId, duration, unstyled: true, style: { background: 'transparent', border: 'none', boxShadow: 'none', backdropFilter: 'none', width: 'fit-content', maxWidth: 'calc(100vw - 2rem)' } },
+      );
+
+    show('running', t('export_toast_preparing'));
 
     downloadExport(
       url,
       filename,
       (loaded, total, attempt) => {
-        // Past attempt 1, a retry restarts the byte count from 0 — without
-        // naming the attempt here too, the counter would just look like it
-        // randomly dropped from e.g. "14.3 MB" back to "0.1 MB", reading as
-        // corruption rather than a fresh try (the one-off `onRetry` message
-        // below gets overwritten by this same call moments later).
-        const progress = total
-          ? t('export_toast_progress_total', { loaded: fmtMB(loaded), total: fmtMB(total) })
-          : t('export_toast_progress_partial', { loaded: fmtMB(loaded) });
-        const msg = attempt > 1 ? t('export_toast_progress_attempt', { progress, attempt }) : progress;
-        toast.loading(msg, { id: toastId });
+        // A retry restarts the byte count from 0, so name the attempt: otherwise the counter would look like it dropped.
+        const progress = total ? `${fmtMB(loaded)} / ${fmtMB(total)}` : fmtMB(loaded);
+        show('running', attempt > 1 ? t('export_toast_progress_attempt', { progress, attempt }) : progress);
       },
-      (attempt, maxAttempts) => {
-        toast.loading(t('export_toast_retrying', { attempt: attempt + 1, max: maxAttempts }), {
-          id: toastId,
-        });
-      },
+      (attempt, maxAttempts) => show('running', t('export_toast_retrying', { attempt: attempt + 1, max: maxAttempts })),
     )
-      .then(() => toast.success(t('export_toast_success'), { id: toastId }))
-      .catch(() => toast.error(t('export_toast_error'), { id: toastId }));
+      .then(() => show('done', undefined, 5000))
+      .catch(() => show('error', undefined, 15000));
   };
 
   const handleDownload = (range?: CustomDateRange) => {

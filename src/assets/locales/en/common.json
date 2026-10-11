@@ -202,5 +202,14 @@
   "conn_link_desc": "The last loaded data is shown. It will refresh by itself once the connection is back.",
   "fresh_delayed": "Data received {{ago}}",
   "fresh_archive": "No data · {{ago}}",
-  "fresh_never": "No data yet"
+  "fresh_never": "No data yet",
+  "chart_empty_hint": "The sensor recorded nothing in this range. Try a longer period.",
+  "chart_empty_widen": "Show 90 days",
+  "export_chip_running": "Downloading",
+  "export_chip_done": "Saved",
+  "export_chip_error": "Failed",
+  "export_chip_failed": "could not download, tap to retry",
+  "range_pick_hint": "Pick the first and the last day of the period",
+  "export_year_all": "Whole year",
+  "export_year_clear": "Clear"
 }

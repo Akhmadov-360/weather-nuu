@@ -1,9 +1,8 @@
-import { motion } from 'framer-motion';
-import { Maximize2, Minimize2, Sigma, Thermometer } from 'lucide-react';
+import { ArrowDown, ArrowUp, type LucideIcon } from 'lucide-react';
 
 import type { MetricTone } from '@/entities/weather/model/weather-thresholds';
 import { AnimateNumber } from '@/shared/ui/animate-number';
-import { getToneTextClass } from '@/shared/lib/sensor-format';
+import { StatusText } from '@/shared/ui/status-text';
 
 export type StatCardType = 'current' | 'min' | 'max' | 'avg';
 
@@ -16,55 +15,41 @@ type SensorStatCardProps = {
   tone?: MetricTone;
 };
 
-const STAT_ICONS: Record<StatCardType, React.ElementType> = {
-  current: Thermometer,
-  min:     Minimize2,
-  max:     Maximize2,
-  avg:     Sigma,
+/** Min and max read at a glance by colour, as on the temperature card: cool for the low, warm for the high. */
+const MARK: Partial<Record<StatCardType, { Icon: LucideIcon; className: string }>> = {
+  min: { Icon: ArrowDown, className: 'text-(--status-info)' },
+  max: { Icon: ArrowUp, className: 'text-(--status-critical)' },
 };
 
-export function SensorStatCard({
-  type,
-  label,
-  value,
-  unit,
-  hint,
-  tone = 'neutral',
-}: SensorStatCardProps): React.JSX.Element {
-  const Icon = STAT_ICONS[type];
+/**
+ * One cell of the statistics strip under the chart. The cells share a single
+ * card (see SensorCharts), so there is no frame or icon here, only the label,
+ * the number and what it means.
+ */
+export function SensorStatCard({ type, label, value, unit, hint, tone = 'neutral' }: SensorStatCardProps): React.JSX.Element {
+  const mark = MARK[type];
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28 }}
-      className="border px-4 py-4"
-      style={{
-        borderRadius: '16px',
-        backgroundColor: 'var(--glass-surface-soft)',
-        borderColor: 'var(--glass-border)',
-        boxShadow: 'var(--card-shadow)',
-      }}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <div className="text-[11px] uppercase tracking-[0.22em] text-muted-themed">{label}</div>
-        <div
-          className="rounded-xl border p-2 text-secondary-themed"
-          style={{ borderColor: 'var(--glass-border)', backgroundColor: 'var(--glass-surface)' }}
-        >
-          <Icon className="h-4 w-4" />
-        </div>
-      </div>
+    <div className="flex min-w-0 flex-col bg-(--glass-surface) px-4 py-4 sm:px-5">
+      <div className="text-[11px] uppercase tracking-[0.14em] text-muted-themed">{label}</div>
 
-      <div className="mt-3 flex items-end gap-1">
-        <span className="text-3xl font-semibold tracking-tight text-primary-themed">
+      <div className="mt-2 flex items-end gap-1.5">
+        {mark ? <mark.Icon className={`mb-1 h-4 w-4 shrink-0 ${mark.className}`} strokeWidth={2.4} aria-hidden /> : null}
+        <span className="text-4xl leading-none font-semibold tracking-tight text-primary-themed [font-variant-numeric:proportional-nums]">
           {value != null ? <AnimateNumber value={value} fractionDigits={1} /> : '—'}
         </span>
-        {unit ? <span className="pb-1 text-sm text-muted-themed">{unit}</span> : null}
+        {unit ? <span className="pb-0.5 text-base text-muted-themed">{unit}</span> : null}
       </div>
 
-      <div className={`mt-2 text-sm ${getToneTextClass(tone)}`}>{hint}</div>
-    </motion.div>
+      <div className="mt-2.5">
+        {type === 'min' || type === 'max' ? (
+          <span className="text-[13px] text-muted-themed">{hint}</span>
+        ) : (
+          <StatusText tone={tone} className="text-[13px]">
+            {hint}
+          </StatusText>
+        )}
+      </div>
+    </div>
   );
 }

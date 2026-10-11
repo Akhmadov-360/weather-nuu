@@ -202,5 +202,14 @@
   "conn_link_desc": "Oxirgi yuklangan ma'lumotlar ko'rsatilmoqda. Aloqa tiklanganda o'zi yangilanadi.",
   "fresh_delayed": "Ma'lumot {{ago}} olindi",
   "fresh_archive": "Ma'lumot yo'q · {{ago}}",
-  "fresh_never": "Hozircha ma'lumot yo'q"
+  "fresh_never": "Hozircha ma'lumot yo'q",
+  "chart_empty_hint": "Bu oraliqda datchik hech narsa yozmagan. Kattaroq davrni sinab ko'ring.",
+  "chart_empty_widen": "90 kunlik ko'rinish",
+  "export_chip_running": "Yuklab olinmoqda",
+  "export_chip_done": "Saqlandi",
+  "export_chip_error": "Xatolik",
+  "export_chip_failed": "yuklab bo'lmadi, qayta urinish uchun bosing",
+  "range_pick_hint": "Davrning birinchi va oxirgi kunini tanlang",
+  "export_year_all": "Butun yil",
+  "export_year_clear": "Tanlovni olib tashlash"
 }
