@@ -211,5 +211,6 @@
   "export_chip_failed": "не удалось скачать, нажмите, чтобы повторить",
   "range_pick_hint": "Выберите первый и последний день периода",
   "export_year_all": "Весь год",
-  "export_year_clear": "Снять выбор"
+  "export_year_clear": "Снять выбор",
+  "range_reset": "Сбросить период"
 }

@@ -211,5 +211,6 @@
   "export_chip_failed": "could not download, tap to retry",
   "range_pick_hint": "Pick the first and the last day of the period",
   "export_year_all": "Whole year",
-  "export_year_clear": "Clear"
+  "export_year_clear": "Clear",
+  "range_reset": "Reset period"
 }

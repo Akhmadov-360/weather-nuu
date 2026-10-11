@@ -211,5 +211,6 @@
   "export_chip_failed": "yuklab bo'lmadi, qayta urinish uchun bosing",
   "range_pick_hint": "Davrning birinchi va oxirgi kunini tanlang",
   "export_year_all": "Butun yil",
-  "export_year_clear": "Tanlovni olib tashlash"
+  "export_year_clear": "Tanlovni olib tashlash",
+  "range_reset": "Davrni bekor qilish"
 }
