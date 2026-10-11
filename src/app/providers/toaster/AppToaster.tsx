@@ -8,7 +8,9 @@ export function AppToaster(): React.JSX.Element {
   return (
     <Toaster
       theme={resolvedTheme}
-      position="bottom-right"
+      position="top-center"
+      offset={{ top: 80 }}
+      mobileOffset={{ top: 56 }}
       richColors
       closeButton
       toastOptions={{

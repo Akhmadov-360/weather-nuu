@@ -63,7 +63,10 @@ export function DateRangePicker({
 
   const handleSelect = (range: DateRange | undefined) => {
     if (range?.from && range.to) {
-      onChange({ from: range.from, to: range.to });
+      // The calendar hands over midnight of the last day, which would cut that day off: take it to the end of the day (but not into the future).
+      const endOfDay = new Date(range.to);
+      endOfDay.setHours(23, 59, 59, 999);
+      onChange({ from: range.from, to: new Date(Math.min(endOfDay.getTime(), Date.now())) });
       setOpen(false);
     } else if (!range) {
       onChange(null);

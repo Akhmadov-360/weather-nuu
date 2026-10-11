@@ -87,11 +87,9 @@ export function useWeatherHistoryCustomRangeQuery(
 
   const rawQuery = useQuery({
     queryKey: ["weather", type, "history", "custom-raw", range?.from.toISOString(), range?.to.toISOString()],
-    queryFn: () => {
-      // Convert span to `hours` so getWeatherHistory can build `from`.
-      const hours = Math.max(1, Math.ceil(spanMs / 3_600_000));
-      return getWeatherHistory(type, { hours });
-    },
+    // Ask for exactly the chosen window. (It used to ask for "the last <span> hours", which is only right
+    // for a window that ends now: any past period came back empty after the client-side trim.)
+    queryFn: () => getWeatherHistory(type, { range: range! }),
     enabled: range !== null && mode === "raw",
     staleTime: 60_000,
   });
