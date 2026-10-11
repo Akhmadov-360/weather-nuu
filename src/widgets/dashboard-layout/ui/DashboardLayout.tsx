@@ -13,8 +13,9 @@ import { useTranslation } from 'react-i18next';
 import { AirQualityCard } from '@/widgets/weather-summary/ui/AirQualityCard';
 import { GasStrip } from '@/widgets/weather-summary/ui/GasStrip';
 import { TimeCard } from '@/widgets/time-card/ui/TimeCard';
-import { MetricCard } from '@/widgets/weather-summary/ui/MetricCard';
-import { TempHeroCard } from '@/widgets/weather-summary/ui/TempHeroCard';
+import { HumidityCard } from '@/widgets/weather-summary/ui/HumidityCard';
+import { PressureCard } from '@/widgets/weather-summary/ui/PressureCard';
+import { TemperatureCard } from '@/widgets/weather-summary/ui/TemperatureCard';
 import { ArchiveDataBanner } from './ArchiveDataBanner';
 import { SensorChartsSkeleton } from './SensorChartsSkeleton';
 import { WeatherSummarySkeleton } from './WeatherSummarySkeleton';
@@ -103,9 +104,9 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
           <div className="mt-6 flex flex-1 flex-col gap-6">
             <motion.div variants={fadeUp} initial="hidden" animate="visible" className={summaryGridClass}>
               <TimeCard history={history} freshness={freshness} now={pinnedNow} />
-              <MetricCard sensor="hum" label={t('lbl_hum')} value={latest.hum} />
-              <MetricCard sensor="press" label={t('lbl_press')} value={latest.press} />
-              <TempHeroCard source={config.key} temp={latest.temp} history={history} />
+              <HumidityCard value={latest.hum} />
+              <PressureCard value={latest.press} history={history} />
+              <TemperatureCard source={config.key} temp={latest.temp} history={history} />
               <div className="sm:col-span-2 lg:col-span-2">
                 <AirQualityCard source={config.key} history={history} dayMean={dustDayQuery.data} />
               </div>
