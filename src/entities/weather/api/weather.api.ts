@@ -41,10 +41,11 @@ const MAX_TOTAL = 2_000_000;
  */
 export async function getWeatherHistory(
   type: WeatherPageType,
-  opts?: { hours?: number },
+  opts?: { hours?: number; /** An exact window: wins over `hours`, so a past period is read from the server, not "the last N hours". */ range?: { from: Date; to: Date } },
 ): Promise<WeatherHistoryItem[]> {
   const hours = opts?.hours ?? 24;
-  const from = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+  const from = (opts?.range?.from ?? new Date(Date.now() - hours * 60 * 60 * 1000)).toISOString();
+  const to = opts?.range?.to.toISOString();
 
   const allItems: unknown[] = [];
   let cursor: string | undefined;
@@ -53,6 +54,7 @@ export async function getWeatherHistory(
     const params: Record<string, unknown> = { limit: PAGE_LIMIT };
     if (cursor) params.cursor = cursor;
     else params.from = from;
+    if (to) params.to = to;
 
     const { data } = await http.get(PATHS[type].history, { params });
 

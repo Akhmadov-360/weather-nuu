@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, X } from 'lucide-react';
 import type { DateRange, Matcher } from 'react-day-picker';
 import { ru, uz, enUS } from 'date-fns/locale';
 
@@ -63,7 +63,10 @@ export function DateRangePicker({
 
   const handleSelect = (range: DateRange | undefined) => {
     if (range?.from && range.to) {
-      onChange({ from: range.from, to: range.to });
+      // The calendar hands over midnight of the last day, which would cut that day off: take it to the end of the day (but not into the future).
+      const endOfDay = new Date(range.to);
+      endOfDay.setHours(23, 59, 59, 999);
+      onChange({ from: range.from, to: new Date(Math.min(endOfDay.getTime(), Date.now())) });
       setOpen(false);
     } else if (!range) {
       onChange(null);
@@ -85,14 +88,28 @@ export function DateRangePicker({
     />
   );
 
+  // One click back to the preset periods; the preset that was active before stays selected.
+  const reset = value ? (
+    <button
+      type="button"
+      onClick={() => onChange(null)}
+      aria-label={t('range_reset')}
+      title={t('range_reset')}
+      className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-(--glass-border) bg-(--glass-surface-soft) text-muted-themed transition-colors hover:bg-(--glass-surface-hover) hover:text-primary-themed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--status-info)"
+    >
+      <X className="h-3.5 w-3.5" aria-hidden />
+    </button>
+  ) : null;
+
   // On a phone the calendar is a bottom sheet with one large month: two months do not fit a popover that narrow.
   if (isPhone) {
     return (
-      <>
+      <div className="inline-flex items-center gap-1.5">
         <Button variant="ghost" className={triggerClass} onClick={() => setOpen(true)}>
           <CalendarIcon className="h-3.5 w-3.5" />
           {label}
         </Button>
+        {reset}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="max-sm:fixed max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-2xl gap-2 p-3 pb-6">
             <DialogHeader>
@@ -102,21 +119,24 @@ export function DateRangePicker({
             {calendar(1, 'mx-auto w-full bg-transparent [--cell-size:2.75rem]')}
           </DialogContent>
         </Dialog>
-      </>
+      </div>
     );
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" className={triggerClass}>
-          <CalendarIcon className="h-3.5 w-3.5" />
-          {label}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="end" className="w-auto p-2">
-        {calendar(2)}
-      </PopoverContent>
-    </Popover>
+    <div className="inline-flex items-center gap-1.5">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" className={triggerClass}>
+            <CalendarIcon className="h-3.5 w-3.5" />
+            {label}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-auto p-2">
+          {calendar(2)}
+        </PopoverContent>
+      </Popover>
+      {reset}
+    </div>
   );
 }
