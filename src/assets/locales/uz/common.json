@@ -166,8 +166,6 @@
   "strip_minute_partial": "ma'lumot kam",
   "strip_minute_gap": "ma'lumot yo'q",
   "fresh_live_ago": "Ma'lumot {{seconds}} soniya oldin olindi",
-  "fresh_stale_ago": "{{minutes}} daqiqadan beri ma'lumot yo'q",
-  "fresh_offline": "Stansiya bilan aloqa yo'q",
   "strip_covered_short": "{{count}}/60 daq",
   "hum_zone_dry": "quruq",
   "hum_zone_ok": "me'yor",
@@ -193,5 +191,16 @@
   "temp_min_title": "Sutkalik minimum: {{value}}°",
   "temp_max_title": "Sutkalik maksimum: {{value}}°",
   "dust_sensor_silent": "Datchik jim",
-  "dust_go_room": "«Auditoriya» sahifasiga o‘tish"
+  "dust_go_room": "«Auditoriya» sahifasiga o‘tish",
+  "age_ago_min": "{{n}} daqiqa oldin",
+  "age_ago_hour": "{{n}} soat oldin",
+  "age_ago_day": "{{n}} kun oldin",
+  "conn_silent_title": "Stansiya ma'lumot yubormayapti",
+  "conn_silent_desc": "Oxirgi o'lchov: {{time}} ({{ago}}). Kartochkalar o'sha paytdagi holatni xira ko'rsatadi.",
+  "conn_silent_never": "Stansiya hali hech narsa yubormagan.",
+  "conn_link_title": "Server bilan aloqa yo'q",
+  "conn_link_desc": "Oxirgi yuklangan ma'lumotlar ko'rsatilmoqda. Aloqa tiklanganda o'zi yangilanadi.",
+  "fresh_delayed": "Ma'lumot {{ago}} olindi",
+  "fresh_archive": "Ma'lumot yo'q · {{ago}}",
+  "fresh_never": "Hozircha ma'lumot yo'q"
 }

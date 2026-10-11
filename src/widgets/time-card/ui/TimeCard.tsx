@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { reliabilityStrip, STRIP_MINUTES } from '@/entities/weather/model/reliability';
-import type { FreshnessState } from '@/entities/weather/model/weather-freshness';
+import { splitAge } from '@/entities/weather/model/connection';
+import { useConnection } from '@/entities/weather/model/connection-context';
 import type { WeatherHistoryItem } from '@/entities/weather/model/weather.types';
 import { STATION } from '@/shared/config/station';
 import { cn } from '@/shared/lib/cn';
@@ -17,8 +18,6 @@ const MINUTE_MS = 60_000;
 
 type TimeCardProps = {
   history: WeatherHistoryItem[];
-  /** Defaults to 'live' for callers without history (the loading state). */
-  freshness?: FreshnessState;
   /** Pins the clock (development review of the sky phases); otherwise the real time. */
   now?: number;
 };
@@ -55,9 +54,11 @@ function Sky({ phase }: { phase: DayPhase | null }): React.JSX.Element {
   );
 }
 
-export function TimeCard({ history, freshness = 'live', now: pinnedNow }: TimeCardProps): React.JSX.Element {
+export function TimeCard({ history, now: pinnedNow }: TimeCardProps): React.JSX.Element {
   const { t, i18n } = useTranslation();
   const now = useNow(pinnedNow);
+  const connection = useConnection();
+  const level = connection.level;
 
   const { hours, minutes } = stationClock(now);
   const sky = useMemo(() => skyState(now, STATION.lat, STATION.lon, STATION.utcOffsetMinutes), [now]);
@@ -78,12 +79,16 @@ export function TimeCard({ history, freshness = 'live', now: pinnedNow }: TimeCa
   );
 
   const ageSeconds = lastDate ? Math.max(0, Math.round((now - Date.parse(lastDate)) / 1000)) : 0;
+  const age = connection.ageMs === null ? null : splitAge(connection.ageMs);
+  const ago = age ? t(`age_ago_${age.unit}`, { n: age.n }) : '';
   const statusText =
-    freshness === 'live'
+    level === 'live'
       ? t('fresh_live_ago', { seconds: ageSeconds })
-      : freshness === 'stale'
-        ? t('fresh_stale_ago', { minutes: Math.max(1, Math.round(ageSeconds / 60)) })
-        : t('fresh_offline');
+      : level === 'delayed'
+        ? t('fresh_delayed', { ago })
+        : age
+          ? t('fresh_archive', { ago })
+          : t('fresh_never');
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card sm:p-5">
@@ -120,16 +125,16 @@ export function TimeCard({ history, freshness = 'live', now: pinnedNow }: TimeCa
             <span
               className={cn(
                 'inline-block h-2 w-2 shrink-0 rounded-full',
-                freshness === 'live' && 'bg-status-safe motion-safe:animate-pulse',
-                freshness === 'stale' && 'bg-status-warning',
-                freshness === 'offline' && 'bg-(--text-muted)',
+                level === 'live' && 'bg-status-safe motion-safe:animate-pulse',
+                level === 'delayed' && 'bg-status-warning',
+                level === 'archive' && 'bg-(--text-muted)',
               )}
             />
             <span
               className={cn(
-                freshness === 'live' && 'text-secondary-themed',
-                freshness === 'stale' && 'text-status-warning',
-                freshness === 'offline' && 'text-muted-themed',
+                level === 'live' && 'text-secondary-themed',
+                level === 'delayed' && 'text-status-warning',
+                level === 'archive' && 'text-muted-themed',
               )}
             >
               {statusText}

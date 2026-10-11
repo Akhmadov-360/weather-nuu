@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next';
 
 import { getSensorStatus, getTempDeltaFromNorm } from '@/entities/weather/model/weather-thresholds';
 import type { WeatherHistoryItem } from '@/entities/weather/model/weather.types';
+import { useConnection } from '@/entities/weather/model/connection-context';
 import { useTheme } from '@/shared/hooks/useTheme';
 import { StatusText } from '@/shared/ui/status-text';
 import { atmosphereFor, temperatureTint, thermometerColor } from '../model/atmosphere';
+import { AgeMark } from './AgeMark';
 import { AtmosphereCanvas } from './AtmosphereCanvas';
 
 type TemperatureCardProps = {
@@ -48,6 +50,7 @@ const format = (v: number) => v.toFixed(1).replace('.', ',');
 export function TemperatureCard({ source, temp, history }: TemperatureCardProps): React.JSX.Element {
   const { t } = useTranslation();
   const { resolvedTheme } = useTheme();
+  const archive = useConnection().level === 'archive';
   const status = getSensorStatus('temp', temp);
   const delta = getTempDeltaFromNorm(temp);
   const { min, max } = useMemo(() => dayRange(temp, history), [temp, history]);
@@ -69,16 +72,16 @@ export function TemperatureCard({ source, temp, history }: TemperatureCardProps)
   return (
     <div className="relative flex h-full min-h-[250px] overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) shadow-card">
       <div
-        className="pointer-events-none absolute inset-0 transition-[background] duration-1000"
+        className="vc-live pointer-events-none absolute inset-0 transition-[background] duration-1000"
         style={{
           background: `linear-gradient(180deg, ${tint.from}, ${tint.to} 62%, transparent)`,
         }}
         aria-hidden
       />
-      <AtmosphereCanvas kind={kind} theme={resolvedTheme} />
+      {archive ? null : <AtmosphereCanvas kind={kind} theme={resolvedTheme} />}
 
       <svg
-        className="relative z-10 ml-2 mt-4 h-[212px] w-[88px] shrink-0 self-start sm:ml-3"
+        className="vc-live relative z-10 ml-2 mt-4 h-[212px] w-[88px] shrink-0 self-start sm:ml-3"
         viewBox="0 0 88 212"
         role="img"
         aria-label={`${format(temp)} °C`}
@@ -114,8 +117,8 @@ export function TemperatureCard({ source, temp, history }: TemperatureCardProps)
       </svg>
 
       <div className="relative z-10 flex min-w-0 flex-1 flex-col p-4 pl-2 sm:p-5 sm:pl-3">
-        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-themed">{t(`current_weather_${source}`)}</div>
-        <div className="mt-2 text-[44px] leading-none font-semibold tracking-tight text-primary-themed [font-variant-numeric:proportional-nums] sm:text-5xl">
+        <div className="flex flex-wrap items-baseline gap-x-2"><div className="text-[11px] uppercase tracking-[0.14em] text-muted-themed">{t(`current_weather_${source}`)}</div><AgeMark /></div>
+        <div className="vc-live mt-2 text-[44px] leading-none font-semibold tracking-tight text-primary-themed [font-variant-numeric:proportional-nums] sm:text-5xl">
           {format(temp)}
           <span className="ml-0.5 text-2xl font-normal tracking-normal text-muted-themed">°C</span>
         </div>
@@ -126,8 +129,8 @@ export function TemperatureCard({ source, temp, history }: TemperatureCardProps)
           </StatusText>
         </div>
         <div className="mt-auto pt-3 text-xs text-muted-themed">
-          {t('temp_minmax_day')}: <span className="text-secondary-themed">▾ {format(min)}°</span>{' '}
-          <span className="text-secondary-themed">▴ {format(max)}°</span>
+          {t('temp_minmax_day')}: <span className="font-medium text-(--status-info)">▾ {format(min)}°</span>{' '}
+          <span className="font-medium text-(--status-critical)">▴ {format(max)}°</span>
         </div>
       </div>
     </div>

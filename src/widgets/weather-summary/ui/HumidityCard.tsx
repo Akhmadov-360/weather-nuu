@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { getSensorStatus } from '@/entities/weather/model/weather-thresholds';
 import { StatusText } from '@/shared/ui/status-text';
+import { AgeMark } from './AgeMark';
 
 type HumidityCardProps = {
   value: number | null | undefined;
@@ -60,7 +61,7 @@ export function HumidityCard({ value }: HumidityCardProps): React.JSX.Element {
 
       {/* Water */}
       <div
-        className="absolute inset-x-0 bottom-0 transition-[height] duration-1000 ease-out motion-reduce:transition-none"
+        className="vc-live absolute inset-x-0 bottom-0 transition-[height] duration-1000 ease-out motion-reduce:transition-none"
         style={{ height: at(percent), background: 'color-mix(in srgb, var(--sensor-hum) 15%, transparent)' }}
         aria-hidden
       >
@@ -117,8 +118,8 @@ export function HumidityCard({ value }: HumidityCardProps): React.JSX.Element {
 
       {/* Text */}
       <div className="relative z-10 flex h-full flex-col p-4 sm:p-5">
-        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-themed">{t('lbl_hum')}</div>
-        <div className="mt-2 text-[44px] leading-none font-semibold tracking-tight text-primary-themed [font-variant-numeric:proportional-nums] sm:text-5xl">
+        <div className="flex flex-wrap items-baseline gap-x-2"><div className="text-[11px] uppercase tracking-[0.14em] text-muted-themed">{t('lbl_hum')}</div><AgeMark /></div>
+        <div className="vc-live mt-2 text-[44px] leading-none font-semibold tracking-tight text-primary-themed [font-variant-numeric:proportional-nums] sm:text-5xl">
           {value == null ? '—' : formatValue(value)}
           <span className="ml-1 text-base font-normal tracking-normal text-muted-themed">%</span>
         </div>

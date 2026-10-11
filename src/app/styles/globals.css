@@ -369,6 +369,19 @@ html.theme-switching *::after {
   }
 }
 
+/* Archive mode: the feed is silent, so live values are shown muted and the animation stops. */
+.vc-live {
+  transition: filter 0.6s ease, opacity 0.6s ease;
+}
+[data-conn='archive'] .vc-live {
+  filter: saturate(0.3);
+  opacity: 0.7;
+}
+[data-conn='archive'] .hum-wave-a,
+[data-conn='archive'] .hum-wave-b {
+  animation-play-state: paused;
+}
+
 @keyframes press-ripple {
   from { transform: scale(0.25); opacity: 0.45; }
   to   { transform: scale(1.05); opacity: 0; }

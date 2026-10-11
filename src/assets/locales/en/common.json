@@ -166,8 +166,6 @@
   "strip_minute_partial": "little data",
   "strip_minute_gap": "no data",
   "fresh_live_ago": "Data received {{seconds}} s ago",
-  "fresh_stale_ago": "No data for {{minutes}} min",
-  "fresh_offline": "No connection to the station",
   "strip_covered_short": "{{count}}/60 min",
   "hum_zone_dry": "dry",
   "hum_zone_ok": "normal",
@@ -193,5 +191,16 @@
   "temp_min_title": "24 h minimum: {{value}}°",
   "temp_max_title": "24 h maximum: {{value}}°",
   "dust_sensor_silent": "Sensor is silent",
-  "dust_go_room": "Go to Classroom"
+  "dust_go_room": "Go to Classroom",
+  "age_ago_min": "{{n}} min ago",
+  "age_ago_hour": "{{n}} h ago",
+  "age_ago_day": "{{n}} d ago",
+  "conn_silent_title": "The station is not sending data",
+  "conn_silent_desc": "Last reading: {{time}} ({{ago}}). The cards show the state at that moment and are muted.",
+  "conn_silent_never": "The station has not sent anything yet.",
+  "conn_link_title": "No connection to the server",
+  "conn_link_desc": "The last loaded data is shown. It will refresh by itself once the connection is back.",
+  "fresh_delayed": "Data received {{ago}}",
+  "fresh_archive": "No data · {{ago}}",
+  "fresh_never": "No data yet"
 }

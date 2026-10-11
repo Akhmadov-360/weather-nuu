@@ -166,8 +166,6 @@
   "strip_minute_partial": "данных мало",
   "strip_minute_gap": "данных нет",
   "fresh_live_ago": "Данные получены {{seconds}} с назад",
-  "fresh_stale_ago": "Данных нет {{minutes}} мин",
-  "fresh_offline": "Нет связи со станцией",
   "strip_covered_short": "{{count}}/60 мин",
   "hum_zone_dry": "сухо",
   "hum_zone_ok": "норма",
@@ -193,5 +191,16 @@
   "temp_min_title": "Минимум за сутки: {{value}}°",
   "temp_max_title": "Максимум за сутки: {{value}}°",
   "dust_sensor_silent": "Датчик молчит",
-  "dust_go_room": "Перейти в «Аудитория»"
+  "dust_go_room": "Перейти в «Аудитория»",
+  "age_ago_min": "{{n}} мин назад",
+  "age_ago_hour": "{{n}} ч назад",
+  "age_ago_day": "{{n}} дн назад",
+  "conn_silent_title": "Станция не передаёт данные",
+  "conn_silent_desc": "Последний замер: {{time}} ({{ago}}). Карточки показывают состояние на тот момент и приглушены.",
+  "conn_silent_never": "Станция пока ничего не передавала.",
+  "conn_link_title": "Нет связи с сервером",
+  "conn_link_desc": "Показаны последние загруженные данные. Они обновятся сами, когда связь появится.",
+  "fresh_delayed": "Данные получены {{ago}}",
+  "fresh_archive": "Нет данных · {{ago}}",
+  "fresh_never": "Данных пока нет"
 }

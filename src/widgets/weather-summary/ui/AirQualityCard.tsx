@@ -1,4 +1,4 @@
-import { ArrowRight, CloudFog, WifiOff } from 'lucide-react';
+import { ArrowRight, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
@@ -15,7 +15,9 @@ import {
   type CategoryId,
 } from '@/shared/lib/air-quality';
 import { ROUTES } from '@/shared/config/routes';
+import { useConnection } from '@/entities/weather/model/connection-context';
 import { AnimateNumber } from '@/shared/ui/animate-number';
+import { AgeMark } from './AgeMark';
 import { DustField, NoSensorArt, SettledDust, SilentLens } from './DustVisuals';
 
 type AirQualityCardProps = {
@@ -53,11 +55,9 @@ function Shell({ art, children }: { art?: React.ReactNode; children: React.React
 
 function CardHeader({ label }: { label: string }): React.JSX.Element {
   return (
-    <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0 text-[10px] uppercase tracking-[0.2em] text-muted-themed sm:text-[11px]">{label}</div>
-      <div className="shrink-0 rounded-xl border border-(--glass-border) bg-(--glass-surface) p-2 text-secondary-themed">
-        <CloudFog className="h-4 w-4" />
-      </div>
+    <div className="flex flex-wrap items-baseline gap-x-2">
+      <div className="min-w-0 text-[11px] uppercase tracking-[0.14em] text-muted-themed">{label}</div>
+      <AgeMark />
     </div>
   );
 }
@@ -65,7 +65,7 @@ function CardHeader({ label }: { label: string }): React.JSX.Element {
 function CategoryBadge({ category, label }: { category: CategoryId; label: string }): React.JSX.Element {
   return (
     <span
-      className="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium tracking-wide"
+      className="inline-flex items-center rounded-full border px-3 py-1 text-[13px] font-medium tracking-wide"
       style={{
         color: text(category),
         borderColor: `color-mix(in srgb, ${fill(category)} 40%, transparent)`,
@@ -84,7 +84,7 @@ function formatMean(value: number): string {
 function SecondaryLine({ name, reading }: { name: string; reading: DustReading }): React.JSX.Element {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-wrap items-baseline gap-x-1.5 text-xs text-secondary-themed">
+    <div className="flex flex-wrap items-baseline gap-x-1.5 text-[13px] text-secondary-themed">
       <span className="text-muted-themed">{name}</span>
       <span className="font-medium text-primary-themed">{formatMean(reading.mean)}</span>
       <span className="text-muted-themed">{t('unit_ugm3')}</span>
@@ -99,6 +99,7 @@ function SecondaryLine({ name, reading }: { name: string; reading: DustReading }
 
 export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps): React.JSX.Element {
   const { t, i18n } = useTranslation();
+  const archive = useConnection().level === 'archive';
   const model = buildDustCardModel({ source, history, dayMean });
   const label = t('lbl_pm25');
 
@@ -154,20 +155,20 @@ export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps
   const category = pm25.category;
 
   return (
-    <Shell art={<DustField pm25={pm25.mean} pm10={pm10?.mean ?? null} colorVar={category ? categoryCssVar(category) : '--status-info'} />}>
+    <Shell art={archive ? <SettledDust /> : <DustField pm25={pm25.mean} pm10={pm10?.mean ?? null} colorVar={category ? categoryTextCssVar(category) : '--status-info'} />}>
       <CardHeader label={label} />
 
-      <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
+      <div className="vc-live mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
         <div className="flex items-end gap-1.5">
-          <span className="text-3xl font-semibold tracking-tight text-primary-themed sm:text-4xl">
+          <span className="text-[44px] leading-none font-semibold tracking-tight text-primary-themed [font-variant-numeric:proportional-nums] sm:text-5xl">
             <AnimateNumber value={pm25.mean} fractionDigits={1} />
           </span>
-          <span className="pb-1 text-xs text-muted-themed">{t('unit_ugm3')}</span>
+          <span className="pb-1 text-base text-muted-themed">{t('unit_ugm3')}</span>
         </div>
         {pm25.aqi != null ? (
-          <div className="pb-1 text-sm text-secondary-themed">
+          <div className="pb-1 text-base text-secondary-themed">
             <span className="text-muted-themed">{t('aqi_label')}</span>{' '}
-            <span className="text-lg font-semibold text-primary-themed">{pm25.aqi}</span>
+            <span className="text-2xl font-semibold text-primary-themed">{pm25.aqi}</span>
           </div>
         ) : null}
         {category ? (
@@ -176,9 +177,9 @@ export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps
           </div>
         ) : null}
       </div>
-      <div className="mt-1 text-[11px] text-muted-themed">{t('dust_avg_10m')}</div>
+      <div className="mt-1.5 text-xs text-muted-themed">{t('dust_avg_10m')}</div>
 
-      <div className="mt-4">
+      <div className="vc-live mt-4">
         <Slider
           value={[Math.min(Math.max(pm25.mean, 0), BAR_MAX)]}
           min={0}
@@ -202,12 +203,12 @@ export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps
         {day ? (
           <SecondaryLine name={`PM2.5 · ${t('dust_avg_24h')}`} reading={day} />
         ) : (
-          <div className="text-xs text-muted-themed">PM2.5 · {t('dust_insufficient_24h')}</div>
+          <div className="text-[13px] text-muted-themed">PM2.5 · {t('dust_insufficient_24h')}</div>
         )}
       </div>
 
       {WHO_PM25_DAILY != null ? (
-        <div className="mt-3 text-[11px] text-muted-themed">{t('dust_who_guideline', { value: WHO_PM25_DAILY })}</div>
+        <div className="mt-3 text-xs text-muted-themed">{t('dust_who_guideline', { value: WHO_PM25_DAILY })}</div>
       ) : null}
     </Shell>
   );
