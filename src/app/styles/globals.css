@@ -382,6 +382,21 @@ html.theme-switching *::after {
   animation-play-state: paused;
 }
 
+/* Loading skeleton of the chart: the dashed line crawls along its path. */
+@keyframes chart-skeleton-crawl {
+  to {
+    stroke-dashoffset: -44;
+  }
+}
+.chart-skeleton-line {
+  animation: chart-skeleton-crawl 1.6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chart-skeleton-line {
+    animation: none;
+  }
+}
+
 @keyframes press-ripple {
   from { transform: scale(0.25); opacity: 0.45; }
   to   { transform: scale(1.05); opacity: 0; }

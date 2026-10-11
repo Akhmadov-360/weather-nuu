@@ -31,6 +31,7 @@ import { getChartTheme, getSensorColor } from "@/shared/lib/chart/chart-colors";
 import { echarts } from "../lib/echarts-core";
 import { buildChartOption, type ChartMode } from "../model/chart-option";
 import { aggregateSeries, rawSeries, summarize } from "../model/chart-series";
+import { ChartEmpty, ChartLoading } from "./ChartPlaceholder";
 import { SensorStatCard } from "./SensorStatCard";
 
 type SensorChartsProps = {
@@ -254,25 +255,18 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
           transition should feel like the chart is being replaced in-place,
           not like the whole panel is resizing. */}
       {isRangeLoading ? (
-        <motion.div
-          key="loading"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="flex min-h-[220px] w-full flex-1 items-center justify-center text-sm text-muted-themed sm:min-h-[300px] lg:min-h-[360px]"
-        >
-          {t("chart_loading")}
-        </motion.div>
+        <ChartLoading />
       ) : seriesData.length === 0 ? (
-        <motion.div
-          key="empty"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="flex min-h-[220px] w-full flex-1 items-center justify-center text-sm text-muted-themed sm:min-h-[300px] lg:min-h-[360px]"
-        >
-          {t("no_data_for_range")}
-        </motion.div>
+        <ChartEmpty
+          onWiden={
+            customRange || activeRange !== "90d"
+              ? () => {
+                  setCustomRange(null);
+                  setActiveRange("90d");
+                }
+              : undefined
+          }
+        />
       ) : (
         <motion.div
           initial={{ opacity: 0 }}
@@ -305,7 +299,7 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
       )}
 
       {/* Stat-карточки */}
-      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-(--glass-border) bg-(--glass-border) lg:grid-cols-4">
         <SensorStatCard
           type="current"
           label={t("stat_current")}

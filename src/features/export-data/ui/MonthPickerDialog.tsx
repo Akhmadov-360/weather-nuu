@@ -102,6 +102,19 @@ export function MonthPickerDialog({
       .map(([year, months]) => ({ year, months }));
   }, [earliest]);
 
+  const toggleYear = (months: { tag: string; enabled: boolean }[]) => {
+    const tags = months.filter((m) => m.enabled).map((m) => m.tag);
+    setSelected((prev) => {
+      const next = new Set(prev);
+      const all = tags.every((tag) => next.has(tag));
+      for (const tag of tags) {
+        if (all) next.delete(tag);
+        else next.add(tag);
+      }
+      return next;
+    });
+  };
+
   const toggle = (tag: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -125,7 +138,7 @@ export function MonthPickerDialog({
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent className="flex max-h-[85vh] w-full max-w-lg flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
+      <DialogContent className="flex max-h-[85vh] w-full max-w-lg flex-col gap-0 overflow-hidden p-0 sm:max-w-lg max-sm:fixed max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-2xl">
         <DialogHeader className="gap-1 border-b px-5 py-4">
           <DialogTitle>{t('export_pick_months_title')}</DialogTitle>
           <DialogDescription>{t('export_pick_months_hint')}</DialogDescription>
@@ -134,9 +147,16 @@ export function MonthPickerDialog({
         <div className="max-h-[45vh] overflow-y-auto px-5 py-3">
           {groupedByYear.map((group) => (
             <section key={group.year} className="mb-5 last:mb-0">
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                {group.year}
-              </h3>
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{group.year}</h3>
+                <button
+                  type="button"
+                  onClick={() => toggleYear(group.months)}
+                  className="rounded-md px-2 py-1 text-xs font-medium text-status-info transition-colors hover:bg-status-info/10"
+                >
+                  {group.months.filter((m) => m.enabled).every((m) => selected.has(m.tag)) ? t('export_year_clear') : t('export_year_all')}
+                </button>
+              </div>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {group.months.map(({ tag, enabled }) => {
                   const checked = selected.has(tag);
@@ -147,7 +167,7 @@ export function MonthPickerDialog({
                       disabled={!enabled}
                       onClick={() => toggle(tag)}
                       className={cn(
-                        'flex items-center justify-center rounded-lg border px-2 py-2 text-xs font-medium transition-colors',
+                        'flex items-center justify-center rounded-lg border px-2 py-3 text-sm font-medium transition-colors sm:py-2 sm:text-xs',
                         enabled ? 'cursor-pointer' : 'cursor-not-allowed opacity-40',
                         checked
                           ? 'border-status-info bg-status-info/15 text-foreground'
@@ -163,7 +183,7 @@ export function MonthPickerDialog({
           ))}
         </div>
 
-        <div className="border-t px-5 py-4">
+        <div className="border-t px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <div className="mb-4">
             <span className="mb-2 block text-xs font-medium text-muted-foreground">
               {t('export_format')}
