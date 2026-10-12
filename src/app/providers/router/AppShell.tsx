@@ -16,6 +16,7 @@ import { AtmosphereProvider } from '@/features/atmosphere-settings/model/atmosph
 import { useAtmosphere } from '@/features/atmosphere-settings/model/use-atmosphere';
 import { TopBar } from '@/widgets/topbar/ui/TopBar';
 
+const GlassShader = lazy(() => import('@/shared/ui/atmosphere/GlassShader'));
 const GREETING_KEY = 'atmosphere-greetings';
 const AtmosphereStage = lazy(() => import('@/shared/ui/atmosphere/AtmosphereStage'));
 
@@ -47,6 +48,9 @@ export function AppShell(): React.JSX.Element {
     [dropForSession, setUserChoice, t, userChoice],
   );
   const layers = useMemo(() => scene?.layers ?? [], [scene]);
+  // Rain on the glass: the full level, on a desktop, when real rain falls (never for the classroom's seasonal scene).
+  const rain = layers.find((l) => l.kind === 'rain');
+  const showGlass = level === 'full' && !isPhone && Boolean(rain) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // A holiday greeting shows once a day per event (it is counted as seen the moment it appears); confetti only on the full level.
   const [greeting, setGreeting] = useState<EventId | null>(null);
@@ -81,6 +85,11 @@ export function AppShell(): React.JSX.Element {
     <div className="relative min-h-screen overflow-hidden text-primary-themed">
       <div className="dash-bg absolute inset-0" />
       {scene ? <AtmosphereSky cloud={scene.sky.cloud} /> : null}
+      {showGlass && rain ? (
+        <Suspense fallback={null}>
+          <GlassShader amount={Math.min(1, 0.25 + rain.intensity * 0.6)} dark={resolvedTheme === 'dark'} />
+        </Suspense>
+      ) : null}
       {scene && level === 'full' ? (
         <Suspense fallback={null}>
           <AtmosphereStage layers={layers} budget={particleBudget(level, isPhone)} dark={resolvedTheme === 'dark'} lights={scene.lights} onFrame={onFrame} />
