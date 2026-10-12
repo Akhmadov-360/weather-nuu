@@ -15,7 +15,8 @@ export type EngineOptions = {
 type FallingKind = 'snow' | 'rain' | 'hail' | 'petals' | 'leaves' | 'motes';
 const FALLING: readonly FallingKind[] = ['snow', 'rain', 'hail', 'petals', 'leaves', 'motes'];
 
-type Particle = { kind: FallingKind; x: number; y: number; vx: number; vy: number; r: number; ph: number; rot: number; bounced: boolean };
+/** depth: 0 far, 1 middle, 2 near (snow only; the rest stay in the middle). */
+type Particle = { kind: FallingKind; depth: number; x: number; y: number; vx: number; vy: number; r: number; ph: number; rot: number; bounced: boolean };
 type Rest = { id: number; dx: number; kind: 'petals' | 'leaves'; age: number; life: number; r: number; rot: number };
 type Splash = { x: number; y: number; vx: number; vy: number; age: number };
 type Ring = { x: number; y: number; age: number };
@@ -42,6 +43,9 @@ const SKY_HEIGHT = 260;
  */
 export class AtmosphereEngine {
   private ctx: CanvasRenderingContext2D;
+  private dctx: CanvasRenderingContext2D;
+  private lastDecor = 0;
+  private decorDpr = 1;
   private w = 0;
   private h = 0;
   private dpr = 1;
@@ -59,10 +63,16 @@ export class AtmosphereEngine {
   private stars: { x: number; y: number; ph: number }[] = [];
   private observer: ResizeObserver;
 
-  constructor(private canvas: HTMLCanvasElement, private opts: EngineOptions) {
+  /**
+   * `canvas` is fixed to the window (falling particles, sky, flashes); `decor` lies in the document and
+   * scrolls with it (garlands, snow caps, frost, petals at rest), so it is always exactly on the cards.
+   */
+  constructor(private canvas: HTMLCanvasElement, private decor: HTMLCanvasElement, private opts: EngineOptions) {
     this.ctx = canvas.getContext('2d')!;
+    this.dctx = decor.getContext('2d')!;
     this.observer = new ResizeObserver(() => this.resize());
     this.observer.observe(canvas);
+    this.observer.observe(decor);
     this.resize();
   }
 
@@ -91,6 +101,7 @@ export class AtmosphereEngine {
     this.stop();
     this.observer.disconnect();
     this.ctx.clearRect(0, 0, this.w, this.h);
+    this.dctx.clearRect(0, 0, this.decor.width, this.decor.height);
   }
 
   private resize(): void {
@@ -100,6 +111,10 @@ export class AtmosphereEngine {
     this.canvas.width = Math.round(this.w * this.dpr);
     this.canvas.height = Math.round(this.h * this.dpr);
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    this.decorDpr = Math.min(1.5, window.devicePixelRatio || 1);
+    this.decor.width = Math.round(this.decor.clientWidth * this.decorDpr);
+    this.decor.height = Math.round(this.decor.clientHeight * this.decorDpr);
+    this.dctx.setTransform(this.decorDpr, 0, 0, this.decorDpr, 0, 0);
     this.stars = Array.from({ length: 36 }, () => ({ x: Math.random() * this.w, y: Math.random() * SKY_HEIGHT, ph: Math.random() * 6 }));
   }
 
@@ -135,10 +150,18 @@ export class AtmosphereEngine {
 
   private spawn(kind: FallingKind, anywhere: boolean): Particle {
     const rnd = (a: number, b: number) => a + Math.random() * (b - a);
-    const base = { kind, x: Math.random() * this.w, y: anywhere ? Math.random() * this.h : -10, ph: Math.random() * 6, rot: Math.random() * 6, bounced: false };
+    const base = { kind, depth: 1, x: Math.random() * this.w, y: anywhere ? Math.random() * this.h : -10, ph: Math.random() * 6, rot: Math.random() * 6, bounced: false };
     switch (kind) {
-      case 'snow':
-        return { ...base, vx: 0, vy: rnd(28, 55), r: rnd(1.2, 3) };
+      case 'snow': {
+        // Three planes give the scene depth: far flakes small, slow and faint, near ones large, fast and soft.
+        const pick = Math.random();
+        const depth = pick < 0.45 ? 0 : pick < 0.85 ? 1 : 2;
+        return depth === 0
+          ? { ...base, depth, vx: 0, vy: rnd(18, 32), r: rnd(0.9, 1.4) }
+          : depth === 1
+            ? { ...base, depth, vx: 0, vy: rnd(30, 52), r: rnd(1.6, 2.4) }
+            : { ...base, depth, vx: 0, vy: rnd(70, 110), r: rnd(3.4, 5) };
+      }
       case 'rain':
         return { ...base, vx: 0, vy: rnd(520, 720), r: rnd(0.8, 1.2) };
       case 'hail':
@@ -150,6 +173,25 @@ export class AtmosphereEngine {
       default:
         return { ...base, y: anywhere ? Math.random() * this.h : this.h + 6, vx: 0, vy: -rnd(3, 9), r: rnd(0.8, 1.8) };
     }
+  }
+
+  private flake: { dark: boolean; canvas: HTMLCanvasElement } | null = null;
+
+  /** A pre-blurred flake for the near plane: one gradient drawn once, then only scaled copies (cheap, unlike a blur filter per flake). */
+  private softFlake(): HTMLCanvasElement {
+    if (this.flake && this.flake.dark === this.opts.dark) return this.flake.canvas;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 48;
+    const g = canvas.getContext('2d')!;
+    const grad = g.createRadialGradient(24, 24, 0, 24, 24, 24);
+    const tint = this.opts.dark ? '238,241,250' : '110,140,185';
+    grad.addColorStop(0, `rgba(${tint},0.95)`);
+    grad.addColorStop(0.45, `rgba(${tint},0.5)`);
+    grad.addColorStop(1, `rgba(${tint},0)`);
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 48, 48);
+    this.flake = { dark: this.opts.dark, canvas };
+    return canvas;
   }
 
   private capFor(surface: Surface): SnowCap {
@@ -170,6 +212,11 @@ export class AtmosphereEngine {
     this.opts.onFrame?.(frameMs);
     this.update(dt);
     this.draw();
+    // The decor changes slowly (twinkle, growing caps): about 20 frames a second is plenty and keeps the big canvas cheap.
+    if (now - this.lastDecor > 48) {
+      this.lastDecor = now;
+      this.drawDecor();
+    }
     this.frame = requestAnimationFrame(this.tick);
   };
 
@@ -181,7 +228,7 @@ export class AtmosphereEngine {
     for (const p of this.particles) {
       const prev = { x: p.x, y: p.y };
       p.ph += dt;
-      const sway = p.kind === 'snow' ? 14 : p.kind === 'petals' ? 26 : p.kind === 'leaves' ? 36 : p.kind === 'motes' ? 6 : 0;
+      const sway = p.kind === 'snow' ? [8, 14, 20][p.depth]! : p.kind === 'petals' ? 26 : p.kind === 'leaves' ? 36 : p.kind === 'motes' ? 6 : 0;
       const slant = p.kind === 'rain' || p.kind === 'hail' ? wind * 1.6 : wind * 0.7;
       p.x += (slant + Math.sin(p.ph * 1.4) * sway) * dt;
       p.y += p.vy * dt;
@@ -226,7 +273,8 @@ export class AtmosphereEngine {
   private land(p: Particle, surface: Surface, x: number): void {
     switch (p.kind) {
       case 'snow':
-        growCap(this.capFor(surface), x - surface.x, 0.35);
+        // Near flakes only pass in front of the page; the rest settle on the card edge.
+        if (p.depth < 2) growCap(this.capFor(surface), x - surface.x, p.depth === 0 ? 0.15 : 0.35);
         Object.assign(p, this.spawn('snow', false));
         break;
       case 'rain':
@@ -254,7 +302,6 @@ export class AtmosphereEngine {
   private draw(): void {
     const { ctx, w, h } = this;
     const c = COLOURS[this.opts.dark ? 'dark' : 'light'];
-    const surfaces = this.opts.getSurfaces();
     ctx.clearRect(0, 0, w, h);
 
     this.drawSky(c);
@@ -263,7 +310,13 @@ export class AtmosphereEngine {
       switch (p.kind) {
         case 'snow':
         case 'motes':
-          ctx.globalAlpha = p.kind === 'motes' ? 0.55 : 0.9;
+          if (p.kind === 'snow' && p.depth === 2) {
+            const sprite = this.softFlake();
+            ctx.globalAlpha = 0.5;
+            ctx.drawImage(sprite, p.x - p.r * 1.6, p.y - p.r * 1.6, p.r * 3.2, p.r * 3.2);
+            break;
+          }
+          ctx.globalAlpha = p.kind === 'motes' ? 0.55 : p.depth === 0 ? 0.4 : 0.9;
           ctx.fillStyle = p.kind === 'snow' ? c.snow : c.mote;
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -287,24 +340,11 @@ export class AtmosphereEngine {
           break;
         case 'petals':
         case 'leaves':
-          this.drawLeaf(p.x, p.y, p.r, p.rot, p.kind === 'petals' ? c.petal : c.leaf, 0.85);
+          this.drawLeaf(ctx, p.x, p.y, p.r, p.rot, p.kind === 'petals' ? c.petal : c.leaf, 0.85);
           break;
       }
     }
     ctx.globalAlpha = 1;
-
-    const tops = new Map(surfaces.map((s) => [s.id ?? 0, s]));
-    for (const r of this.rests) {
-      const s = tops.get(r.id);
-      if (!s) continue;
-      const fade = Math.min(1, (r.life - r.age) / 1);
-      this.drawLeaf(s.x + r.dx, s.top - r.r * 0.5, r.r, r.rot, r.kind === 'petals' ? c.petal : c.leaf, 0.85 * fade);
-    }
-
-    for (const s of surfaces) {
-      const cap = this.caps.get(s.id ?? 0);
-      if (cap) this.drawCap(cap, s, c);
-    }
 
     ctx.fillStyle = c.rain;
     for (const sp of this.splashes) {
@@ -321,16 +361,38 @@ export class AtmosphereEngine {
     }
     ctx.globalAlpha = 1;
 
-    if (this.layer('frost')) this.drawFrost(surfaces, c.frost);
-    if (this.opts.lights) this.drawLights(surfaces, c.glow);
     if (this.flash > 0) {
       ctx.fillStyle = `rgba(255,255,255,${0.28 * this.flash})`;
       ctx.fillRect(0, 0, w, h);
     }
   }
 
-  private drawLeaf(x: number, y: number, r: number, rot: number, colour: string, alpha: number): void {
-    const { ctx } = this;
+  /** Everything that sits on the cards, drawn in page coordinates on the canvas that scrolls with the document. */
+  private drawDecor(): void {
+    const { dctx: ctx } = this;
+    const c = COLOURS[this.opts.dark ? 'dark' : 'light'];
+    ctx.clearRect(0, 0, this.decor.clientWidth, this.decor.clientHeight);
+    const surfaces = this.opts.getSurfaces()
+      .filter((s) => s.pageTop !== undefined)
+      .map((s) => ({ ...s, top: s.pageTop! }));
+    if (surfaces.length === 0) return;
+
+    const byId = new Map(surfaces.map((s) => [s.id ?? 0, s]));
+    for (const r of this.rests) {
+      const s = byId.get(r.id);
+      if (!s) continue;
+      const fade = Math.min(1, (r.life - r.age) / 1);
+      this.drawLeaf(ctx, s.x + r.dx, s.top - r.r * 0.5, r.r, r.rot, r.kind === 'petals' ? c.petal : c.leaf, 0.85 * fade);
+    }
+    for (const s of surfaces) {
+      const cap = this.caps.get(s.id ?? 0);
+      if (cap) this.drawCap(ctx, cap, s, c);
+    }
+    if (this.layer('frost')) this.drawFrost(ctx, surfaces, c.frost);
+    if (this.opts.lights) this.drawLights(ctx, surfaces, c.glow);
+  }
+
+  private drawLeaf(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rot: number, colour: string, alpha: number): void {
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.translate(x, y);
@@ -343,8 +405,7 @@ export class AtmosphereEngine {
     ctx.restore();
   }
 
-  private drawCap(cap: SnowCap, s: Surface, c: Palette): void {
-    const { ctx } = this;
+  private drawCap(ctx: CanvasRenderingContext2D, cap: SnowCap, s: Surface, c: Palette): void {
     if (!cap.heights.some((v) => v > 0.05)) return;
     const step = s.width / cap.heights.length;
     ctx.beginPath();
@@ -422,8 +483,7 @@ export class AtmosphereEngine {
     ctx.globalAlpha = 1;
   }
 
-  private drawFrost(surfaces: Surface[], colour: string): void {
-    const { ctx } = this;
+  private drawFrost(ctx: CanvasRenderingContext2D, surfaces: Surface[], colour: string): void {
     ctx.strokeStyle = colour;
     ctx.lineWidth = 1;
     ctx.globalAlpha = 0.7;
@@ -439,8 +499,7 @@ export class AtmosphereEngine {
     ctx.globalAlpha = 1;
   }
 
-  private drawLights(surfaces: Surface[], glow: string): void {
-    const { ctx } = this;
+  private drawLights(ctx: CanvasRenderingContext2D, surfaces: Surface[], glow: string): void {
     for (const s of surfaces) {
       ctx.strokeStyle = this.opts.dark ? 'rgba(200,210,235,0.5)' : 'rgba(90,100,130,0.5)';
       ctx.lineWidth = 1;

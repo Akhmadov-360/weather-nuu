@@ -19,15 +19,17 @@ type AtmosphereStageProps = {
  */
 export default function AtmosphereStage({ layers, budget, dark, lights, onFrame }: AtmosphereStageProps): React.JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const decorRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<AtmosphereEngine | null>(null);
   const onFrameRef = useRef(onFrame);
   onFrameRef.current = onFrame;
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const decor = decorRef.current;
+    if (!canvas || !decor) return;
     const surfaces = trackSurfaces();
-    const engine = new AtmosphereEngine(canvas, {
+    const engine = new AtmosphereEngine(canvas, decor, {
       budget,
       dark,
       lights,
@@ -57,5 +59,12 @@ export default function AtmosphereStage({ layers, budget, dark, lights, onFrame 
     engineRef.current?.setLayers(layers);
   }, [layers]);
 
-  return <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-40 h-full w-full" aria-hidden />;
+  return (
+    <>
+      {/* In the document: scrolls natively with the cards, so what hangs on their edges never lags. */}
+      <canvas ref={decorRef} className="pointer-events-none absolute inset-0 z-20 h-full w-full" aria-hidden />
+      {/* Fixed to the window: falling particles, sky effects, lightning. */}
+      <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-40 h-full w-full" aria-hidden />
+    </>
+  );
 }
