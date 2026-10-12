@@ -9,8 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 
 type MonthPickerDialogProps = {
   open: boolean;
@@ -63,6 +65,7 @@ export function MonthPickerDialog({
   onConfirm,
 }: MonthPickerDialogProps): React.JSX.Element {
   const { t } = useTranslation();
+  const isPhone = useMediaQuery('(max-width: 639px)');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [format, setFormat] = useState<'csv' | 'xlsx'>('xlsx');
 
@@ -136,15 +139,19 @@ export function MonthPickerDialog({
     onClose();
   };
 
-  return (
-    <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent className="flex max-h-[85vh] w-full max-w-lg flex-col gap-0 overflow-hidden p-0 sm:max-w-lg max-sm:fixed max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-2xl">
-        <DialogHeader className="gap-1 border-b px-5 py-4">
-          <DialogTitle>{t('export_pick_months_title')}</DialogTitle>
-          <DialogDescription>{t('export_pick_months_hint')}</DialogDescription>
-        </DialogHeader>
+  const Header = isPhone ? DrawerHeader : DialogHeader;
+  const Title = isPhone ? DrawerTitle : DialogTitle;
+  const Description = isPhone ? DrawerDescription : DialogDescription;
+  const Footer = DialogFooter;
 
-        <div className="max-h-[45vh] overflow-y-auto px-5 py-3">
+  const content = (
+    <>
+        <Header className="gap-1 border-b px-5 py-4">
+          <Title>{t('export_pick_months_title')}</Title>
+          <Description>{t('export_pick_months_hint')}</Description>
+        </Header>
+
+        <div className="max-h-[45vh] overflow-y-auto px-5 py-3 max-sm:max-h-[55vh]">
           {groupedByYear.map((group) => (
             <section key={group.year} className="mb-5 last:mb-0">
               <div className="mb-2 flex items-center justify-between">
@@ -206,7 +213,7 @@ export function MonthPickerDialog({
             </RadioGroup>
           </div>
 
-          <DialogFooter className="mx-0 mb-0 flex-row items-center justify-between gap-2 rounded-none border-t-0 bg-transparent p-0 sm:flex-row sm:justify-between">
+          <Footer className="mx-0 mb-0 flex-row items-center justify-between gap-2 rounded-none border-t-0 bg-transparent p-0 sm:flex-row sm:justify-between">
             <span className="text-xs text-muted-foreground">
               {selected.size === 0
                 ? t('export_pick_months_none')
@@ -220,8 +227,24 @@ export function MonthPickerDialog({
                 {t('export_download')}
               </Button>
             </div>
-          </DialogFooter>
+          </Footer>
         </div>
+    </>
+  );
+
+  // On a phone the picker is a bottom drawer (drag down to close); elsewhere a dialog.
+  if (isPhone) {
+    return (
+      <Drawer open={open} onOpenChange={(next) => !next && onClose()}>
+        <DrawerContent className="flex max-h-[88vh] flex-col gap-0 overflow-hidden p-0">{content}</DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
+      <DialogContent className="flex max-h-[85vh] w-full max-w-lg flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
+        {content}
       </DialogContent>
     </Dialog>
   );

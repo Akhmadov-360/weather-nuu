@@ -2,7 +2,7 @@ import NumberFlow from '@number-flow/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { reliabilityStrip, STRIP_MINUTES } from '@/entities/weather/model/reliability';
+import { reliabilityStrip, STRIP_MINUTES, type Bucket } from '@/entities/weather/model/reliability';
 import { splitAge } from '@/entities/weather/model/connection';
 import { useConnection } from '@/entities/weather/model/connection-context';
 import type { WeatherHistoryItem } from '@/entities/weather/model/weather.types';
@@ -19,6 +19,8 @@ const MINUTE_MS = 60_000;
 
 type TimeCardProps = {
   history: WeatherHistoryItem[];
+  /** The day of history is still arriving: the strip shows a placeholder instead of an empty hour. */
+  historyLoading?: boolean;
   /** Pins the clock (development review of the sky phases); otherwise the real time. */
   now?: number;
 };
@@ -56,7 +58,7 @@ function Sky({ phase }: { phase: DayPhase | null }): React.JSX.Element {
   );
 }
 
-export function TimeCard({ history, now: pinnedNow }: TimeCardProps): React.JSX.Element {
+export function TimeCard({ history, historyLoading = false, now: pinnedNow }: TimeCardProps): React.JSX.Element {
   const { t, i18n } = useTranslation();
   const now = useNow(pinnedNow);
   const connection = useConnection();
@@ -71,9 +73,9 @@ export function TimeCard({ history, now: pinnedNow }: TimeCardProps): React.JSX.
   const minuteKey = Math.floor(now / MINUTE_MS);
   const lastDate = history[history.length - 1]?.date;
   const strip = useMemo(
-    () => reliabilityStrip(history, now),
+    () => (historyLoading ? { buckets: new Array<Bucket>(STRIP_MINUTES).fill('gap'), covered: 0 } : reliabilityStrip(history, now)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [history, minuteKey, Math.floor(now / 10_000)],
+    [history, historyLoading, minuteKey, Math.floor(now / 10_000)],
   );
   const minuteLabels = useMemo(
     () => Array.from({ length: STRIP_MINUTES }, (_, i) => formatStationTime((minuteKey - (STRIP_MINUTES - 1 - i)) * MINUTE_MS)),
@@ -142,7 +144,7 @@ export function TimeCard({ history, now: pinnedNow }: TimeCardProps): React.JSX.
               {statusText}
             </span>
             <span className="ml-auto text-muted-themed" title={t('strip_covered', { count: strip.covered })}>
-              {t('strip_covered_short', { count: strip.covered })}
+              {historyLoading ? '…' : t('strip_covered_short', { count: strip.covered })}
             </span>
           </div>
           <ReliabilityStrip

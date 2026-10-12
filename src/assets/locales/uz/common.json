@@ -230,5 +230,8 @@
   "greeting_teachers": "Ustoz va murabbiylar kuni muborak bo‘lsin!",
   "greeting_constitution": "Konstitutsiya kuni muborak bo‘lsin!",
   "greeting_new_year": "Yangi yilingiz muborak bo‘lsin!",
-  "greeting_close": "Tabrikni yopish"
+  "greeting_close": "Tabrikni yopish",
+  "press_trend_loading": "tendensiya hisoblanmoqda…",
+  "dust_meter_label": "Havo sifati shkalasida PM2.5 konsentratsiyasi",
+  "atm_hint_bubble": "Mavsumiy effektlarni shu yerda o‘chirish mumkin"
 }

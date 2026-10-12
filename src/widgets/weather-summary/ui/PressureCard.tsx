@@ -11,6 +11,7 @@ import { AgeMark } from './AgeMark';
 type PressureCardProps = {
   value: number | null | undefined;
   history: WeatherHistoryItem[];
+  historyLoading?: boolean;
 };
 
 const CX = 170;
@@ -44,7 +45,7 @@ function directionOf(kind: TendencyKind): 'up' | 'down' | 'flat' {
  * inward when it falls, faster for bigger changes, and stop when it is steady,
  * so the motion is the tendency, not decoration.
  */
-export function PressureCard({ value, history }: PressureCardProps): React.JSX.Element {
+export function PressureCard({ value, history, historyLoading = false }: PressureCardProps): React.JSX.Element {
   const { t } = useTranslation();
   const { level, lastSeenMs } = useConnection();
   const archive = level === 'archive';
@@ -170,7 +171,7 @@ export function PressureCard({ value, history }: PressureCardProps): React.JSX.E
               {t(`press_trend_${tendency.kind}`)}
             </>
           ) : (
-            t('press_trend_unknown')
+            t(historyLoading ? 'press_trend_loading' : 'press_trend_unknown')
           )}
         </div>
         {tendency ? (

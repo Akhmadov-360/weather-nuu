@@ -122,7 +122,13 @@ export class AtmosphereEngine {
   }
 
   /** The floating header's rectangle in window coordinates, or null while it is not on screen. */
+  private headerRect: HeaderRect | null = null;
+
   private header(): HeaderRect | null {
+    return this.headerRect;
+  }
+
+  private measureHeader(): HeaderRect | null {
     if (!this.headerEl || !this.headerEl.isConnected) this.headerEl = document.querySelector<HTMLElement>('[data-atmosphere-header]');
     if (!this.headerEl) return null;
     const r = this.headerEl.getBoundingClientRect();
@@ -221,6 +227,8 @@ export class AtmosphereEngine {
     this.last = now;
     this.time += dt;
     this.opts.onFrame?.(frameMs);
+    // One layout read per frame: the rest of the frame reuses it (reading it repeatedly forced the browser to re-layout).
+    this.headerRect = this.measureHeader();
     this.update(dt);
     this.draw();
     // The decor changes slowly (twinkle, growing caps): about 20 frames a second is plenty and keeps the big canvas cheap.

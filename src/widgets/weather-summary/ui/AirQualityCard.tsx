@@ -2,7 +2,6 @@ import { ArrowRight, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { Slider } from '@/components/ui/slider';
 import { buildDustCardModel, type DustReading } from '@/entities/weather/model/dust-card';
 import type { WeatherHistoryItem } from '@/entities/weather/model/weather.types';
 import {
@@ -23,6 +22,8 @@ import { DustField, NoSensorArt, SettledDust, SilentLens } from './DustVisuals';
 type AirQualityCardProps = {
   source: 'room' | 'street';
   history: WeatherHistoryItem[];
+  /** The history the 10-minute average is built from is still loading. */
+  historyLoading?: boolean;
   /** 24 h PM2.5 mean from the aggregate query; undefined while loading or after an error. */
   dayMean: { mean: number; coverage: number } | null | undefined;
 };
@@ -97,7 +98,7 @@ function SecondaryLine({ name, reading }: { name: string; reading: DustReading }
   );
 }
 
-export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps): React.JSX.Element {
+export function AirQualityCard({ source, history, historyLoading = false, dayMean }: AirQualityCardProps): React.JSX.Element {
   const { t, i18n } = useTranslation();
   const archive = useConnection().level === 'archive';
   const model = buildDustCardModel({ source, history, dayMean });
@@ -116,6 +117,18 @@ export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps
           {t('dust_go_room')}
           <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
+      </Shell>
+    );
+  }
+
+  if (historyLoading) {
+    return (
+      <Shell>
+        <CardHeader label={label} />
+        <div className="mt-4 h-11 w-40 animate-pulse rounded-lg bg-(--control-track)" aria-hidden />
+        <div className="mt-4 h-2 w-full animate-pulse rounded-full bg-(--control-track)" aria-hidden />
+        <div className="mt-5 h-3 w-56 animate-pulse rounded bg-(--control-track)" aria-hidden />
+        <span className="sr-only">{t('chart_loading')}</span>
       </Shell>
     );
   }
@@ -180,18 +193,25 @@ export function AirQualityCard({ source, history, dayMean }: AirQualityCardProps
       <div className="mt-1.5 text-xs text-muted-themed">{t('dust_avg_10m')}</div>
 
       <div className="vc-live mt-4">
-        <Slider
-          value={[Math.min(Math.max(pm25.mean, 0), BAR_MAX)]}
-          min={0}
-          max={BAR_MAX}
-          disabled
-          className="data-disabled:opacity-100"
-          trackClassName="data-horizontal:h-2 bg-transparent"
-          trackStyle={{ background: GRADIENT }}
-          rangeClassName="hidden"
-          thumbClassName="h-4 w-4 border-2 border-(--marker) shadow-md disabled:opacity-100"
-          style={{ ["--marker" as string]: category ? fill(category) : "var(--status-info)" }}
-        />
+        {/* A gauge, not a control: it shows where the reading falls on the AQI zones. */}
+        <div
+          role="meter"
+          aria-label={t('dust_meter_label')}
+          aria-valuemin={0}
+          aria-valuemax={BAR_MAX}
+          aria-valuenow={Math.min(Math.max(pm25.mean, 0), BAR_MAX)}
+          aria-valuetext={`${formatMean(pm25.mean)} ${t('unit_ugm3')}`}
+          className="relative h-2 rounded-full"
+          style={{ background: GRADIENT }}
+        >
+          <span
+            className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-white shadow-md transition-[left] duration-700"
+            style={{
+              left: `${(Math.min(Math.max(pm25.mean, 0), BAR_MAX) / BAR_MAX) * 100}%`,
+              borderColor: category ? fill(category) : 'var(--status-info)',
+            }}
+          />
+        </div>
         <div className="mt-2 flex justify-between text-[11px] text-muted-themed">
           <span>0</span>
           <span>{BAR_MAX}+</span>
