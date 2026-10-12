@@ -46,7 +46,7 @@ const GRADIENT = buildGradient();
 /** The card frame: `art` sits behind the content, which stays above it. */
 function Shell({ art, children }: { art?: React.ReactNode; children: React.ReactNode }): React.JSX.Element {
   return (
-    <div className="relative h-full overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) shadow-card">
+    <div data-atmosphere-surface className="relative h-full overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) shadow-card">
       {art}
       <div className="relative z-10 flex h-full flex-col px-4 py-4 sm:p-5">{children}</div>
     </div>

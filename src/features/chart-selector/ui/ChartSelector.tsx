@@ -43,12 +43,13 @@ export function ChartSelector({ sensors, active, onChange }: ChartSelectorProps)
   });
 
   return (
-    <div className="relative w-full overflow-x-auto pb-1">
+    <div className="tabs-scroll relative w-full overflow-x-auto pb-1">
       <RubberSegment
         aria-label={t('chart_history_title')}
         items={items}
         value={active}
         onChange={(next) => onChange(next as SensorType)}
+        draggable={false}
         size="lg"
         radius={16}
         inset={4}

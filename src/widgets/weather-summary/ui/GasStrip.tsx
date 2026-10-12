@@ -38,7 +38,7 @@ function Tile({ sensor, label, note, value }: TileProps): React.JSX.Element {
   const gradient = sensor === 'mq5' ? buildZoneGradient(range) : DOTTED_TRACK;
 
   return (
-    <div className="relative h-full overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) shadow-card">
+    <div data-atmosphere-surface className="relative h-full overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) shadow-card">
       {archive ? null : (
         <GasMotes kind={sensor === 'mq5' ? 'ember' : 'bubble'} count={gasMoteCount(value, MOTES_FULL_AT[sensor])} color={color} />
       )}
