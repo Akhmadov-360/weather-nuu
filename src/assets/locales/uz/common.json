@@ -212,5 +212,17 @@
   "range_pick_hint": "Davrning birinchi va oxirgi kunini tanlang",
   "export_year_all": "Butun yil",
   "export_year_clear": "Tanlovni olib tashlash",
-  "range_reset": "Davrni bekor qilish"
+  "range_reset": "Davrni bekor qilish",
+  "atm_title": "Mavsumiy bezak",
+  "atm_level_full": "To‘liq",
+  "atm_level_calm": "Sokin",
+  "atm_level_off": "O‘chiq",
+  "atm_hint_full": "Mavsumiy ranglar, jonli ob-havo va bayram effektlari.",
+  "atm_hint_calm": "Mavsumiy ranglar va animatsiyasiz sokin osmon.",
+  "atm_hint_off": "Mavsumiy effektlarsiz oddiy ko‘rinish.",
+  "atm_auto_device": "Ushbu qurilma uchun avtomatik kamaytirildi: trafik, quvvat yoki «kamroq harakat» tejash.",
+  "atm_auto_governor": "Sahifa silliq ishlashi uchun avtomatik kamaytirildi.",
+  "atm_auto_reset": "Avtomatik rejimga qaytish",
+  "atm_governor_toast": "Animatsiyalar silliqlik uchun soddalashtirildi",
+  "atm_governor_restore": "Qaytarish"
 }

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/shared/config/routes';
 import { cn } from '@/shared/lib/cn';
 import { useScrolledPast } from '@/shared/hooks/useScrolledPast';
+import { AtmosphereControl } from '@/features/atmosphere-settings/ui/AtmosphereControl';
 import { LanguageSwitcher } from '@/widgets/language-switcher/ui/LanguageSwitcher';
 import { Logo } from '../../../components/Logo';
 import { SwapArrows } from './SwapArrows';
@@ -34,6 +35,7 @@ function Divider({ className }: { className?: string }): React.JSX.Element {
 function Settings(): React.JSX.Element {
   return (
     <div className="flex items-center gap-1 sm:gap-3">
+      <AtmosphereControl />
       <ThemeToggle />
       {/* On phones the pill is gone, so the hairline sits between the two settings instead. */}
       <Divider className="sm:hidden" />

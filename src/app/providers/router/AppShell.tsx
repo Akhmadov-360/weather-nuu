@@ -2,6 +2,8 @@ import { Outlet, useLocation } from 'react-router-dom';
 
 import { ROOM_CONFIG, STREET_CONFIG } from '@/entities/weather/model/weather.constants';
 import { ROUTES } from '@/shared/config/routes';
+import { AtmosphereProvider } from '@/features/atmosphere-settings/model/atmosphere-context';
+import { useAtmosphere } from '@/features/atmosphere-settings/model/use-atmosphere';
 import { TopBar } from '@/widgets/topbar/ui/TopBar';
 
 /**
@@ -12,8 +14,10 @@ import { TopBar } from '@/widgets/topbar/ui/TopBar';
 export function AppShell(): React.JSX.Element {
   const { pathname } = useLocation();
   const config = pathname === ROUTES.street ? STREET_CONFIG : ROOM_CONFIG;
+  const atmosphere = useAtmosphere(config.key);
 
   return (
+    <AtmosphereProvider value={atmosphere}>
     <div className="relative min-h-screen overflow-hidden text-primary-themed">
       <div className="dash-bg absolute inset-0" />
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
@@ -26,5 +30,6 @@ export function AppShell(): React.JSX.Element {
         <Outlet />
       </div>
     </div>
+    </AtmosphereProvider>
   );
 }
