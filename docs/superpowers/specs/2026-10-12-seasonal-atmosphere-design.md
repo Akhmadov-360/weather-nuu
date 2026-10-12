@@ -72,11 +72,17 @@ sceneFor(date: Date, tz: string): { season: Season; event: EventId | null }
 type Condition =
   | 'clear' | 'clouds' | 'fog' | 'drizzle' | 'rain' | 'shower' | 'sleet'
   | 'snow' | 'blizzard' | 'hail' | 'thunder';
-type Weather = { condition: Condition; intensity: number /*0..1*/; cloud: number /*0..1*/;
+type Weather = { condition: Condition; temp: number /*°C, temperature_2m*/; intensity: number /*0..1*/; cloud: number /*0..1*/;
                  windX: number /*px/s, знак = направление*/; isDay: boolean };
 
 describeScene(input: { date: Date; source: 'room' | 'street'; weather: Weather | null;
-                       streetTemp: number | null }): AtmosphereScene
+                       streetTemp: number | null /* датчик станции; null, если молчит или устарел */ }): AtmosphereScene
+
+// Температура для условий жара (≥ 29 °C) и мороз (≤ −5 °C), и для выбора снег/дождь:
+// 1) показание датчика «Улицы», пока оно свежее (уровень связи не «архив»);
+// 2) иначе `weather.temp` (temperature_2m Open-Meteo);
+// 3) иначе температурные эффекты не включаются. Эффект не пропадает, если датчик замолчал.
+effectiveTemperature(streetTemp: number | null, weather: Weather | null): number | null
 // AtmosphereScene: { season, event, layers: LayerSpec[], tint: { from, to }, lights: boolean, greeting: EventId | null }
 
 deviceCap(signals: DeviceSignals): Level          // потолок по железу и настройкам
@@ -114,7 +120,7 @@ effectiveLevel(userChoice: Level | null, cap: Level, governorDrop: boolean): Lev
 
 ## 6. Погода (только «Улица»)
 
-Источник: `https://api.open-meteo.com/v1/forecast?latitude=41.343&longitude=69.205&current=weather_code,precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,is_day&timezone=Asia/Tashkent`.
+Источник: `https://api.open-meteo.com/v1/forecast?latitude=41.343&longitude=69.205&current=weather_code,temperature_2m,precipitation,cloud_cover,wind_speed_10m,wind_direction_10m,is_day&timezone=Asia/Tashkent`.
 Ключ не нужен, CSP на сервере нет. Кэш 15 минут; при ошибке или отсутствии сети сцена строится без
 погоды (только сезон), интерфейс не ломается.
 
@@ -137,7 +143,7 @@ effectiveLevel(userChoice: Level | null, cap: Level, governorDrop: boolean): Lev
 | Мороз от −5 °C и ниже | изморозь на гранях |
 
 Приоритет: гроза, град, метель и снег, мокрый снег, ливень и дождь, морось, туман, облачность, ясно.
-Температура нашего датчика уточняет осадок (снег против дождя) и включает жару и мороз.
+Температура уточняет осадок (снег против дождя) и включает жару и мороз; берётся с нашего датчика, а при его молчании из `temperature_2m` Open-Meteo (`effectiveTemperature`, см. 3.1).
 
 ## 7. Осадки «садятся» на карточки
 
@@ -180,11 +186,15 @@ effectiveLevel(userChoice: Level | null, cap: Level, governorDrop: boolean): Lev
 
 | Событие | ru | uz | en |
 |---|---|---|---|
-| Навруз | Навруз муборак! | Navro‘z muborak! | Happy Navruz! |
-| Независимость | С Днём независимости! | Mustaqillik kuni muborak! | Happy Independence Day! |
-| День учителей | С Днём учителей! | Ustoz va murabbiylar kuni muborak! | Happy Teachers’ Day! |
-| Конституция | С Днём Конституции! | Konstitutsiya kuni muborak! | Happy Constitution Day! |
-| Новый год | С Новым годом! | Yangi yil muborak! | Happy New Year! |
+| Навруз | С праздником Навруз! | Navro‘z bayrami muborak bo‘lsin! | Happy Navruz! |
+| Независимость | С Днём независимости! | Mustaqillik bayrami muborak bo‘lsin! | Happy Independence Day! |
+| День учителей | С Днём учителей! | Ustoz va murabbiylar kuni muborak bo‘lsin! | Happy Teachers’ Day! |
+| Конституция | С Днём Конституции! | Konstitutsiya kuni muborak bo‘lsin! | Happy Constitution Day! |
+| Новый год | С Новым годом! | Yangi yilingiz muborak bo‘lsin! | Happy New Year! |
+
+Узбекские тексты проверены носителем: в латинице используется типографский апостроф `‘`
+(U+2018: `Navro‘z`, `bo‘lsin`), а не прямой `'`. Тест на строки локали проверяет отсутствие
+прямого апострофа в этих ключах.
 
 ## 10. Две правки интерфейса
 
@@ -198,7 +208,7 @@ effectiveLevel(userChoice: Level | null, cap: Level, governorDrop: boolean): Lev
 ## 11. Тестирование
 
 * Чистые функции с тестами: `sceneFor` (границы окон, високосный год), `describeScene`
-  (приоритеты, «Аудитория» без погоды), `weather-code`, `deviceCap`, `effectiveLevel`, физика
+  (приоритеты, «Аудитория» без погоды), `effectiveTemperature` (датчик свежий, датчик молчит, оба недоступны), `weather-code`, `deviceCap`, `effectiveLevel`, физика
   поверхностей (посадка частицы, рост и таяние шапки), выбор сезона и палитры.
 * Контраст палитры сезонов: тест на токены, как у существующей палитры.
 * Ручная проверка: каждый сезон и событие через dev-параметры `?season=` и `?event=` и `?weather=`
@@ -213,5 +223,6 @@ effectiveLevel(userChoice: Level | null, cap: Level, governorDrop: boolean): Lev
   запрос на посетителя в 15 минут), при росте трафика кэшировать на нашем сервере.
 * Много верхних граней и частиц: пересчёт граней ограничен, бюджет частиц и страж FPS страхуют.
 * Контраст тёмной темы с зимним небом: проверяется тестом.
-* Открыто: подтвердить окно Навруза (20–23 марта), формулировки приветствий, нужен ли отдельный
-  праздник «День знаний» (совпадает с 1 сентября).
+* Закрыто 12.10.2026: окно Навруза 20–23 марта подтверждено; формулировки приветствий уточнены;
+  отдельный праздник «День знаний» не делаем, он объединён с Днём независимости (1 сентября), чтобы не
+  перегружать интерфейс двумя баннерами и разными конфетти.
