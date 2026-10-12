@@ -7,8 +7,9 @@
 **Стек:** React 19, TypeScript, Vite, TanStack Query, ECharts, Tailwind CSS **v4**,
 shadcn/ui (Radix), i18next, React Router.
 
-Бэкенд — отдельный репозиторий `weather-backend`. Подробный технический отчёт по обеим частям:
-[docs/PROJECT_REPORT.md](docs/PROJECT_REPORT.md).
+Бэкенд — отдельный репозиторий `weather-backend`. Устройство фронтенда — [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md);
+подробный технический отчёт по обеим частям — [docs/PROJECT_REPORT.md](docs/PROJECT_REPORT.md). Для ИИ-агентов —
+[AGENTS.md](AGENTS.md).
 
 ## Быстрый старт (локально, без доступа к серверу)
 
@@ -68,10 +69,10 @@ pnpm dev
 src/
   app/        провайдеры (query, i18n, тема, router, toaster), глобальные стили
   pages/      страницы: dashboard-room, dashboard-street, not-found
-  widgets/    крупные блоки: dashboard-layout, weather-summary, sensor-charts, topbar
+  widgets/    крупные блоки: dashboard-layout, weather-summary, time-card, sensor-charts, topbar
   features/   пользовательские сценарии: time-range-selector, date-range-picker,
-              chart-selector, export-data
-  entities/   домен «weather»: api/ (запросы, WebSocket), model/ (типы, пороги, свежесть данных)
+              chart-selector, export-data, atmosphere-settings
+  entities/   домены: weather (api/, model/: типы, пороги, связь), atmosphere (сезонная тема)
   shared/     http, конфиг, утилиты дат и форматирования, общие UI-компоненты
   components/ui/   примитивы shadcn/ui (button, dialog, radio-group, ...)
 ```
@@ -80,6 +81,12 @@ src/
 (pages → widgets → features → entities → shared). Новый домен-специфичный код — в `entities`.
 
 Правила работы с кодом и PR — в [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Параметры предпросмотра (только `pnpm dev`)
+
+На `/room` и `/street`: `?time=18:20` (время), `?conn=archive|delayed` (состояния связи),
+`?date=2026-12-31` (сезон и праздник), `?weather=rain` (погода сцены), `?level=full|calm|off`
+(уровень сцены). В боевой сборке отключены. Подробнее — в [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Важно знать
 
