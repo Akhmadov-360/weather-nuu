@@ -397,6 +397,30 @@ html.theme-switching *::after {
   }
 }
 
+/* Scrollbars in the dashboard's own colours: thin everywhere; the sensor tabs hide theirs and fade at the edges instead. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-muted) transparent;
+}
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--control-track);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+.tabs-scroll {
+  scrollbar-width: none;
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent 100%);
+}
+.tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 @keyframes press-ripple {
   from { transform: scale(0.25); opacity: 0.45; }
   to   { transform: scale(1.05); opacity: 0; }
