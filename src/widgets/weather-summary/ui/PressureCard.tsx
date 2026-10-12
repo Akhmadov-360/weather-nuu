@@ -67,7 +67,7 @@ export function PressureCard({ value, history }: PressureCardProps): React.JSX.E
   const stationAngle = (-40 * Math.PI) / 180;
 
   return (
-    <div className="relative h-full min-h-[236px] overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) shadow-card sm:min-h-[250px]">
+    <div data-atmosphere-surface className="relative h-full min-h-[236px] overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) shadow-card sm:min-h-[250px]">
       {geometry ? (
         <svg
           className="vc-live press-isobars pointer-events-none absolute -right-8 top-1/2 h-[330px] w-[330px] -translate-y-1/2 sm:right-0 sm:h-[360px] sm:w-[360px]"

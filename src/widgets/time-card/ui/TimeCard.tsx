@@ -91,7 +91,7 @@ export function TimeCard({ history, now: pinnedNow }: TimeCardProps): React.JSX.
           : t('fresh_never');
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card sm:p-5">
+    <div data-atmosphere-surface className="relative flex h-full flex-col overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card sm:p-5">
       <Sky phase={sky?.phase ?? null} />
 
       <div className="relative flex flex-1 flex-col">

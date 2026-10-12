@@ -195,7 +195,7 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
 
 
   return (
-    <div
+    <div data-atmosphere-surface
       className="relative flex h-full flex-col border p-3 sm:p-4 lg:p-5"
       style={{
         borderRadius: "24px",

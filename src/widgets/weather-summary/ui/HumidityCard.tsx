@@ -48,7 +48,7 @@ export function HumidityCard({ value }: HumidityCardProps): React.JSX.Element {
   const flagTitle = value == null ? undefined : t('hum_flag_title', { value: formatValue(value) });
 
   return (
-    <div
+    <div data-atmosphere-surface
       className="relative h-full min-h-[236px] overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) shadow-card sm:min-h-[250px]"
       style={{ ['--inset' as string]: '20px' }}
     >

@@ -224,5 +224,11 @@
   "atm_auto_governor": "Sahifa silliq ishlashi uchun avtomatik kamaytirildi.",
   "atm_auto_reset": "Avtomatik rejimga qaytish",
   "atm_governor_toast": "Animatsiyalar silliqlik uchun soddalashtirildi",
-  "atm_governor_restore": "Qaytarish"
+  "atm_governor_restore": "Qaytarish",
+  "greeting_navruz": "Navro‘z bayrami muborak bo‘lsin!",
+  "greeting_independence": "Mustaqillik bayrami muborak bo‘lsin!",
+  "greeting_teachers": "Ustoz va murabbiylar kuni muborak bo‘lsin!",
+  "greeting_constitution": "Konstitutsiya kuni muborak bo‘lsin!",
+  "greeting_new_year": "Yangi yilingiz muborak bo‘lsin!",
+  "greeting_close": "Tabrikni yopish"
 }

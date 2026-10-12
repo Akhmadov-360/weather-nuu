@@ -70,7 +70,7 @@ export function TemperatureCard({ source, temp, history }: TemperatureCardProps)
   const ticks = [-20, -10, 0, 10, 20, 30, 40];
 
   return (
-    <div className="relative flex h-full min-h-[250px] overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) shadow-card">
+    <div data-atmosphere-surface className="relative flex h-full min-h-[250px] overflow-hidden rounded-card border border-(--glass-border) bg-(--glass-surface) shadow-card">
       <div
         className="vc-live pointer-events-none absolute inset-0 transition-[background] duration-1000"
         style={{

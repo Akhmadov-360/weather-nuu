@@ -58,6 +58,8 @@ export type AtmosphereState = {
   /** Why an automatic level is lower than full, for the hint in the control. */
   limitedBy: 'device' | 'governor' | null;
   isPhone: boolean;
+  /** Today's date at the station (YYYY-MM-DD), the day a greeting is counted on. */
+  today: string;
   /** Called by the stage when frames keep dropping: lowers an automatic level for this session. */
   dropForSession: () => void;
 };
@@ -120,6 +122,8 @@ export function useAtmosphere(source: WeatherPageType): AtmosphereState {
     }
   }, [scene]);
 
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tashkent' }).format(devDate ?? new Date());
+
   const setUserChoice = useCallback((next: Level | null) => {
     setChoice(next);
     try {
@@ -141,5 +145,5 @@ export function useAtmosphere(source: WeatherPageType): AtmosphereState {
 
   const limitedBy = userChoice !== null ? null : governorDrop && cap === 'full' ? 'governor' : cap !== 'full' ? 'device' : null;
 
-  return { level, scene, userChoice, setUserChoice, limitedBy, isPhone: signals.isPhone, dropForSession };
+  return { level, scene, userChoice, setUserChoice, limitedBy, isPhone: signals.isPhone, today, dropForSession };
 }

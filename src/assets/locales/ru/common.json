@@ -224,5 +224,11 @@
   "atm_auto_governor": "Автоматически снижено, чтобы страница оставалась плавной.",
   "atm_auto_reset": "Вернуть автоматический режим",
   "atm_governor_toast": "Анимации упрощены для плавности",
-  "atm_governor_restore": "Вернуть"
+  "atm_governor_restore": "Вернуть",
+  "greeting_navruz": "С праздником Навруз!",
+  "greeting_independence": "С Днём независимости!",
+  "greeting_teachers": "С Днём учителей!",
+  "greeting_constitution": "С Днём Конституции!",
+  "greeting_new_year": "С Новым годом!",
+  "greeting_close": "Закрыть приветствие"
 }

@@ -453,7 +453,7 @@ html.dark[data-season='spring'] {
 }
 /* SEASON:summer:light */
 html:not(.dark)[data-season='summer'] {
-  --season-accent: #A8741F;
+  --season-accent: #8F611A;
   --season-sky-from: #F5E6C8;
   --season-sky-to: #F4F0EC;
   --season-header-tint: #F7EDD7;
@@ -478,6 +478,11 @@ html.dark[data-season='autumn'] {
   --season-sky-from: #3A2415;
   --season-sky-to: #0D1128;
   --season-header-tint: #40281A;
+}
+
+/* The sticky header takes the season's tint (the base token stays for the "off" level). */
+html[data-season] {
+  --topbar-bg: color-mix(in srgb, var(--season-header-tint) 92%, transparent);
 }
 
 @keyframes press-ripple {

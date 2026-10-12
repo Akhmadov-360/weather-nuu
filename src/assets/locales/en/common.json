@@ -224,5 +224,11 @@
   "atm_auto_governor": "Lowered automatically to keep the page smooth.",
   "atm_auto_reset": "Back to automatic",
   "atm_governor_toast": "Animations simplified to stay smooth",
-  "atm_governor_restore": "Restore"
+  "atm_governor_restore": "Restore",
+  "greeting_navruz": "Happy Navruz!",
+  "greeting_independence": "Happy Independence Day!",
+  "greeting_teachers": "Happy Teachers’ Day!",
+  "greeting_constitution": "Happy Constitution Day!",
+  "greeting_new_year": "Happy New Year!",
+  "greeting_close": "Dismiss greeting"
 }

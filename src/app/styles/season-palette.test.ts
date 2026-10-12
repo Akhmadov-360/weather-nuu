@@ -50,6 +50,10 @@ describe.each(SEASONS)('season palette: %s', (season) => {
       expect(contrast(palette['--text-secondary']!, tokens[name]!)).toBeGreaterThanOrEqual(4.5);
     });
 
+    it('keeps the accent readable as text on the card surface (4.5:1, used by the greeting)', () => {
+      expect(contrast(tokens['--season-accent']!, palette['--surface']!)).toBeGreaterThanOrEqual(4.5);
+    });
+
     it('ends the sky in the page colour so there is no seam', () => {
       expect(tokens['--season-sky-to']!.toLowerCase()).toBe(palette['--paper']!.toLowerCase());
     });

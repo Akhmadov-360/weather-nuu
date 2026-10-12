@@ -1,5 +1,5 @@
 /** The top edge of a card in window coordinates. */
-export type Surface = { x: number; width: number; top: number; /** Stable between measurements, to keep a card's snow cap. */ id?: number };
+export type Surface = { x: number; width: number; top: number; /** Stable between measurements, to keep a card's snow cap. */ id?: number; /** Bottom edge, so particles can be kept out of the card body. */ bottom?: number };
 
 /**
  * A particle that fell through a card's top edge this frame, with the x where it crossed.
