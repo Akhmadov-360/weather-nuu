@@ -2,7 +2,7 @@ import { useDustDayMeanQuery, useLatestWeatherQuery, useWeatherHistoryQuery } fr
 import { useWeatherSocket } from '@/entities/weather/api/useWeatherSocket';
 import type { ConnectionState } from '@/entities/weather/model/connection';
 import { ConnectionProvider, useConnectionState } from '@/entities/weather/model/connection-context';
-import type { DashboardPageConfig } from '@/entities/weather/model/weather.types';
+import type { DashboardPageConfig, WeatherHistoryItem } from '@/entities/weather/model/weather.types';
 import { GlassPanel } from '@/shared/ui/glass-panel';
 import { EmptyState } from '@/shared/ui/empty-state';
 import { ErrorState } from '@/shared/ui/error-state';
@@ -21,12 +21,15 @@ import { ConnectionBanner } from './ConnectionBanner';
 import { SensorChartsSkeleton } from './SensorChartsSkeleton';
 import { WeatherSummarySkeleton } from './WeatherSummarySkeleton';
 import { previewNow } from '@/widgets/time-card/model/station-time';
+import { OnApproach } from '@/shared/ui/on-approach';
 import { LiveStreams } from '../../../components/LiveStreams';
 
 // ECharts is ~2 MB: load it after the cards are on screen instead of blocking first paint.
 const SensorCharts = lazy(() =>
   import('@/widgets/sensor-charts/ui/SensorCharts').then((m) => ({ default: m.SensorCharts })),
 );
+
+const NO_HISTORY: WeatherHistoryItem[] = [];
 
 type DashboardLayoutProps = {
   config: DashboardPageConfig;
@@ -59,14 +62,17 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
   const [searchParams] = useSearchParams();
   const pinnedNow = import.meta.env.DEV ? previewNow(searchParams.get('time'), Date.now()) : undefined;
 
-  const isInitialLoading = latestQuery.isLoading  || historyQuery.isLoading;
+  // The cards need only the latest reading to appear; the day of history (the slow part) fills in behind them.
+  const isInitialLoading = latestQuery.isLoading;
+  const historyLoading   = historyQuery.isLoading;
   const isError          = latestQuery.isError    || historyQuery.isError;
   // isFetching = true и при initial load, и при background refetch
   const isRefetching     = (latestQuery.isFetching || historyQuery.isFetching) && !isInitialLoading;
 
   const latest  = latestQuery.data;
   const history = historyQuery.data;
-  const measured = useConnectionState(history, latestQuery.isError && latestQuery.data !== undefined);
+  // Until the history arrives, the age of the feed is judged from the latest reading alone.
+  const measured = useConnectionState(history ?? (latest ? [latest] : undefined), latestQuery.isError && latestQuery.data !== undefined);
   // Development aid: `?conn=archive` or `?conn=delayed` shows those states without waiting for the station to go quiet.
   const forced = import.meta.env.DEV ? searchParams.get('conn') : null;
   const forcedAgeMs = forced === 'archive' ? 3 * 3_600_000 + 12 * 60_000 : 4 * 60_000;
@@ -101,7 +107,7 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
             </GlassPanel>
           </div>
 
-        ) : !latest || !history || history.length === 0 ? (
+        ) : !latest || (history && history.length === 0) ? (
           <div className="mt-6">
             <GlassPanel className="p-6">
               <EmptyState title={t('empty_title')} description={t('empty_description')} />
@@ -113,12 +119,12 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
           <div className="mt-6 flex flex-1 flex-col gap-6" data-conn={connection.level}>
             <ConnectionBanner connection={connection} />
             <motion.div variants={fadeUp} initial="hidden" animate="visible" className={summaryGridClass}>
-              <TimeCard history={history} now={pinnedNow} />
+              <TimeCard history={history ?? NO_HISTORY} historyLoading={historyLoading} now={pinnedNow} />
               <HumidityCard value={latest.hum} />
-              <PressureCard value={latest.press} history={history} />
-              <TemperatureCard source={config.key} temp={latest.temp} history={history} />
+              <PressureCard value={latest.press} history={history ?? NO_HISTORY} historyLoading={historyLoading} />
+              <TemperatureCard source={config.key} temp={latest.temp} history={history ?? NO_HISTORY} historyLoading={historyLoading} />
               <div className="sm:col-span-2 lg:col-span-2">
-                <AirQualityCard source={config.key} history={history} dayMean={dustDayQuery.data} />
+                <AirQualityCard source={config.key} history={history ?? NO_HISTORY} historyLoading={historyLoading} dayMean={dustDayQuery.data} />
               </div>
               <div className="sm:col-span-2 lg:col-span-3">
                 <GasStrip mq5={latest.mq5} mq3={latest.mq3} />
@@ -132,9 +138,11 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
               transition={{ delay: 0.1, duration: 0.45, ease: 'easeOut' }}
               className="flex-1"
             >
-              <Suspense fallback={<SensorChartsSkeleton />}>
-                <SensorCharts type={config.key} history={history} isRefetching={isRefetching} />
-              </Suspense>
+              <OnApproach fallback={<SensorChartsSkeleton />}>
+                <Suspense fallback={<SensorChartsSkeleton />}>
+                  {history ? <SensorCharts type={config.key} history={history} isRefetching={isRefetching} /> : <SensorChartsSkeleton />}
+                </Suspense>
+              </OnApproach>
             </motion.section>
 
             <LiveStreams />

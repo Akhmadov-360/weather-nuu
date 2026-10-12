@@ -230,5 +230,8 @@
   "greeting_teachers": "Happy Teachers’ Day!",
   "greeting_constitution": "Happy Constitution Day!",
   "greeting_new_year": "Happy New Year!",
-  "greeting_close": "Dismiss greeting"
+  "greeting_close": "Dismiss greeting",
+  "press_trend_loading": "working out the trend…",
+  "dust_meter_label": "PM2.5 concentration on the air quality scale",
+  "atm_hint_bubble": "You can turn the seasonal effects off here"
 }

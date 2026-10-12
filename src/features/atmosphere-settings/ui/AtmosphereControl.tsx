@@ -1,4 +1,5 @@
 import { Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,24 @@ import type { Level } from '@/entities/atmosphere/model/tier';
 import { useAtmosphereState } from '../model/atmosphere-context';
 
 const LEVELS: Level[] = ['full', 'calm', 'off'];
+const HINT_KEY = 'atmosphere-hint-seen';
+const HINT_MS = 10_000;
+
+function hintAlreadySeen(): boolean {
+  try {
+    return localStorage.getItem(HINT_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function rememberHint(): void {
+  try {
+    localStorage.setItem(HINT_KEY, '1');
+  } catch {
+    // Blocked storage: the hint then shows once per visit.
+  }
+}
 
 /**
  * The scene's switch: a header button that opens three levels. Until the user
@@ -16,11 +35,35 @@ const LEVELS: Level[] = ['full', 'calm', 'off'];
 export function AtmosphereControl(): React.JSX.Element | null {
   const { t } = useTranslation();
   const atmosphere = useAtmosphereState();
+  const [hintOpen, setHintOpen] = useState(() => !hintAlreadySeen());
+  const showHint = hintOpen && atmosphere !== null && atmosphere.level !== 'off' && atmosphere.userChoice === null;
+
+  // The hint points at the button once, then gets out of the way on its own.
+  useEffect(() => {
+    if (!hintOpen) return;
+    const timer = window.setTimeout(() => {
+      setHintOpen(false);
+      rememberHint();
+    }, HINT_MS);
+    return () => window.clearTimeout(timer);
+  }, [hintOpen]);
+
   if (!atmosphere) return null;
   const { level, userChoice, limitedBy, setUserChoice } = atmosphere;
+  const dismissHint = () => {
+    setHintOpen(false);
+    rememberHint();
+  };
 
   return (
-    <Popover>
+    <Popover onOpenChange={(open) => open && dismissHint()}>
+      <span className="relative inline-flex">
+      {showHint ? (
+        <>
+          <span className="pointer-events-none absolute inset-0 rounded-full ring-2 ring-(--season-accent) motion-safe:animate-ping" aria-hidden />
+          <span className="pointer-events-none absolute inset-0 rounded-full ring-2 ring-(--season-accent)" aria-hidden />
+        </>
+      ) : null}
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
@@ -32,7 +75,16 @@ export function AtmosphereControl(): React.JSX.Element | null {
           <Sparkles className="h-4 w-4" aria-hidden />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[min(18rem,calc(100vw-2rem))] border border-(--glass-border) bg-(--surface) p-3">
+      {showHint ? (
+        <span
+          role="status"
+          className="pointer-events-none absolute right-0 top-full z-[60] mt-3 w-56 rounded-lg border border-(--glass-border) bg-(--surface) px-3 py-2 text-xs leading-snug text-secondary-themed shadow-lg"
+        >
+          {t('atm_hint_bubble')}
+        </span>
+      ) : null}
+      </span>
+      <PopoverContent align="end" className="w-[min(22rem,calc(100vw-2rem))] border border-(--glass-border) bg-(--surface) p-3">
         <div className="text-sm font-medium text-primary-themed">{t('atm_title')}</div>
         <RubberSegment
           aria-label={t('atm_title')}
@@ -40,7 +92,7 @@ export function AtmosphereControl(): React.JSX.Element | null {
           value={level}
           onChange={(next) => setUserChoice(next as Level)}
           draggable={false}
-          size="md"
+          size="sm"
           radius={12}
           inset={3}
           trackColor="var(--glass-surface-soft)"

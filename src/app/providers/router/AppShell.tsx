@@ -8,6 +8,7 @@ import type { EventId } from '@/entities/atmosphere/model/calendar';
 import { createFpsGovernor, particleBudget } from '@/entities/atmosphere/model/tier';
 import { ROOM_CONFIG, STREET_CONFIG } from '@/entities/weather/model/weather.constants';
 import { ROUTES } from '@/shared/config/routes';
+import { useIdleReady } from '@/shared/hooks/useIdleReady';
 import { useTheme } from '@/shared/hooks/useTheme';
 import { AtmosphereSky } from '@/shared/ui/atmosphere/AtmosphereSky';
 import { burstConfetti } from '@/shared/ui/atmosphere/confetti';
@@ -31,6 +32,8 @@ export function AppShell(): React.JSX.Element {
   const atmosphere = useAtmosphere(config.key);
   const { t } = useTranslation();
   const { resolvedTheme } = useTheme();
+  // The animated scene starts once the page has been painted and the browser is idle, not with the first request.
+  const sceneReady = useIdleReady();
   const { scene, level, isPhone, userChoice, setUserChoice, dropForSession, today } = atmosphere;
 
   // Frame times go to the governor; when it calls for a lighter scene the level steps down and the user is told.
@@ -50,7 +53,7 @@ export function AppShell(): React.JSX.Element {
   const layers = useMemo(() => scene?.layers ?? [], [scene]);
   // Rain on the glass: the full level, on a desktop, when real rain falls (never for the classroom's seasonal scene).
   const rain = layers.find((l) => l.kind === 'rain');
-  const showGlass = level === 'full' && !isPhone && Boolean(rain) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const showGlass = level === 'full' && sceneReady && !isPhone && Boolean(rain) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // A holiday greeting shows once a day per event (it is counted as seen the moment it appears); confetti only on the full level.
   const [greeting, setGreeting] = useState<EventId | null>(null);
@@ -90,7 +93,7 @@ export function AppShell(): React.JSX.Element {
           <GlassShader amount={Math.min(1, 0.25 + rain.intensity * 0.6)} dark={resolvedTheme === 'dark'} />
         </Suspense>
       ) : null}
-      {scene && level === 'full' ? (
+      {scene && level === 'full' && sceneReady ? (
         <Suspense fallback={null}>
           <AtmosphereStage layers={layers} budget={particleBudget(level, isPhone)} dark={resolvedTheme === 'dark'} lights={scene.lights} onFrame={onFrame} />
         </Suspense>

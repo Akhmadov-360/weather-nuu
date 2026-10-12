@@ -6,7 +6,7 @@ import { ru, uz, enUS } from 'date-fns/locale';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import type { CustomDateRange } from '@/shared/lib/date/filter-by-range';
@@ -110,15 +110,15 @@ export function DateRangePicker({
           {label}
         </Button>
         {reset}
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-sm:fixed max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:rounded-t-2xl gap-2 p-3 pb-6">
-            <DialogHeader>
-              <DialogTitle>{t('range_custom')}</DialogTitle>
-              <DialogDescription>{t('range_pick_hint')}</DialogDescription>
-            </DialogHeader>
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerContent className="px-3 pb-6">
+            <DrawerHeader>
+              <DrawerTitle>{t('range_custom')}</DrawerTitle>
+              <DrawerDescription>{t('range_pick_hint')}</DrawerDescription>
+            </DrawerHeader>
             {calendar(1, 'mx-auto w-full bg-transparent [--cell-size:2.75rem]')}
-          </DialogContent>
-        </Dialog>
+          </DrawerContent>
+        </Drawer>
       </div>
     );
   }

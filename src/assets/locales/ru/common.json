@@ -230,5 +230,8 @@
   "greeting_teachers": "С Днём учителей!",
   "greeting_constitution": "С Днём Конституции!",
   "greeting_new_year": "С Новым годом!",
-  "greeting_close": "Закрыть приветствие"
+  "greeting_close": "Закрыть приветствие",
+  "press_trend_loading": "тенденция считается…",
+  "dust_meter_label": "Концентрация PM2.5 на шкале качества воздуха",
+  "atm_hint_bubble": "Сезонные эффекты можно выключить здесь"
 }

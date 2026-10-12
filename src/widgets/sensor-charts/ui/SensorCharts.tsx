@@ -218,9 +218,9 @@ export function SensorCharts({ type, history, isRefetching = false }: SensorChar
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="h-5 w-1 shrink-0 rounded-full bg-status-info" />
-            <h3 className="text-[11px] font-medium uppercase tracking-[0.24em] text-muted-themed sm:text-xs">
+            <h2 className="text-[11px] font-medium uppercase tracking-[0.24em] text-muted-themed sm:text-xs">
               {t("chart_history_title")}
-            </h3>
+            </h2>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <TimeRangeSelector

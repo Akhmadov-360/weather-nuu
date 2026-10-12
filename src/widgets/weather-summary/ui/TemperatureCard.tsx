@@ -14,6 +14,7 @@ type TemperatureCardProps = {
   source: 'room' | 'street';
   temp: number;
   history?: WeatherHistoryItem[];
+  historyLoading?: boolean;
 };
 
 const SCALE_MIN = -20;
@@ -47,7 +48,7 @@ const format = (v: number) => v.toFixed(1).replace('.', ',');
  * the card's background reacts to the air outside (snow, heat shimmer). The
  * classroom only gets a calm background.
  */
-export function TemperatureCard({ source, temp, history }: TemperatureCardProps): React.JSX.Element {
+export function TemperatureCard({ source, temp, history, historyLoading = false }: TemperatureCardProps): React.JSX.Element {
   const { t } = useTranslation();
   const { resolvedTheme } = useTheme();
   const archive = useConnection().level === 'archive';
@@ -129,8 +130,15 @@ export function TemperatureCard({ source, temp, history }: TemperatureCardProps)
           </StatusText>
         </div>
         <div className="mt-auto pt-3 text-xs text-muted-themed">
-          {t('temp_minmax_day')}: <span className="font-medium text-(--status-info)">▾ {format(min)}°</span>{' '}
-          <span className="font-medium text-(--status-critical)">▴ {format(max)}°</span>
+          {t('temp_minmax_day')}:{' '}
+          {historyLoading ? (
+            <span className="inline-block h-3 w-20 animate-pulse rounded bg-(--control-track) align-middle" aria-hidden />
+          ) : (
+            <>
+              <span className="font-medium text-(--status-info)">▾ {format(min)}°</span>{' '}
+              <span className="font-medium text-(--status-critical)">▴ {format(max)}°</span>
+            </>
+          )}
         </div>
       </div>
     </div>
