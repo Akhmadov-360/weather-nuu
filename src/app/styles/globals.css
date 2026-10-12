@@ -421,6 +421,65 @@ html.theme-switching *::after {
   display: none;
 }
 
+/* Seasonal accents: only the sky and header tint change; statuses and chart series keep their validated colours.
+   The sky always ends in the page colour, so text on it is checked against both stops. */
+/* SEASON:winter:light */
+html:not(.dark)[data-season='winter'] {
+  --season-accent: #3A6EA5;
+  --season-sky-from: #DCE8F5;
+  --season-sky-to: #F4F0EC;
+  --season-header-tint: #E4EDF7;
+}
+/* SEASON:winter:dark */
+html.dark[data-season='winter'] {
+  --season-accent: #8DB8F0;
+  --season-sky-from: #16294F;
+  --season-sky-to: #0D1128;
+  --season-header-tint: #1A2D52;
+}
+/* SEASON:spring:light */
+html:not(.dark)[data-season='spring'] {
+  --season-accent: #3F7F4E;
+  --season-sky-from: #E1EFDC;
+  --season-sky-to: #F4F0EC;
+  --season-header-tint: #E9F2E4;
+}
+/* SEASON:spring:dark */
+html.dark[data-season='spring'] {
+  --season-accent: #8FD0A0;
+  --season-sky-from: #15301F;
+  --season-sky-to: #0D1128;
+  --season-header-tint: #193524;
+}
+/* SEASON:summer:light */
+html:not(.dark)[data-season='summer'] {
+  --season-accent: #A8741F;
+  --season-sky-from: #F5E6C8;
+  --season-sky-to: #F4F0EC;
+  --season-header-tint: #F7EDD7;
+}
+/* SEASON:summer:dark */
+html.dark[data-season='summer'] {
+  --season-accent: #E9B65A;
+  --season-sky-from: #3A2D12;
+  --season-sky-to: #0D1128;
+  --season-header-tint: #3F3115;
+}
+/* SEASON:autumn:light */
+html:not(.dark)[data-season='autumn'] {
+  --season-accent: #A9561F;
+  --season-sky-from: #F2DDC8;
+  --season-sky-to: #F4F0EC;
+  --season-header-tint: #F6E7D6;
+}
+/* SEASON:autumn:dark */
+html.dark[data-season='autumn'] {
+  --season-accent: #E8955B;
+  --season-sky-from: #3A2415;
+  --season-sky-to: #0D1128;
+  --season-header-tint: #40281A;
+}
+
 @keyframes press-ripple {
   from { transform: scale(0.25); opacity: 0.45; }
   to   { transform: scale(1.05); opacity: 0; }
