@@ -1,3 +1,4 @@
+import { STATION } from '@/shared/config/station';
 import { sceneFor, type EventId, type Season } from './calendar';
 import { effectiveTemperature, type Weather } from './weather';
 
@@ -90,7 +91,7 @@ export function describeScene(input: {
   streetTemp: number | null;
 }): AtmosphereScene {
   const { date, source, weather } = input;
-  const { season, event } = sceneFor(date, 'Asia/Tashkent');
+  const { season, event } = sceneFor(date, STATION.timeZone);
   const street = source === 'street';
   const live = street ? weather : null;
   const temp = street ? effectiveTemperature(input.streetTemp, weather) : null;

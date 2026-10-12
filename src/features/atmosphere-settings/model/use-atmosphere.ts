@@ -6,6 +6,7 @@ import { dateFromParam, weatherFromParam } from '@/entities/atmosphere/model/dev
 import { describeScene, type AtmosphereScene } from '@/entities/atmosphere/model/scene';
 import { deviceCap, effectiveLevel, type DeviceSignals, type Level } from '@/entities/atmosphere/model/tier';
 import { useLatestWeatherQuery } from '@/entities/weather/api/weather.queries';
+import { STATION } from '@/shared/config/station';
 import type { WeatherPageType } from '@/shared/types/common';
 
 const CHOICE_KEY = 'atmosphere-level';
@@ -122,7 +123,7 @@ export function useAtmosphere(source: WeatherPageType): AtmosphereState {
     }
   }, [scene]);
 
-  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tashkent' }).format(devDate ?? new Date());
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: STATION.timeZone }).format(devDate ?? new Date());
 
   const setUserChoice = useCallback((next: Level | null) => {
     setChoice(next);
