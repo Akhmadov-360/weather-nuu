@@ -56,10 +56,31 @@ vec4 layer(vec2 uv, float cells, float seed) {
 
   float inTrail = step(c.y, f.y) * step(f.y, start.y) * smoothstep(r * 0.4, 0.0, abs(f.x - c.x)) * smoothstep(0.25, 0.55, life);
 
+  // A drop is a small lens: the bottom edge gathers light (caustic), the top edge is dark, a bright speck sits up-left.
+  vec2 nrm = d / max(r, 0.0001);
+  float caustic = smoothstep(0.35, 1.0, length(nrm)) * smoothstep(0.0, 0.8, -nrm.y) * body;
+  float topShade = smoothstep(0.2, 1.0, nrm.y) * body;
+
   vec3 tint = mix(vec3(0.20, 0.27, 0.42), vec3(0.74, 0.82, 0.96), uDark);
-  float a = (body * 0.22 + rim * 0.55 + inTrail * 0.1) * fade;
-  vec3 col = tint * a + vec3(1.0) * spec * 0.7 * body * fade;
-  return vec4(col, clamp(a + spec * 0.6 * body * fade, 0.0, 1.0));
+  float a = (body * 0.2 + topShade * 0.18 + rim * 0.5 + inTrail * 0.1) * fade;
+  vec3 col = tint * a + vec3(1.0) * (spec * 0.7 * body + caustic * 0.4) * fade;
+  return vec4(col, clamp(a + (spec * 0.6 + caustic * 0.3) * body * fade, 0.0, 1.0));
+}
+
+// Fine mist: many tiny drops that come and go slowly, so the glass is never perfectly clean.
+vec4 mist(vec2 uv) {
+  vec2 g = uv * 80.0;
+  vec2 id = floor(g);
+  vec2 f = fract(g) - 0.5;
+  float n = hash(id + 91.0);
+  if (n > 0.38 * uAmount + 0.1) return vec4(0.0);
+  vec2 c = (vec2(hash(id + 3.0), hash(id + 5.0)) - 0.5) * 0.5;
+  float r = 0.06 + 0.1 * hash(id + 8.0);
+  float pulse = 0.5 + 0.5 * sin(uTime * 0.25 + n * 40.0);
+  float body = smoothstep(r, r * 0.6, length(f - c)) * pulse;
+  vec3 tint = mix(vec3(0.20, 0.27, 0.42), vec3(0.8, 0.88, 1.0), uDark);
+  float a = body * 0.35;
+  return vec4(tint * a + vec3(1.0) * body * 0.12, a);
 }
 
 void main() {
@@ -68,6 +89,8 @@ void main() {
   vec4 acc = layer(uv, 9.0, 0.0);
   vec4 b = layer(uv + 0.37, 17.0, 11.0);
   acc = acc + b * (1.0 - acc.a);
+  vec4 m = mist(uv);
+  acc = acc + m * (1.0 - acc.a);
   gl_FragColor = acc;
 }
 `;

@@ -131,6 +131,7 @@ export function TopBar({ titleKey, sectionKey, switchPath, switchLabelKey }: Top
             className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6"
           >
             <div
+              data-atmosphere-header
               className="mx-auto max-w-[1440px] border px-3 py-2.5 backdrop-blur-xl sm:px-4 sm:py-3"
               style={{
                 borderRadius: '18px',

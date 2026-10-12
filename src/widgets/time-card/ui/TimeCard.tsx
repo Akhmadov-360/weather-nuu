@@ -12,6 +12,7 @@ import { skyState, type DayPhase } from '@/shared/lib/sky';
 import { formatStationDate, formatStationTime, stationClock } from '../model/station-time';
 import { ReliabilityStrip } from './ReliabilityStrip';
 import { SkyArc } from './SkyArc';
+import { SkyLight } from './SkyLight';
 
 const PHASES: DayPhase[] = ['night', 'dawn', 'morning', 'day', 'evening', 'dusk'];
 const MINUTE_MS = 60_000;
@@ -50,6 +51,7 @@ function Sky({ phase }: { phase: DayPhase | null }): React.JSX.Element {
           }}
         />
       ))}
+      <SkyLight phase={phase} />
     </div>
   );
 }

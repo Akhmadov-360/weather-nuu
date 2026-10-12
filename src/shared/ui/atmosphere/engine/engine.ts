@@ -1,3 +1,5 @@
+import { HeaderEmitter, type HeaderRect } from './header-emitter';
+import { drawLeaf, drawPetal, drawStrand } from './shapes';
 import { CAP_MAX, createCap, growCap, landOn, meltCap, type SnowCap, type Surface } from './surfaces';
 
 export type EngineLayer = { kind: string; intensity: number; windX: number };
@@ -16,15 +18,15 @@ type FallingKind = 'snow' | 'rain' | 'hail' | 'petals' | 'leaves' | 'motes';
 const FALLING: readonly FallingKind[] = ['snow', 'rain', 'hail', 'petals', 'leaves', 'motes'];
 
 /** depth: 0 far, 1 middle, 2 near (snow only; the rest stay in the middle). */
-type Particle = { kind: FallingKind; depth: number; x: number; y: number; vx: number; vy: number; r: number; ph: number; rot: number; bounced: boolean };
-type Rest = { id: number; dx: number; kind: 'petals' | 'leaves'; age: number; life: number; r: number; rot: number };
+type Particle = { kind: FallingKind; depth: number; variant: number; x: number; y: number; vx: number; vy: number; r: number; ph: number; rot: number; bounced: boolean };
+type Rest = { id: number; variant: number; dx: number; kind: 'petals' | 'leaves'; age: number; life: number; r: number; rot: number };
 type Splash = { x: number; y: number; vx: number; vy: number; age: number };
 type Ring = { x: number; y: number; age: number };
 
-type Palette = Record<'snow' | 'cap' | 'capEdge' | 'rain' | 'hail' | 'petal' | 'leaf' | 'mote' | 'frost' | 'glow', string>;
+type Palette = Record<'snow' | 'cap' | 'capEdge' | 'rain' | 'hail' | 'mote' | 'frost' | 'glow', string> & { petals: string[]; leaves: string[] };
 const COLOURS: Record<'light' | 'dark', Palette> = {
-  light: { snow: 'rgba(110,140,185,0.85)', cap: 'rgba(255,255,255,0.98)', capEdge: 'rgba(150,175,210,0.9)', rain: 'rgba(95,135,200,0.7)', hail: 'rgba(120,150,190,0.9)', petal: '#E58BAA', leaf: '#B8651F', mote: 'rgba(190,160,110,0.8)', frost: 'rgba(120,160,210,0.7)', glow: '#FFF3C4' },
-  dark: { snow: 'rgba(238,241,250,0.9)', cap: 'rgba(245,247,252,0.95)', capEdge: 'rgba(170,185,215,0.9)', rain: 'rgba(170,200,255,0.6)', hail: 'rgba(210,225,250,0.9)', petal: '#F4B6C8', leaf: '#E0954A', mote: 'rgba(220,195,150,0.7)', frost: 'rgba(190,215,255,0.7)', glow: '#FFE9A8' },
+  light: { snow: 'rgba(110,140,185,0.85)', cap: 'rgba(255,255,255,0.98)', capEdge: 'rgba(150,175,210,0.9)', rain: 'rgba(95,135,200,0.7)', hail: 'rgba(120,150,190,0.9)', petals: ['#F2A6BF', '#E58BAA', '#F7C8D6', '#EE97B4'], leaves: ['#B8651F', '#9C4A1A', '#C78A2B', '#8A7A2A'], mote: 'rgba(190,160,110,0.8)', frost: 'rgba(120,160,210,0.7)', glow: '#FFF3C4' },
+  dark: { snow: 'rgba(238,241,250,0.9)', cap: 'rgba(245,247,252,0.95)', capEdge: 'rgba(170,185,215,0.9)', rain: 'rgba(170,200,255,0.6)', hail: 'rgba(210,225,250,0.9)', petals: ['#F4B6C8', '#F8D2DE', '#E9A0B8', '#F6C2D2'], leaves: ['#E0954A', '#D97B3C', '#E8B25A', '#B9A140'], mote: 'rgba(220,195,150,0.7)', frost: 'rgba(190,215,255,0.7)', glow: '#FFE9A8' },
 };
 
 /** True when a point is inside a card's body: nothing is drawn there, a particle that gets in is sent back to the top. */
@@ -32,7 +34,6 @@ function insideCard(surfaces: readonly Surface[], x: number, y: number): boolean
   return surfaces.some((s) => s.bottom !== undefined && y > s.top && y < s.bottom && x > s.x - 14 && x < s.x + s.width + 14);
 }
 
-const BULBS = ['#FF5C5C', '#FFC857', '#5CD68A', '#5CA8FF', '#E27FD0'];
 const SKY_HEIGHT = 260;
 
 /**
@@ -58,6 +59,8 @@ export class AtmosphereEngine {
   private splashes: Splash[] = [];
   private rings: Ring[] = [];
   private caps = new Map<number, SnowCap>();
+  private emitter = new HeaderEmitter();
+  private headerEl: HTMLElement | null = null;
   private flash = 0;
   private nextFlash = 3;
   private stars: { x: number; y: number; ph: number }[] = [];
@@ -118,6 +121,14 @@ export class AtmosphereEngine {
     this.stars = Array.from({ length: 36 }, () => ({ x: Math.random() * this.w, y: Math.random() * SKY_HEIGHT, ph: Math.random() * 6 }));
   }
 
+  /** The floating header's rectangle in window coordinates, or null while it is not on screen. */
+  private header(): HeaderRect | null {
+    if (!this.headerEl || !this.headerEl.isConnected) this.headerEl = document.querySelector<HTMLElement>('[data-atmosphere-header]');
+    if (!this.headerEl) return null;
+    const r = this.headerEl.getBoundingClientRect();
+    return r.width > 0 ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null;
+  }
+
   private layer(kind: string): EngineLayer | undefined {
     return this.layers.find((l) => l.kind === kind);
   }
@@ -150,7 +161,7 @@ export class AtmosphereEngine {
 
   private spawn(kind: FallingKind, anywhere: boolean): Particle {
     const rnd = (a: number, b: number) => a + Math.random() * (b - a);
-    const base = { kind, depth: 1, x: Math.random() * this.w, y: anywhere ? Math.random() * this.h : -10, ph: Math.random() * 6, rot: Math.random() * 6, bounced: false };
+    const base = { kind, depth: 1, variant: Math.floor(Math.random() * 4), x: Math.random() * this.w, y: anywhere ? Math.random() * this.h : -10, ph: Math.random() * 6, rot: Math.random() * 6, bounced: false };
     switch (kind) {
       case 'snow': {
         // Three planes give the scene depth: far flakes small, slow and faint, near ones large, fast and soft.
@@ -245,6 +256,8 @@ export class AtmosphereEngine {
       if (out) Object.assign(p, this.spawn(p.kind, false));
     }
 
+    this.emitter.update(dt, this.opts.budget > 0 ? this.header() : null, this.layers, wind);
+
     for (const r of this.rests) r.age += dt;
     this.rests = this.rests.filter((r) => r.age < r.life);
     for (const s of this.splashes) {
@@ -293,7 +306,7 @@ export class AtmosphereEngine {
         break;
       case 'petals':
       case 'leaves':
-        this.rests.push({ id: surface.id ?? 0, dx: x - surface.x, kind: p.kind, age: 0, life: 4 + Math.random() * 5, r: p.r, rot: p.rot });
+        this.rests.push({ id: surface.id ?? 0, variant: p.variant, dx: x - surface.x, kind: p.kind, age: 0, life: 4 + Math.random() * 5, r: p.r, rot: p.rot });
         Object.assign(p, this.spawn(p.kind, false));
         break;
     }
@@ -340,7 +353,7 @@ export class AtmosphereEngine {
           break;
         case 'petals':
         case 'leaves':
-          this.drawLeaf(ctx, p.x, p.y, p.r, p.rot, p.kind === 'petals' ? c.petal : c.leaf, 0.85);
+          this.drawShape(ctx, p.kind, p.x, p.y, p.r, p.rot, p.kind === 'petals' ? c.petals[p.variant % c.petals.length]! : c.leaves[p.variant % c.leaves.length]!, 0.9);
           break;
       }
     }
@@ -361,6 +374,7 @@ export class AtmosphereEngine {
     }
     ctx.globalAlpha = 1;
 
+    this.drawHeaderScene(ctx, c);
     if (this.flash > 0) {
       ctx.fillStyle = `rgba(255,255,255,${0.28 * this.flash})`;
       ctx.fillRect(0, 0, w, h);
@@ -382,7 +396,7 @@ export class AtmosphereEngine {
       const s = byId.get(r.id);
       if (!s) continue;
       const fade = Math.min(1, (r.life - r.age) / 1);
-      this.drawLeaf(ctx, s.x + r.dx, s.top - r.r * 0.5, r.r, r.rot, r.kind === 'petals' ? c.petal : c.leaf, 0.85 * fade);
+      this.drawShape(ctx, r.kind, s.x + r.dx, s.top - r.r * 0.5, r.r, r.rot, r.kind === 'petals' ? c.petals[r.variant % c.petals.length]! : c.leaves[r.variant % c.leaves.length]!, 0.9 * fade);
     }
     for (const s of surfaces) {
       const cap = this.caps.get(s.id ?? 0);
@@ -390,19 +404,56 @@ export class AtmosphereEngine {
     }
     if (this.layer('frost')) this.drawFrost(ctx, surfaces, c.frost);
     if (this.opts.lights) this.drawLights(ctx, surfaces, c.glow);
+
+    // The floating header lies over the page: nothing hangs behind its (translucent) body.
+    const header = this.header();
+    if (header) ctx.clearRect(header.left - 4, header.top + window.scrollY - 4, header.right - header.left + 8, header.bottom - header.top + 8);
   }
 
-  private drawLeaf(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rot: number, colour: string, alpha: number): void {
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.translate(x, y);
-    ctx.rotate(rot);
-    ctx.scale(1, 0.55 + 0.45 * Math.abs(Math.sin(rot * 1.3)));
-    ctx.fillStyle = colour;
-    ctx.beginPath();
-    ctx.ellipse(0, 0, r, r * 0.6, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+  private drawShape(ctx: CanvasRenderingContext2D, kind: 'petals' | 'leaves' | string, x: number, y: number, r: number, rot: number, colour: string, alpha: number): void {
+    if (kind === 'petals') drawPetal(ctx, x, y, r, rot, colour, alpha);
+    else drawLeaf(ctx, x, y, r, rot, colour, alpha);
+  }
+
+  /** The floating header's own weather and, at New Year, a strand of lights on its outer edges (never over its buttons). */
+  private drawHeaderScene(ctx: CanvasRenderingContext2D, c: Palette): void {
+    for (const p of this.emitter.active) {
+      const a = HeaderEmitter.fade(p);
+      switch (p.kind) {
+        case 'snow':
+          ctx.globalAlpha = a;
+          ctx.fillStyle = c.snow;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+          break;
+        case 'hail':
+          ctx.globalAlpha = a;
+          ctx.fillStyle = c.hail;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+          break;
+        case 'rain':
+          ctx.globalAlpha = a;
+          ctx.strokeStyle = c.rain;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.x - this.wind * 0.02 - 1, p.y - 9);
+          ctx.stroke();
+          break;
+        default:
+          this.drawShape(ctx, p.kind, p.x, p.y, p.r, p.rot, p.kind === 'petals' ? c.petals[p.variant % c.petals.length]! : c.leaves[p.variant % c.leaves.length]!, a * 1.6);
+      }
+    }
+    ctx.globalAlpha = 1;
+    const header = this.header();
+    if (header && this.opts.lights) {
+      const width = header.right - header.left - 28;
+      drawStrand(ctx, header.left + 14, width, header.top - 1, 101, this.time, c.glow, this.opts.dark, -1);
+      drawStrand(ctx, header.left + 14, width, header.bottom + 1, 102, this.time, c.glow, this.opts.dark, 1);
+    }
   }
 
   private drawCap(ctx: CanvasRenderingContext2D, cap: SnowCap, s: Surface, c: Palette): void {
@@ -500,32 +551,6 @@ export class AtmosphereEngine {
   }
 
   private drawLights(ctx: CanvasRenderingContext2D, surfaces: Surface[], glow: string): void {
-    for (const s of surfaces) {
-      ctx.strokeStyle = this.opts.dark ? 'rgba(200,210,235,0.5)' : 'rgba(90,100,130,0.5)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      const bulbs: { x: number; y: number }[] = [];
-      for (let x = 0; x <= s.width; x += 22) {
-        const y = s.top - 3 - Math.sin((x / 22) * 1.6) * 2.5;
-        if (x === 0) ctx.moveTo(s.x + x, y);
-        else ctx.lineTo(s.x + x, y);
-        bulbs.push({ x: s.x + x, y });
-      }
-      ctx.stroke();
-      bulbs.forEach((b, i) => {
-        const twinkle = 0.55 + 0.45 * Math.sin(this.time * 2.4 + i * 1.7 + (s.id ?? 0));
-        ctx.globalAlpha = 0.25 * twinkle;
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(b.x, b.y + 3, 6, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 0.5 + 0.5 * twinkle;
-        ctx.fillStyle = BULBS[i % BULBS.length]!;
-        ctx.beginPath();
-        ctx.arc(b.x, b.y + 3, 2.4, 0, Math.PI * 2);
-        ctx.fill();
-      });
-    }
-    ctx.globalAlpha = 1;
+    for (const s of surfaces) drawStrand(ctx, s.x, s.width, s.top, s.id ?? 0, this.time, glow, this.opts.dark, -1);
   }
 }
