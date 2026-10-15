@@ -7,9 +7,22 @@
 **Стек:** React 19, TypeScript, Vite, TanStack Query, ECharts, Tailwind CSS **v4**,
 shadcn/ui (Radix), i18next, React Router.
 
-Бэкенд — отдельный репозиторий `weather-backend`. Устройство фронтенда — [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md);
-подробный технический отчёт по обеим частям — [docs/PROJECT_REPORT.md](docs/PROJECT_REPORT.md). Для ИИ-агентов —
-[AGENTS.md](AGENTS.md).
+## Проект целиком: репозитории и документы
+
+Система состоит из двух репозиториев. **Этот README — единая точка входа для обоих**: здесь
+запуск всей системы и карта документов, README бэкенда содержит только справочник по API.
+
+| Репозиторий | Что внутри | Где читать |
+|-------------|-----------|-----------|
+| `weather-nuu` (этот) | веб-дашборд, карта, аналитика (React) | этот README, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| `weather-backend` | API, база, приём данных с датчиков (Node.js, Fastify, PostgreSQL) | README и `docs/ARCHITECTURE.md` бэкенда |
+
+| Документ | Для кого и зачем |
+|----------|-----------------|
+| [docs/tasks/README.md](docs/tasks/README.md) | **участникам**: зоны, правила работы, календарь, задания |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | правила кода и pull request |
+| [AGENTS.md](AGENTS.md) | ИИ-помощникам: что читать и чего не делать |
+| [docs/PROJECT_REPORT.md](docs/PROJECT_REPORT.md) | технический отчёт для диплома: проблемы, решения, замеры |
 
 ## Быстрый старт (локально, без доступа к серверу)
 
