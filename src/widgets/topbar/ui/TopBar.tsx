@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
-import { ROUTES } from '@/shared/config/routes';
+import { enabledSections, hasSectionNav, type Section } from '@/shared/config/sections';
 import { cn } from '@/shared/lib/cn';
 import { useScrolledPast } from '@/shared/hooks/useScrolledPast';
 import { AtmosphereControl } from '@/features/atmosphere-settings/ui/AtmosphereControl';
@@ -20,11 +20,6 @@ type TopBarProps = {
   switchPath: string;
   switchLabelKey: string;
 };
-
-const SECTIONS = [
-  { to: ROUTES.room, labelKey: 'nav_room' },
-  { to: ROUTES.street, labelKey: 'nav_street' },
-] as const;
 
 /** Vertical hairline between the compact settings triggers — replaces the old per-item pill borders. */
 function Divider({ className }: { className?: string }): React.JSX.Element {
@@ -86,6 +81,9 @@ function Title({
 export function TopBar({ titleKey, sectionKey, switchPath, switchLabelKey }: TopBarProps): React.JSX.Element {
   const { t } = useTranslation();
   const isStickyVisible = useScrolledPast(110);
+  const sections = enabledSections();
+  // Two dashboards keep the swap link; with more sections a full switch replaces it.
+  const sectionNav = hasSectionNav(sections);
 
   return (
     <>
@@ -112,10 +110,14 @@ export function TopBar({ titleKey, sectionKey, switchPath, switchLabelKey }: Top
           />
         </div>
 
-        <SectionSwitch id="header" className="w-full sm:hidden" />
+        <SectionSwitch id="header" sections={sections} className="w-full sm:hidden" />
 
         <div className="hidden items-center gap-3 sm:flex">
-          <SwitchSectionLink to={switchPath} label={switchLabelKey} size="default" />
+          {sectionNav ? (
+            <SectionSwitch id="header-wide" sections={sections} size="default" className="w-auto" />
+          ) : (
+            <SwitchSectionLink to={switchPath} label={switchLabelKey} size="default" />
+          )}
           <Divider />
           <Settings />
         </div>
@@ -162,7 +164,11 @@ export function TopBar({ titleKey, sectionKey, switchPath, switchLabelKey }: Top
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <SwitchSectionLink to={switchPath} label={switchLabelKey} size="sm" className="hidden sm:inline-flex" />
+                  {sectionNav ? (
+                    <SectionSwitch id="sticky" sections={sections} size="sm" className="hidden w-auto sm:flex" />
+                  ) : (
+                    <SwitchSectionLink to={switchPath} label={switchLabelKey} size="sm" className="hidden sm:inline-flex" />
+                  )}
                   <Divider className="hidden sm:block" />
                   <Settings />
                 </div>
@@ -179,7 +185,17 @@ export function TopBar({ titleKey, sectionKey, switchPath, switchLabelKey }: Top
  * Phone version of the section switch: both sections visible, the active one
  * marked by a pill that glides to the other when the page changes.
  */
-function SectionSwitch({ id, className }: { id: string; className?: string }): React.JSX.Element {
+function SectionSwitch({
+  id,
+  sections,
+  size = 'phone',
+  className,
+}: {
+  id: string;
+  sections: readonly Section[];
+  size?: 'phone' | 'default' | 'sm';
+  className?: string;
+}): React.JSX.Element {
   const { t } = useTranslation();
   const { pathname } = useLocation();
 
@@ -187,11 +203,12 @@ function SectionSwitch({ id, className }: { id: string; className?: string }): R
     <nav
       aria-label={t('nav_sections')}
       className={cn(
-        'relative flex h-11 items-center rounded-full border border-(--glass-border) bg-(--control-track) p-1',
+        'relative flex items-center rounded-full border border-(--glass-border) bg-(--control-track) p-1',
+        size === 'phone' ? 'h-11' : size === 'default' ? 'h-10' : 'h-9',
         className,
       )}
     >
-      {SECTIONS.map(({ to, labelKey }) => {
+      {sections.map(({ to, navKey }) => {
         const active = pathname === to;
         return (
           <Link
@@ -199,7 +216,8 @@ function SectionSwitch({ id, className }: { id: string; className?: string }): R
             to={to}
             aria-current={active ? 'page' : undefined}
             className={cn(
-              'relative z-10 flex h-full flex-1 items-center justify-center rounded-full px-3 text-sm font-medium transition-colors',
+              'relative z-10 flex h-full items-center justify-center rounded-full px-3 font-medium transition-colors',
+              size === 'phone' ? 'min-w-0 flex-1 text-sm max-[359px]:px-1.5 max-[359px]:text-xs' : size === 'default' ? 'px-4 text-sm' : 'text-xs sm:px-4 sm:text-sm',
               active ? 'text-primary-themed' : 'text-muted-themed',
             )}
           >
@@ -210,7 +228,7 @@ function SectionSwitch({ id, className }: { id: string; className?: string }): R
                 transition={{ type: 'spring', stiffness: 380, damping: 32 }}
               />
             ) : null}
-            {t(labelKey)}
+            {t(navKey)}
           </Link>
         );
       })}

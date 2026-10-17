@@ -1,6 +1,10 @@
 {
   "nav_room": "Classroom",
   "nav_street": "Outdoors",
+  "nav_map": "Map",
+  "nav_analytics": "Analytics",
+  "title_map": "Air quality map",
+  "title_analytics": "Data analytics",
   "panel_room": "Sensors in the classroom",
   "panel_street": "Outdoor sensors",
   "btn_temp": "Temperature",

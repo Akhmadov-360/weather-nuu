@@ -6,6 +6,8 @@ import { AppShell } from './AppShell';
 
 const DashboardRoomPage = lazy(() => import('@/pages/dashboard-room/ui/DashboardRoomPage'));
 const DashboardStreetPage = lazy(() => import('@/pages/dashboard-street/ui/DashboardStreetPage'));
+const MapPage = lazy(() => import('@/pages/map/ui/MapPage'));
+const AnalyticsPage = lazy(() => import('@/pages/analytics/ui/AnalyticsPage'));
 const NotFoundPage = lazy(() => import('@/pages/not-found/ui/NotFoundPage'));
 
 const withSuspense = (component: React.JSX.Element): React.JSX.Element => (
@@ -23,6 +25,8 @@ export const appRouter = createBrowserRouter([
     children: [
       { path: ROUTES.room, element: withSuspense(<DashboardRoomPage />) },
       { path: ROUTES.street, element: withSuspense(<DashboardStreetPage />) },
+      { path: ROUTES.map, element: withSuspense(<MapPage />) },
+      { path: ROUTES.analytics, element: withSuspense(<AnalyticsPage />) },
     ],
   },
   {

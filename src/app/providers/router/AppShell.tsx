@@ -8,6 +8,7 @@ import type { EventId } from '@/entities/atmosphere/model/calendar';
 import { createFpsGovernor, particleBudget } from '@/entities/atmosphere/model/tier';
 import { ROOM_CONFIG, STREET_CONFIG } from '@/entities/weather/model/weather.constants';
 import { ROUTES } from '@/shared/config/routes';
+import { sectionForPath } from '@/shared/config/sections';
 import { useIdleReady } from '@/shared/hooks/useIdleReady';
 import { useTheme } from '@/shared/hooks/useTheme';
 import { AtmosphereSky } from '@/shared/ui/atmosphere/AtmosphereSky';
@@ -28,7 +29,10 @@ const AtmosphereStage = lazy(() => import('@/shared/ui/atmosphere/AtmosphereStag
  */
 export function AppShell(): React.JSX.Element {
   const { pathname } = useLocation();
+  // Room and Street are dashboards with their own station config; the other sections use the Room scene.
   const config = pathname === ROUTES.street ? STREET_CONFIG : ROOM_CONFIG;
+  const section = sectionForPath(pathname);
+  const isDashboard = section?.id === 'room' || section?.id === 'street';
   const atmosphere = useAtmosphere(config.key);
   const { t } = useTranslation();
   const { resolvedTheme } = useTheme();
@@ -101,10 +105,10 @@ export function AppShell(): React.JSX.Element {
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         {greeting ? <GreetingBar event={greeting} onClose={() => setGreeting(null)} /> : null}
         <TopBar
-          titleKey={config.titleKey}
-          sectionKey={config.navKey}
-          switchPath={config.oppositePath}
-          switchLabelKey={config.oppositeNavKey}
+          titleKey={section?.titleKey ?? config.titleKey}
+          sectionKey={section?.navKey ?? config.navKey}
+          switchPath={isDashboard ? config.oppositePath : ROUTES.room}
+          switchLabelKey={isDashboard ? config.oppositeNavKey : config.navKey}
         />
         <Outlet />
       </div>
