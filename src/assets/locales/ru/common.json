@@ -1,6 +1,10 @@
 {
   "nav_room": "Аудитория",
   "nav_street": "Улица",
+  "nav_map": "Карта",
+  "nav_analytics": "Аналитика",
+  "title_map": "Карта качества воздуха",
+  "title_analytics": "Аналитика данных",
   "panel_room": "Датчики в аудитории",
   "panel_street": "Датчики на улице",
   "btn_temp": "Температура",

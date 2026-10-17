@@ -1,6 +1,10 @@
 {
   "nav_room": "Auditoriya",
   "nav_street": "Ko'cha",
+  "nav_map": "Xarita",
+  "nav_analytics": "Tahlil",
+  "title_map": "Havo sifati xaritasi",
+  "title_analytics": "Ma‘lumotlar tahlili",
   "panel_room": "Auditoriya datchiklari",
   "panel_street": "Ko'cha datchiklari",
   "btn_temp": "Harorat",

@@ -76,10 +76,13 @@
 * бэкенд: `packages/contracts/src/schemas/analytics-stats.ts` со схемами ответов для A1–A5
   (минимальные, уточните по ходу), JSON-примеры в `packages/contracts/fixtures/`, тест «пример
   проходит схему»;
-* фронтенд: страница `src/pages/analytics/ui/AnalyticsPage.tsx`, маршрут `/analytics` в
-  `router.tsx` (лениво, как остальные), пункт в верхней панели, три вкладки-заглушки с
-  состоянием «пока нет данных», тексты в `analytics.json` (ru/uz/en), выбор станции (Room/Street)
-  и периода (24 ч, 7 д, 30 д) в верхней части страницы.
+* фронтенд: страница `src/pages/analytics/ui/AnalyticsPage.tsx` уже есть как заглушка (маршрут
+  `/analytics`, пункт `analytics` в реестре разделов `src/shared/config/sections.ts`, пространство
+  переводов `analytics`). Замените её тело тремя вкладками-заглушками с состоянием «пока нет
+  данных», тексты пишите в `analytics.json` (ru/uz/en), добавьте выбор станции (Room/Street) и
+  периода (24 ч, 7 д, 30 д) в верхней части страницы. В реестре поставьте `enabled: true` для
+  `analytics`, тогда пункт появится в шапке (`nav_analytics` и `title_analytics` уже есть в
+  `common.json`). Шапку и `router.tsx` не правьте.
 
 **Готово, когда:** страница открывается из панели, вкладки переключаются, тёмная и светлая
 темы, три языка, CI зелёный.
