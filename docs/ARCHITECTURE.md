@@ -98,7 +98,7 @@ src/
 
 | Модуль | Назначение |
 |--------|-----------|
-| `shared/lib/air-quality/` | шкалы и AQI (US EPA 2024), без React и i18n; стандарт описан данными, региональная норма добавляется файлом |
+| `shared/lib/air-quality/` | шкалы и AQI (US EPA 2024), без React и i18n; стандарт описан данными, региональная норма добавляется файлом Серверная копия — пакет `@weather/air-quality` бэкенда; совпадение двух реализаций проверяет общий `aqi-vectors.json` (меняя шкалу, обновите файл в обоих репозиториях, см. README пакета) |
 | `shared/lib/weather-ranges.ts`, `entities/weather/model/weather-thresholds.ts` | зоны нормы и статусы: единственное место для порогов |
 | `entities/weather/model/dust-card.ts`, `dust.ts` | состояния карточки пыли (нет датчика, молчит, есть) и усреднение (10 мин, 24 ч) |
 | `entities/weather/model/pressure-tendency.ts` | тенденция давления за 3 часа |
