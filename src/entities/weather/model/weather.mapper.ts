@@ -6,7 +6,9 @@ import type { WeatherHistoryItem, WeatherLatest } from './weather.types';
  * null ("no reading"; z.coerce would turn it into 0), numeric strings are
  * converted, and anything unusable becomes null instead of failing the parse.
  */
-const dustValue = z.unknown().transform((value): number | null => {
+// `.optional()` is explicit since zod 4: a missing key (an old payload without dust) is no longer accepted
+// for `z.unknown()` and must reach the transform as undefined, which becomes null.
+const dustValue = z.unknown().optional().transform((value): number | null => {
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
   if (typeof value === 'string' && value.trim() !== '') {
     const parsed = Number(value);
