@@ -8,7 +8,7 @@
 
 **Tech Stack:** Tailwind v4 (`@tailwindcss/vite`), Vite 6, React 19, shadcn/ui (Radix), tw-animate-css, Vitest, pnpm.
 
-**Spec:** the outline `docs/superpowers/plans/2026-10-10-tailwind-v4-migration-outline.md` (replaced by this plan) and the design spec `docs/superpowers/specs/2026-10-10-dust-card-and-air-quality-scales-design.md` (which depends on this migration for PR 3).
+**Spec:** the outline `docs/internal/plans/2026-10-10-tailwind-v4-migration-outline.md` (replaced by this plan) and the design spec `docs/internal/specs/2026-10-10-dust-card-and-air-quality-scales-design.md` (which depends on this migration for PR 3).
 
 ## Global Constraints
 
@@ -34,7 +34,7 @@ scripts/style-snapshot/   capture.js (runs in the page), receiver.mjs (saves pos
 src/app/styles/globals.css, vite.config.ts, package.json, pnpm-lock.yaml
 tailwind.config.ts, postcss.config.js            (removed)
 src/components/ui/*.tsx                          (only if a v4 class needs a fix)
-README.md, docs/PROJECT_REPORT.md                (wording)
+README.md, docs/thesis/PROJECT_REPORT.md                (wording)
 ```
 
 ---
@@ -88,7 +88,7 @@ README.md, docs/PROJECT_REPORT.md                (wording)
 
 ### Task 6: Docs, checks and PR
 
-**Files:** Modify `README.md`, `docs/PROJECT_REPORT.md`, delete the outline plan.
+**Files:** Modify `README.md`, `docs/thesis/PROJECT_REPORT.md`, delete the outline plan.
 
 - [ ] **Step 1:** README: replace the "Tailwind here is v3" note with "Tailwind v4: config lives in `src/app/styles/globals.css` (`@theme`); no `tailwind.config.ts`"; note the browser floor. PROJECT_REPORT: section 5.9 and the tech-debt mentions of the v3/v4 mismatch become "resolved by migration (date)". Remove `2026-10-10-tailwind-v4-migration-outline.md`.
 - [ ] **Step 2:** Run `pnpm typecheck && pnpm lint && pnpm test && pnpm build`; Expected: all pass. Push the branch and give the PR link; list the accepted style differences in the PR description.

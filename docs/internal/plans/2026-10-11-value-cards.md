@@ -39,7 +39,7 @@ src/widgets/dashboard-layout/ui/{DashboardLayout,WeatherSummarySkeleton}.tsx
 src/app/styles/globals.css                                 water, ripple keyframes
 src/app/styles/temperature-tint.test.ts                    contrast of the tint
 src/assets/locales/{ru,uz,en}/common.json
-docs/PROJECT_REPORT.md
+docs/thesis/PROJECT_REPORT.md
 ```
 
 ---
@@ -93,4 +93,4 @@ docs/PROJECT_REPORT.md
 
 - [ ] **Step 1:** Replace `MetricCard`/`TempHeroCard` in `DashboardLayout` (humidity and pressure take the two wide cells of row 1, temperature the narrow cell of row 2), update the skeleton, delete `MetricCard.tsx`, `TempHeroCard.tsx` and sensor-format helpers that nothing uses any more, remove locale keys that became unused (`indoor_*`, `range_hum_*` zone lines and so on only if truly unused).
 - [ ] **Step 2:** Headless Edge screenshots (dev server, local backend, `?time=` not needed): Room and Street, both themes, 1440 / 768 / 375 / 320 px, with temperature extremes on Street through the simulator values or a dev query parameter if needed; console clean; check the card heights of the first row and that nothing overflows horizontally.
-- [ ] **Step 3:** One paragraph in `docs/PROJECT_REPORT.md`; push; give the PR link; list what only the eye can judge.
+- [ ] **Step 3:** One paragraph in `docs/thesis/PROJECT_REPORT.md`; push; give the PR link; list what only the eye can judge.

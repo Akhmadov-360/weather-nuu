@@ -8,7 +8,7 @@
 
 **Стек:** React 19, TypeScript, Vite, Vitest (только `src/**/*.test.ts`, окружение node), Tailwind v4, framer-motion, react-query, i18next (ru/uz/en), pnpm. Новые зависимости: `canvas-confetti` (ленивый), `ogl` (ленивый).
 
-**Спецификация:** `docs/superpowers/specs/2026-10-12-seasonal-atmosphere-design.md` (читать целиком перед началом).
+**Спецификация:** `docs/internal/specs/2026-10-12-seasonal-atmosphere-design.md` (читать целиком перед началом).
 
 ## Глобальные ограничения
 
@@ -186,7 +186,7 @@
 ### Task 13: Документы, проверка, итоговый обзор
 
 **Files:**
-- Modify: `docs/PROJECT_REPORT.md`, при необходимости `CONTRIBUTING.md`
+- Modify: `docs/thesis/PROJECT_REPORT.md`, при необходимости `CONTRIBUTING.md`
 
 - [ ] **Step 1a (документация для разработчиков и ИИ-агентов, обязательно):** создать `docs/ARCHITECTURE.md` фронтенда и `docs/ARCHITECTURE.md` бэкенда, обновить `AGENTS.md`, `CONTRIBUTING.md`, `README.md` обоих репозиториев (архитектура, слои, команды запуска и проверки обеих частей, правила добавления кода), чтобы ИИ-агенты участника 2 и группы №7 соответствовали обеим архитектурам.
 - [ ] **Step 1:** добавить в §13.1 и §14 отчёта абзац про атмосферу (модель сцены как чистые функции с тестами, три уровня, страж FPS, осадки на гранях карточек, Open-Meteo с фоллбэком температуры, расчётные размеры чанков).

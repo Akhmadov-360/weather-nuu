@@ -8,7 +8,7 @@
 
 **Tech Stack:** React 19, TypeScript, Tailwind v4 (PR 2, branch `chore/tailwind-v4`), shadcn Slider, ECharts, i18next, Vitest, pnpm.
 
-**Spec:** `docs/superpowers/specs/2026-10-10-dust-card-and-air-quality-scales-design.md` (sections 4 colours, 6 UI, 7 texts, 8 tests). The logic layer (PR 1) is already in this branch's history.
+**Spec:** `docs/internal/specs/2026-10-10-dust-card-and-air-quality-scales-design.md` (sections 4 colours, 6 UI, 7 texts, 8 tests). The logic layer (PR 1) is already in this branch's history.
 
 ## Global Constraints
 
@@ -44,7 +44,7 @@ src/widgets/sensor-charts/ui/SensorCharts.tsx       dust thresholds, sensor list
 src/entities/weather/api/weather.queries.ts         refetchInterval
 src/entities/weather/model/weather.constants.ts     remove SENSOR_ORDER
 src/assets/locales/{ru,uz,en}/common.json
-docs/PROJECT_REPORT.md
+docs/thesis/PROJECT_REPORT.md
 ```
 
 ---
@@ -123,7 +123,7 @@ buildDustCardModel(input: {
 
 ### Task 7: Documentation and browser verification
 
-**Files:** Modify `docs/PROJECT_REPORT.md` (section 11.3 status table, stage table row 3).
+**Files:** Modify `docs/thesis/PROJECT_REPORT.md` (section 11.3 status table, stage table row 3).
 
 - [ ] **Step 1:** Update the report: stage 3 "выполнено" for the frontend card, describe states and tokens briefly; remove the "after Tailwind migration" wording.
 - [ ] **Step 2:** With the local stack running (`weather-backend`, `docker compose -f docker-compose.dev.yml up -d --wait` and seed), open Room and Street in the browser pane; verify: all four card states (no_sensor on Street; ready with seed data; no_data by loading with the dust field emptied via a request override; insufficient 24 h), both themes, widths 1440/768/375, chart tabs (PM2.5/PM10 on Room only, tab reset on Street), console without errors. Save screenshots under `docs/screenshots/pr3/` only if requested by the user; otherwise describe the findings in the PR text.
