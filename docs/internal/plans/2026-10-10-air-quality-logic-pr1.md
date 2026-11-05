@@ -8,7 +8,7 @@
 
 **Tech Stack:** React 19, TypeScript, Vite, Vitest (`pnpm test`), ESLint, i18next (ru/uz/en), pnpm.
 
-**Spec:** `docs/superpowers/specs/2026-10-10-dust-card-and-air-quality-scales-design.md` (sections 4, 5 and the status/ranges part of 6; sections 6 UI, CSS tokens and chart tabs belong to PR 3 after the Tailwind v4 migration).
+**Spec:** `docs/internal/specs/2026-10-10-dust-card-and-air-quality-scales-design.md` (sections 4, 5 and the status/ranges part of 6; sections 6 UI, CSS tokens and chart tabs belong to PR 3 after the Tailwind v4 migration).
 
 ## Spec amendments (applied in Task 8)
 
@@ -202,7 +202,7 @@ export function hasEnoughDayCoverage(coverage: number): boolean;  // coverage >=
 
 ### Task 8: 24-hour query, spec amendments, docs, verification
 
-**Files:** Modify `src/entities/weather/api/weather.queries.ts`; the spec file; `docs/PROJECT_REPORT.md` (section 11.3, stage 3 row); `docs/tasks/SPATIAL_VISUALIZATION.md` (T2).
+**Files:** Modify `src/entities/weather/api/weather.queries.ts`; the spec file; `docs/thesis/PROJECT_REPORT.md` (section 11.3, stage 3 row); `docs/team/SPATIAL_VISUALIZATION.md` (T2).
 
 **Interfaces — Consumes:** `getWeatherAggregate`, `dayMeanFromAggregate`, `SENSORS_BY_SOURCE`. **Produces:** `export function useDustDayMeanQuery(type: WeatherPageType): UseQueryResult<{ mean: number; coverage: number } | null>` — enabled only when `SENSORS_BY_SOURCE[type]` includes `'pm25'`, `staleTime` 5 min, `retry: 1`; last 24 h, field `pm25`.
 

@@ -2,7 +2,7 @@
 
 Короткие правила для всех, кто правит фронтенд: людей и ИИ-агентов. Запуск и команды описаны в
 [README.md](README.md), устройство фронтенда — в [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (бэкенд — в репозитории
-`weather-backend`, `docs/ARCHITECTURE.md`), история решений — в [docs/PROJECT_REPORT.md](docs/PROJECT_REPORT.md).
+`weather-backend`, `docs/ARCHITECTURE.md`), история решений — в [docs/thesis/PROJECT_REPORT.md](docs/thesis/PROJECT_REPORT.md).
 
 ## Порядок работы
 
@@ -57,6 +57,6 @@
 
 ## Зоны ответственности
 
-Каталоги разделены между участниками (таблица в [docs/tasks/README.md](docs/tasks/README.md)): свой каталог
+Каталоги разделены между участниками (таблица в [docs/team/README.md](docs/team/README.md)): свой каталог
 правишь сам, в чужой не вносишь правки без согласования, общие файлы меняешь одной строкой. В описании PR
 отметь зону и, если менялась форма данных, парный PR в другом репозитории.

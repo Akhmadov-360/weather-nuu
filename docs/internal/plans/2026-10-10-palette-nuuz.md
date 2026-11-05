@@ -38,7 +38,7 @@ src/shared/lib/chart/chart-colors.ts               read series colours from CSS 
 src/features/chart-selector/ui/ChartSelector.tsx   tints from variables
 src/widgets/sensor-charts/model/chart-option.ts + ui/SensorCharts.tsx   theme-aware colours
 src/components/{LiveStreams,StreamCard,StreamModal}.tsx and card components   remove white/blur hard-codes
-docs/PROJECT_REPORT.md                             short note
+docs/thesis/PROJECT_REPORT.md                             short note
 ```
 
 ---
@@ -73,4 +73,4 @@ docs/PROJECT_REPORT.md                             short note
 ### Task 5: Verification and report
 
 - [ ] **Step 1:** `pnpm typecheck && pnpm lint && pnpm test && pnpm build`; Playwright screenshots of Room and Street, both themes, 1440 and 375 px, dialogs/menus open; console without errors; check layout shift from the new font.
-- [ ] **Step 2:** One short paragraph in `docs/PROJECT_REPORT.md` section 13.1 (palette, typeface, contrast test); push the branch, give the PR link, list what only a human eye can judge.
+- [ ] **Step 2:** One short paragraph in `docs/thesis/PROJECT_REPORT.md` section 13.1 (palette, typeface, contrast test); push the branch, give the PR link, list what only a human eye can judge.

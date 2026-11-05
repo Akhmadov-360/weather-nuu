@@ -207,7 +207,7 @@ Room и Street, светлая и тёмная тема, ширины 1440, 768 
 `weather.queries.ts`, `DashboardLayout.tsx`, `MetricCard.tsx`, `ChartSelector.tsx`,
 `SensorCharts.tsx`, `chart-colors.ts`, `sensor-format.ts`, `globals.css`, `eslint.config.js` (запрет импортов
 из верхних слоёв в `shared`), три файла локалей,
-существующие тесты. Документы: `docs/PROJECT_REPORT.md` (раздел 11.3), `docs/tasks/SPATIAL_VISUALIZATION.md`
+существующие тесты. Документы: `docs/thesis/PROJECT_REPORT.md` (раздел 11.3), `docs/team/SPATIAL_VISUALIZATION.md`
 (T2: шкала AQI уже существует, задача сужается до легенды и показа на карте).
 
 ## 10. Риски и открытые вопросы
