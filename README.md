@@ -20,6 +20,7 @@ shadcn/ui (Radix), i18next, React Router.
 | Документ | Для кого и зачем |
 |----------|-----------------|
 | [docs/tasks/README.md](docs/tasks/README.md) | **участникам**: зоны, правила работы, календарь, задания |
+| [docs/thesis/README.md](docs/thesis/README.md) | диплом: структура на 60–80 страниц, образец раздела, план защиты |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | правила кода и pull request |
 | [AGENTS.md](AGENTS.md) | ИИ-помощникам: что читать и чего не делать |
 | [docs/PROJECT_REPORT.md](docs/PROJECT_REPORT.md) | технический отчёт для диплома: проблемы, решения, замеры |
