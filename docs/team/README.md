@@ -15,6 +15,8 @@
 | Отличительная возможность проекта («умный помощник аудитории») | владелец | [../features/SMART_ASSISTANT.md](../features/SMART_ASSISTANT.md) |
 | Карта всех документов: что кому читать | все | [../README.md](../README.md) |
 
+**Новичок? Начните с [START_HERE.md](START_HERE.md):** установка, Git, Docker, pnpm и первый pull request по шагам.
+
 Прочитайте до первого задания: `README.md`, `AGENTS.md`, `CONTRIBUTING.md` и **оба**
 `docs/ARCHITECTURE.md` (в `weather-nuu` и в `weather-backend`). Если вы работаете с ИИ-помощником,
 он обязан прочитать то же самое: готовое вступление для него ниже.
