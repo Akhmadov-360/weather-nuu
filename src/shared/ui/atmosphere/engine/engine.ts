@@ -1,5 +1,6 @@
 import { HeaderEmitter, type HeaderRect } from './header-emitter';
 import { drawLeaf, drawPetal, drawStrand } from './shapes';
+import { fallSpeedFactor, flipScale, makeFlutter, swayVelocity, tilt, type Flutter } from './flutter';
 import { CAP_MAX, createCap, growCap, landOn, meltCap, type SnowCap, type Surface } from './surfaces';
 
 export type EngineLayer = { kind: string; intensity: number; windX: number };
@@ -18,7 +19,7 @@ type FallingKind = 'snow' | 'rain' | 'hail' | 'petals' | 'leaves' | 'motes';
 const FALLING: readonly FallingKind[] = ['snow', 'rain', 'hail', 'petals', 'leaves', 'motes'];
 
 /** depth: 0 far, 1 middle, 2 near (snow only; the rest stay in the middle). */
-type Particle = { kind: FallingKind; depth: number; variant: number; x: number; y: number; vx: number; vy: number; r: number; ph: number; rot: number; bounced: boolean };
+type Particle = { kind: FallingKind; depth: number; variant: number; x: number; y: number; vx: number; vy: number; r: number; ph: number; rot: number; bounced: boolean; /** How this piece flutters; leaves, petals and flakes only. */ fl?: Flutter };
 type Rest = { id: number; variant: number; dx: number; kind: 'petals' | 'leaves'; age: number; life: number; r: number; rot: number };
 type Splash = { x: number; y: number; vx: number; vy: number; age: number };
 type Ring = { x: number; y: number; age: number };
@@ -166,6 +167,12 @@ export class AtmosphereEngine {
   }
 
   private spawn(kind: FallingKind, anywhere: boolean): Particle {
+    const p = this.spawnBase(kind, anywhere);
+    if (kind === 'leaves' || kind === 'petals' || kind === 'snow') p.fl = makeFlutter(kind, Math.random);
+    return p;
+  }
+
+  private spawnBase(kind: FallingKind, anywhere: boolean): Particle {
     const rnd = (a: number, b: number) => a + Math.random() * (b - a);
     const base = { kind, depth: 1, variant: Math.floor(Math.random() * 4), x: Math.random() * this.w, y: anywhere ? Math.random() * this.h : -10, ph: Math.random() * 6, rot: Math.random() * 6, bounced: false };
     switch (kind) {
@@ -249,9 +256,17 @@ export class AtmosphereEngine {
       p.ph += dt;
       const sway = p.kind === 'snow' ? [8, 14, 20][p.depth]! : p.kind === 'petals' ? 26 : p.kind === 'leaves' ? 36 : p.kind === 'motes' ? 6 : 0;
       const slant = p.kind === 'rain' || p.kind === 'hail' ? wind * 1.6 : wind * 0.7;
-      p.x += (slant + Math.sin(p.ph * 1.4) * sway) * dt;
-      p.y += p.vy * dt;
-      p.rot += dt * (p.kind === 'leaves' ? 2.2 : 1.2);
+      if (p.fl) {
+        // Each piece sways at its own pace, spins slowly and tumbles; the tilt is applied when drawing.
+        p.fl.flipPh += dt * p.fl.flipF;
+        p.x += (slant + swayVelocity(p.ph, p.fl, sway)) * dt;
+        p.y += p.vy * (p.fl.flipF > 0 ? fallSpeedFactor(flipScale(p.fl.flipPh)) : 1) * dt;
+        p.rot += dt * p.fl.spin;
+      } else {
+        p.x += (slant + Math.sin(p.ph * 1.4) * sway) * dt;
+        p.y += p.vy * dt;
+        p.rot += dt * (p.kind === 'leaves' ? 2.2 : 1.2);
+      }
 
       if (p.kind !== 'motes') {
         const hit = landOn(surfaces, prev, { x: p.x, y: p.y });
@@ -361,7 +376,7 @@ export class AtmosphereEngine {
           break;
         case 'petals':
         case 'leaves':
-          this.drawShape(ctx, p.kind, p.x, p.y, p.r, p.rot, p.kind === 'petals' ? c.petals[p.variant % c.petals.length]! : c.leaves[p.variant % c.leaves.length]!, 0.9);
+          this.drawShape(ctx, p.kind, p.x, p.y, p.r, p.rot + (p.fl ? tilt(p.ph, p.fl) : 0), p.kind === 'petals' ? c.petals[p.variant % c.petals.length]! : c.leaves[p.variant % c.leaves.length]!, 0.9, p.fl ? flipScale(p.fl.flipPh) : undefined);
           break;
       }
     }
@@ -418,9 +433,9 @@ export class AtmosphereEngine {
     if (header) ctx.clearRect(header.left - 4, header.top + window.scrollY - 4, header.right - header.left + 8, header.bottom - header.top + 8);
   }
 
-  private drawShape(ctx: CanvasRenderingContext2D, kind: 'petals' | 'leaves' | string, x: number, y: number, r: number, rot: number, colour: string, alpha: number): void {
-    if (kind === 'petals') drawPetal(ctx, x, y, r, rot, colour, alpha);
-    else drawLeaf(ctx, x, y, r, rot, colour, alpha);
+  private drawShape(ctx: CanvasRenderingContext2D, kind: 'petals' | 'leaves' | string, x: number, y: number, r: number, rot: number, colour: string, alpha: number, flip?: number): void {
+    if (kind === 'petals') drawPetal(ctx, x, y, r, rot, colour, alpha, flip);
+    else drawLeaf(ctx, x, y, r, rot, colour, alpha, flip);
   }
 
   /** The floating header's own weather and, at New Year, a strand of lights on its outer edges (never over its buttons). */
@@ -452,7 +467,7 @@ export class AtmosphereEngine {
           ctx.stroke();
           break;
         default:
-          this.drawShape(ctx, p.kind, p.x, p.y, p.r, p.rot, p.kind === 'petals' ? c.petals[p.variant % c.petals.length]! : c.leaves[p.variant % c.leaves.length]!, a * 1.6);
+          this.drawShape(ctx, p.kind, p.x, p.y, p.r, p.rot + (p.fl ? tilt(p.ph, p.fl) : 0), p.kind === 'petals' ? c.petals[p.variant % c.petals.length]! : c.leaves[p.variant % c.leaves.length]!, a * 1.6, p.fl ? flipScale(p.fl.flipPh) : undefined);
       }
     }
     ctx.globalAlpha = 1;
