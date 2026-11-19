@@ -13,6 +13,7 @@ import { useIdleReady } from '@/shared/hooks/useIdleReady';
 import { useTheme } from '@/shared/hooks/useTheme';
 import { AtmosphereSky } from '@/shared/ui/atmosphere/AtmosphereSky';
 import { burstConfetti } from '@/shared/ui/atmosphere/confetti';
+import { packagePlan } from '@/shared/ui/atmosphere/packages/plan';
 import { GreetingBar } from '@/widgets/topbar/ui/GreetingBar';
 import { AtmosphereProvider } from '@/features/atmosphere-settings/model/atmosphere-context';
 import { useAtmosphere } from '@/features/atmosphere-settings/model/use-atmosphere';
@@ -21,9 +22,10 @@ import { TopBar } from '@/widgets/topbar/ui/TopBar';
 const GlassShader = lazy(() => import('@/shared/ui/atmosphere/GlassShader'));
 const GREETING_KEY = 'atmosphere-greetings';
 const AtmosphereStage = lazy(() => import('@/shared/ui/atmosphere/AtmosphereStage'));
-// EXPERIMENT (development only): `?engine=lib` draws the falling layers with ready-made packages to compare them with ours.
-const LibStage = lazy(() => import('@/shared/ui/atmosphere/experimental/LibStage'));
-const USE_LIB_ENGINE = import.meta.env.DEV && new URLSearchParams(window.location.search).get('engine') === 'lib';
+// Leaves, petals, snow and rain are drawn by packages (falling-leaves, react-snowfall, react-rainfall); our engine keeps the
+// rest of the scene. In development `?engine=ours` brings back the engine's own falling layers, to compare or to roll back.
+const PackageStage = lazy(() => import('@/shared/ui/atmosphere/packages/PackageStage'));
+const OWN_FALLING = import.meta.env.DEV && new URLSearchParams(window.location.search).get('engine') === 'ours';
 
 /**
  * Shared frame of the dashboard pages. The header lives here, not in each
@@ -58,6 +60,10 @@ export function AppShell(): React.JSX.Element {
     [dropForSession, setUserChoice, t, userChoice],
   );
   const layers = useMemo(() => scene?.layers ?? [], [scene]);
+  const budget = particleBudget(level, isPhone);
+  const plan = useMemo(() => packagePlan(layers, budget), [layers, budget]);
+  const engineLayers = OWN_FALLING ? layers : plan.rest;
+  const hasPackages = !OWN_FALLING && Boolean(plan.leaves || plan.petals || plan.snow || plan.rain);
   // Rain on the glass: the full level, on a desktop, when real rain falls (never for the classroom's seasonal scene).
   const rain = layers.find((l) => l.kind === 'rain');
   const showGlass = level === 'full' && sceneReady && !isPhone && Boolean(rain) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -100,13 +106,14 @@ export function AppShell(): React.JSX.Element {
           <GlassShader amount={Math.min(1, 0.25 + rain.intensity * 0.6)} dark={resolvedTheme === 'dark'} />
         </Suspense>
       ) : null}
-      {scene && level === 'full' && sceneReady ? (
+      {scene && level === 'full' && sceneReady && hasPackages ? (
         <Suspense fallback={null}>
-          {USE_LIB_ENGINE ? (
-            <LibStage layers={layers} dark={resolvedTheme === 'dark'} />
-          ) : (
-            <AtmosphereStage layers={layers} budget={particleBudget(level, isPhone)} dark={resolvedTheme === 'dark'} lights={scene.lights} onFrame={onFrame} />
-          )}
+          <PackageStage plan={plan} dark={resolvedTheme === 'dark'} onFrame={onFrame} />
+        </Suspense>
+      ) : null}
+      {scene && level === 'full' && sceneReady && (OWN_FALLING || engineLayers.length > 0 || scene.lights) ? (
+        <Suspense fallback={null}>
+          <AtmosphereStage layers={engineLayers} budget={budget} dark={resolvedTheme === 'dark'} lights={scene.lights} onFrame={onFrame} />
         </Suspense>
       ) : null}
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
