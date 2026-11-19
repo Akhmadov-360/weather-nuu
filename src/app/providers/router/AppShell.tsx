@@ -21,6 +21,9 @@ import { TopBar } from '@/widgets/topbar/ui/TopBar';
 const GlassShader = lazy(() => import('@/shared/ui/atmosphere/GlassShader'));
 const GREETING_KEY = 'atmosphere-greetings';
 const AtmosphereStage = lazy(() => import('@/shared/ui/atmosphere/AtmosphereStage'));
+// EXPERIMENT (development only): `?engine=lib` draws the falling layers with ready-made packages to compare them with ours.
+const LibStage = lazy(() => import('@/shared/ui/atmosphere/experimental/LibStage'));
+const USE_LIB_ENGINE = import.meta.env.DEV && new URLSearchParams(window.location.search).get('engine') === 'lib';
 
 /**
  * Shared frame of the dashboard pages. The header lives here, not in each
@@ -99,7 +102,11 @@ export function AppShell(): React.JSX.Element {
       ) : null}
       {scene && level === 'full' && sceneReady ? (
         <Suspense fallback={null}>
-          <AtmosphereStage layers={layers} budget={particleBudget(level, isPhone)} dark={resolvedTheme === 'dark'} lights={scene.lights} onFrame={onFrame} />
+          {USE_LIB_ENGINE ? (
+            <LibStage layers={layers} dark={resolvedTheme === 'dark'} />
+          ) : (
+            <AtmosphereStage layers={layers} budget={particleBudget(level, isPhone)} dark={resolvedTheme === 'dark'} lights={scene.lights} onFrame={onFrame} />
+          )}
         </Suspense>
       ) : null}
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
