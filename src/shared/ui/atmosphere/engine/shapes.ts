@@ -3,13 +3,13 @@
 const TAU = Math.PI * 2;
 
 /** An apricot-blossom petal: a rounded teardrop with a small notch at the tip, shaded from the base to the tip. */
-export function drawPetal(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rot: number, colour: string, alpha: number): void {
+export function drawPetal(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rot: number, colour: string, alpha: number, flip?: number): void {
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.translate(x, y);
   ctx.rotate(rot);
-  // The petal turns over as it falls: its width follows |sin|, so it never vanishes completely.
-  ctx.scale(0.35 + 0.65 * Math.abs(Math.sin(rot * 1.3)), 1);
+  // The petal turns over as it falls. A falling petal gets its own tumble (`flip`); a resting one keeps the width its angle gives it.
+  ctx.scale(flip ?? 0.35 + 0.65 * Math.abs(Math.sin(rot * 1.3)), 1);
   const grad = ctx.createLinearGradient(0, r, 0, -r);
   grad.addColorStop(0, 'rgba(0,0,0,0.18)');
   grad.addColorStop(0.15, colour);
@@ -42,12 +42,12 @@ const LEAF_HALF: ReadonlyArray<readonly [number, number]> = [
 ];
 
 /** A five-lobed autumn leaf with a stem and a midrib; it tumbles by narrowing and widening as it turns. */
-export function drawLeaf(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rot: number, colour: string, alpha: number): void {
+export function drawLeaf(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rot: number, colour: string, alpha: number, flip?: number): void {
   ctx.save();
   ctx.globalAlpha = alpha;
   ctx.translate(x, y);
   ctx.rotate(rot);
-  ctx.scale(0.4 + 0.6 * Math.abs(Math.sin(rot * 1.1 + 0.6)), 1);
+  ctx.scale(flip ?? 0.4 + 0.6 * Math.abs(Math.sin(rot * 1.1 + 0.6)), 1);
   ctx.fillStyle = colour;
   ctx.beginPath();
   LEAF_HALF.forEach(([px, py], i) => (i === 0 ? ctx.moveTo(px * r, py * r) : ctx.lineTo(px * r, py * r)));

@@ -1,3 +1,5 @@
+import { fallSpeedFactor, flipScale, makeFlutter, swayVelocity, type Flutter } from './flutter';
+
 export type HeaderRect = { left: number; top: number; right: number; bottom: number };
 
 export type EmitterKind = 'snow' | 'rain' | 'hail' | 'petals' | 'leaves';
@@ -14,6 +16,8 @@ export type HeaderParticle = {
   variant: number;
   age: number;
   life: number;
+  /** How this piece flutters (leaves, petals, flakes); see flutter.ts. */
+  fl?: Flutter;
 };
 
 const SPEED: Record<EmitterKind, number> = { snow: 38, rain: 300, hail: 320, petals: 36, leaves: 44 };
@@ -45,9 +49,17 @@ export class HeaderEmitter {
     for (const p of this.particles) {
       p.age += dt;
       p.ph += dt;
-      p.rot += dt * 1.4;
-      p.x += (windX * (p.kind === 'rain' || p.kind === 'hail' ? 1.2 : 0.5) + Math.sin(p.ph * 1.6) * (p.kind === 'petals' || p.kind === 'leaves' ? 22 : 8)) * dt;
-      p.y += p.vy * dt;
+      const slant = windX * (p.kind === 'rain' || p.kind === 'hail' ? 1.2 : 0.5);
+      if (p.fl) {
+        p.fl.flipPh += dt * p.fl.flipF;
+        p.rot += dt * p.fl.spin;
+        p.x += (slant + swayVelocity(p.ph, p.fl, p.kind === 'petals' || p.kind === 'leaves' ? 22 : 8)) * dt;
+        p.y += p.vy * (p.fl.flipF > 0 ? fallSpeedFactor(flipScale(p.fl.flipPh)) : 1) * dt;
+      } else {
+        p.rot += dt * 1.4;
+        p.x += (slant + Math.sin(p.ph * 1.6) * 8) * dt;
+        p.y += p.vy * dt;
+      }
     }
     this.particles = this.particles.filter((p) => p.age < p.life);
     if (!header) return;
@@ -73,6 +85,7 @@ export class HeaderEmitter {
         variant: Math.floor(Math.random() * 4),
         age: 0,
         life: LIFE[kind] * (0.8 + Math.random() * 0.4),
+        ...(kind === 'snow' || kind === 'petals' || kind === 'leaves' ? { fl: makeFlutter(kind, Math.random) } : {}),
       });
     }
     this.credit = Math.min(this.credit, 2);
