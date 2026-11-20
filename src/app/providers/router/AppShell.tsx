@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Outlet, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -34,6 +35,7 @@ const OWN_FALLING = import.meta.env.DEV && new URLSearchParams(window.location.s
  */
 export function AppShell(): React.JSX.Element {
   const { pathname } = useLocation();
+  const reduceMotion = useReducedMotion();
   // Room and Street are dashboards with their own station config; the other sections use the Room scene.
   const config = pathname === ROUTES.street ? STREET_CONFIG : ROOM_CONFIG;
   const section = sectionForPath(pathname);
@@ -124,7 +126,15 @@ export function AppShell(): React.JSX.Element {
           switchPath={isDashboard ? config.oppositePath : ROUTES.room}
           switchLabelKey={isDashboard ? config.oppositeNavKey : config.navKey}
         />
-        <Outlet />
+        <motion.div
+          key={pathname}
+          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+          className="flex flex-1 flex-col"
+        >
+          <Outlet />
+        </motion.div>
       </div>
     </div>
     </AtmosphereProvider>

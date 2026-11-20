@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Download } from 'lucide-react';
+import { AnimateIcon } from '@animate-ui/react/icons';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { Download } from '@/components/animate-ui/icons/download';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -119,13 +120,15 @@ export function ExportMenu({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="h-9 gap-1.5 rounded-xl border border-(--glass-border) bg-(--glass-surface-soft) px-2.5 text-[11px] font-medium text-secondary-themed transition-colors hover:bg-(--glass-surface-hover) hover:text-primary-themed sm:text-xs"
-          >
-            <Download className="h-3.5 w-3.5" />
-            {t('export_data')}
-          </Button>
+          <AnimateIcon animateOnHover asChild>
+            <Button
+              variant="ghost"
+              className="h-9 gap-1.5 rounded-xl border border-(--glass-border) bg-(--glass-surface-soft) px-2.5 text-[11px] font-medium text-secondary-themed transition-colors hover:bg-(--glass-surface-hover) hover:text-primary-themed sm:text-xs"
+            >
+              <Download className="h-3.5 w-3.5" />
+              {t('export_data')}
+            </Button>
+          </AnimateIcon>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => handleDownload()}>{t('export_all')}</DropdownMenuItem>

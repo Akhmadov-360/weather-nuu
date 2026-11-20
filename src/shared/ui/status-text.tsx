@@ -1,3 +1,5 @@
+import { SwappingText } from '@animate-ui/react/primitives/texts/swapping';
+
 import type { MetricTone } from '@/shared/types/sensor';
 import { cn } from '@/shared/lib/cn';
 
@@ -31,7 +33,7 @@ export function StatusText({
   return (
     <span className={cn('inline-flex items-center gap-1.5 text-xs font-medium', TEXT[tone], className)}>
       <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', DOT[tone])} aria-hidden />
-      {children}
+      {typeof children === 'string' ? <SwappingText text={children} /> : children}
     </span>
   );
 }

@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CalendarIcon, X } from 'lucide-react';
+import { AnimateIcon } from '@animate-ui/react/icons';
+import { Button as PressButton } from '@animate-ui/react/primitives/buttons/button';
 import type { DateRange, Matcher } from 'react-day-picker';
 import { ru, uz, enUS } from 'date-fns/locale';
 
+import { Calendar as CalendarIcon } from '@/components/animate-ui/icons/calendar';
+import { X } from '@/components/animate-ui/icons/x';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
@@ -90,25 +93,31 @@ export function DateRangePicker({
 
   // One click back to the preset periods; the preset that was active before stays selected.
   const reset = value ? (
-    <button
+    <AnimateIcon animateOnHover asChild>
+    <PressButton
       type="button"
+      hoverScale={1.06}
+      tapScale={0.94}
       onClick={() => onChange(null)}
       aria-label={t('range_reset')}
       title={t('range_reset')}
       className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-(--glass-border) bg-(--glass-surface-soft) text-muted-themed transition-colors hover:bg-(--glass-surface-hover) hover:text-primary-themed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--status-info)"
     >
       <X className="h-3.5 w-3.5" aria-hidden />
-    </button>
+    </PressButton>
+    </AnimateIcon>
   ) : null;
 
   // On a phone the calendar is a bottom sheet with one large month: two months do not fit a popover that narrow.
   if (isPhone) {
     return (
       <div className="inline-flex items-center gap-1.5">
-        <Button variant="ghost" className={triggerClass} onClick={() => setOpen(true)}>
-          <CalendarIcon className="h-3.5 w-3.5" />
-          {label}
-        </Button>
+        <AnimateIcon animateOnHover asChild>
+          <Button variant="ghost" className={triggerClass} onClick={() => setOpen(true)}>
+            <CalendarIcon className="h-3.5 w-3.5" />
+            {label}
+          </Button>
+        </AnimateIcon>
         {reset}
         <Drawer open={open} onOpenChange={setOpen}>
           <DrawerContent className="px-3 pb-6">
@@ -127,10 +136,12 @@ export function DateRangePicker({
     <div className="inline-flex items-center gap-1.5">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" className={triggerClass}>
-            <CalendarIcon className="h-3.5 w-3.5" />
-            {label}
-          </Button>
+          <AnimateIcon animateOnHover asChild>
+            <Button variant="ghost" className={triggerClass}>
+              <CalendarIcon className="h-3.5 w-3.5" />
+              {label}
+            </Button>
+          </AnimateIcon>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-auto p-2">
           {calendar(2)}

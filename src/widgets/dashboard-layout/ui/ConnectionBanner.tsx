@@ -1,4 +1,6 @@
-import { RadioTower, WifiOff } from 'lucide-react';
+import { RadioTower } from 'lucide-react';
+
+import { WifiOff } from '@/components/animate-ui/icons/wifi-off';
 import { useTranslation } from 'react-i18next';
 
 import { splitAge, type ConnectionState } from '@/entities/weather/model/connection';
@@ -42,14 +44,13 @@ export function ConnectionBanner({ connection }: { connection: ConnectionState }
   const silent = connection.level === 'archive';
   if (!linkLost && !silent) return null;
 
-  const Icon = linkLost ? WifiOff : RadioTower;
   const age = connection.ageMs === null ? null : splitAge(connection.ageMs);
   const ago = age ? t(`age_ago_${age.unit}`, { n: age.n }) : null;
 
   return (
     <div role="status" className="flex items-center gap-4 rounded-card border border-(--glass-border) bg-(--glass-surface) p-4 shadow-card sm:px-5">
       <div className="shrink-0 rounded-xl border border-(--glass-border) bg-(--glass-surface-hover) p-2.5 text-secondary-themed">
-        <Icon className="h-5 w-5" aria-hidden />
+        {linkLost ? <WifiOff className="h-5 w-5" animateOnView aria-hidden /> : <RadioTower className="h-5 w-5" aria-hidden />}
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-medium text-primary-themed sm:text-base">

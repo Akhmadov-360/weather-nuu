@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button as PressButton } from '@animate-ui/react/primitives/buttons/button';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -156,22 +158,27 @@ export function MonthPickerDialog({
             <section key={group.year} className="mb-5 last:mb-0">
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{group.year}</h3>
-                <button
+                <PressButton
                   type="button"
+                  hoverScale={1.04}
+                  tapScale={0.96}
                   onClick={() => toggleYear(group.months)}
                   className="rounded-md px-2 py-1 text-xs font-medium text-status-info transition-colors hover:bg-status-info/10"
                 >
                   {group.months.filter((m) => m.enabled).every((m) => selected.has(m.tag)) ? t('export_year_clear') : t('export_year_all')}
-                </button>
+                </PressButton>
               </div>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {group.months.map(({ tag, enabled }) => {
                   const checked = selected.has(tag);
                   return (
-                    <button
+                    <PressButton
                       key={tag}
                       type="button"
                       disabled={!enabled}
+                      aria-pressed={checked}
+                      hoverScale={enabled ? 1.04 : 1}
+                      tapScale={enabled ? 0.95 : 1}
                       onClick={() => toggle(tag)}
                       className={cn(
                         'flex items-center justify-center rounded-lg border px-2 py-3 text-sm font-medium transition-colors sm:py-2 sm:text-xs',
@@ -182,7 +189,7 @@ export function MonthPickerDialog({
                       )}
                     >
                       {monthLabel(tag)}
-                    </button>
+                    </PressButton>
                   );
                 })}
               </div>
