@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button as PressButton } from '@animate-ui/react/primitives/buttons/button';
 
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -181,7 +181,7 @@ export function MonthPickerDialog({
                       tapScale={enabled ? 0.95 : 1}
                       onClick={() => toggle(tag)}
                       className={cn(
-                        'flex items-center justify-center rounded-lg border px-2 py-3 text-sm font-medium transition-colors sm:py-2 sm:text-xs',
+                        'flex items-center justify-center rounded-lg border px-2 py-3 text-sm font-medium transition-colors duration-200 sm:py-2 sm:text-xs',
                         enabled ? 'cursor-pointer' : 'cursor-not-allowed opacity-40',
                         checked
                           ? 'border-status-info bg-status-info/15 text-foreground'
@@ -227,12 +227,25 @@ export function MonthPickerDialog({
                 : t('export_pick_months_count', { count: selected.size })}
             </span>
             <div className="flex gap-2">
-              <Button variant="ghost" size="sm" onClick={onClose}>
+              <PressButton
+                type="button"
+                hoverScale={1.03}
+                tapScale={0.96}
+                onClick={onClose}
+                className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+              >
                 {t('export_cancel')}
-              </Button>
-              <Button variant="default" size="sm" onClick={submit} disabled={selected.size === 0}>
+              </PressButton>
+              <PressButton
+                type="button"
+                hoverScale={selected.size === 0 ? 1 : 1.03}
+                tapScale={selected.size === 0 ? 1 : 0.96}
+                onClick={submit}
+                disabled={selected.size === 0}
+                className={buttonVariants({ variant: 'default', size: 'sm' })}
+              >
                 {t('export_download')}
-              </Button>
+              </PressButton>
             </div>
           </Footer>
         </div>

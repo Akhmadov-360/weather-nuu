@@ -1,5 +1,6 @@
 import * as React from "react"
 import { RadioGroup as RadioGroupPrimitive } from "@animate-ui/react/primitives/radix-ui"
+import { motion } from "motion/react"
 
 import { cn } from "@/lib/utils"
 
@@ -24,7 +25,7 @@ function RadioGroupItem({
     <RadioGroupPrimitive.Item
       data-slot="radio-group-item"
       className={cn(
-        "peer relative flex aspect-square size-5 shrink-0 rounded-full border-2 border-input outline-none after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-[state=checked]:border-status-info data-[state=checked]:bg-status-info",
+        "peer relative flex transition-colors duration-200 aspect-square size-5 shrink-0 rounded-full border-2 border-input outline-none after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-[state=checked]:border-status-info data-[state=checked]:bg-status-info",
         className
       )}
       {...props}
@@ -33,7 +34,12 @@ function RadioGroupItem({
         data-slot="radio-group-indicator"
         className="flex size-5 items-center justify-center"
       >
-        <span className="absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
+        <motion.span
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 500, damping: 24 }}
+          className="absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
+        />
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>
   )
