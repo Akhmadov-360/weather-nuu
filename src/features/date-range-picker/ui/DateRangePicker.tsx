@@ -45,12 +45,19 @@ export function DateRangePicker({
   const isPhone = useMediaQuery('(max-width: 639px)');
   const [openInternal, setOpenInternal] = useState(false);
   const open = openProp ?? openInternal;
+  // The first click of a range is only an anchor: the range is applied when the second day is picked.
+  const [anchor, setAnchor] = useState<Date | null>(null);
   const setOpen = (next: boolean) => {
+    setAnchor(null);
     onOpenChange?.(next);
     if (openProp === undefined) setOpenInternal(next);
   };
 
-  const selected: DateRange | undefined = value ? { from: value.from, to: value.to } : undefined;
+  const selected: DateRange | undefined = anchor
+    ? { from: anchor, to: undefined }
+    : value
+      ? { from: value.from, to: value.to }
+      : undefined;
 
   const formatter = new Intl.DateTimeFormat(i18n.language, { day: '2-digit', month: '2-digit', year: 'numeric' });
   const label = value ? `${formatter.format(value.from)} – ${formatter.format(value.to)}` : t('range_custom');
@@ -64,16 +71,17 @@ export function DateRangePicker({
   const triggerClass =
     'h-9 gap-1.5 rounded-xl border border-(--glass-border) bg-(--glass-surface-soft) px-2.5 text-[11px] font-medium text-secondary-themed transition-colors hover:bg-(--glass-surface-hover) hover:text-primary-themed sm:text-xs';
 
-  const handleSelect = (range: DateRange | undefined) => {
-    if (range?.from && range.to) {
-      // The calendar hands over midnight of the last day, which would cut that day off: take it to the end of the day (but not into the future).
-      const endOfDay = new Date(range.to);
-      endOfDay.setHours(23, 59, 59, 999);
-      onChange({ from: range.from, to: new Date(Math.min(endOfDay.getTime(), Date.now())) });
-      setOpen(false);
-    } else if (!range) {
-      onChange(null);
+  const handleSelect = (_range: DateRange | undefined, picked: Date) => {
+    if (!anchor) {
+      setAnchor(picked);
+      return;
     }
+    const [from, to] = picked < anchor ? [picked, anchor] : [anchor, picked];
+    // The calendar hands over midnight of the last day, which would cut that day off: take it to the end of the day (but not into the future).
+    const endOfDay = new Date(to);
+    endOfDay.setHours(23, 59, 59, 999);
+    onChange({ from, to: new Date(Math.min(endOfDay.getTime(), Date.now())) });
+    setOpen(false);
   };
 
   const calendar = (months: number, className?: string) => (
