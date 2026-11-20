@@ -53,9 +53,10 @@ export function useLatestPoint(type: WeatherPageType): WeatherLatest | undefined
 }
 
 /**
- * Preset ranges (7д / 30д / 90д) now always use the bucketed aggregate
+ * Preset ranges (6ч / 24ч / 7д / 30д / 90д) use the bucketed aggregate
  * endpoint — a single ~1500-point response instead of dozens of raw
- * paginated pages. 1h/6h/24h still ride the live cache client-side.
+ * paginated pages. Only 1h rides the live cache client-side (the cache
+ * holds ~4 h, so it cannot honestly serve 6h or 24h).
  * `enabled` is off for the ranges that don't need a server fetch.
  */
 export function useWeatherHistoryRangeQuery(type: WeatherPageType, range: TimeRange) {
@@ -69,6 +70,8 @@ export function useWeatherHistoryRangeQuery(type: WeatherPageType, range: TimeRa
     queryFn: () => getWeatherAggregate(type, { from: from!, to }),
     enabled: needsServerFetch && from !== null,
     staleTime: 60_000,
+    // Short windows end "now", so keep them moving without the live cache.
+    refetchInterval: range === "6h" || range === "24h" ? 60_000 : false,
   });
 }
 

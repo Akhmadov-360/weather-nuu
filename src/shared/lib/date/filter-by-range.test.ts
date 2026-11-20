@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  CLIENT_ONLY_RANGES,
+  RANGE_TO_HOURS,
   customRangeToHours,
   filterByExactRange,
   filterByTimeRange,
@@ -105,5 +107,13 @@ describe('customRangeToHours', () => {
   it('caps at 90 days', () => {
     const from = new Date('2025-01-01T00:00:00Z');
     expect(customRangeToHours({ from, to: new Date() })).toBe(90 * 24);
+  });
+});
+
+describe('range transport', () => {
+  it('serves only 1h from the live cache: the cache holds ~4 h, so 6h and 24h must come from the server', () => {
+    expect([...CLIENT_ONLY_RANGES]).toEqual(['1h']);
+    expect(RANGE_TO_HOURS['6h']).toBe(6);
+    expect(RANGE_TO_HOURS['24h']).toBe(24);
   });
 });
