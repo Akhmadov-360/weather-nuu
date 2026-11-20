@@ -1,8 +1,11 @@
 import { motion, useReducedMotion } from 'framer-motion';
-import { Check, ChevronDown, Globe } from 'lucide-react';
+import { AnimateIcon } from '@animate-ui/react/icons';
+import { Check } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { ChevronDown } from '@/components/animate-ui/icons/chevron-down';
+import { Globe } from '@/components/animate-ui/icons/globe';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
@@ -54,6 +57,7 @@ export function LanguageSwitcher(): React.JSX.Element {
         if (!next) setActive(null);
       }}
     >
+      <AnimateIcon animateOnHover asChild>
       <DropdownMenuTrigger asChild>
         {/* No border/bg — matches ThemeToggle now that the group uses dividers, not per-item pills. */}
         <Button
@@ -73,6 +77,7 @@ export function LanguageSwitcher(): React.JSX.Element {
           <ChevronDown className="hidden h-3 w-3 opacity-50 sm:block" />
         </Button>
       </DropdownMenuTrigger>
+      </AnimateIcon>
 
       <DropdownMenuContent
         align="end"

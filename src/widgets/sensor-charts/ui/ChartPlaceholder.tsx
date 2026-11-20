@@ -1,3 +1,4 @@
+import { Button } from '@animate-ui/react/primitives/buttons/button';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
@@ -47,13 +48,15 @@ export function ChartEmpty({ onWiden }: { onWiden?: () => void }): React.JSX.Ele
       <div className="relative text-base font-medium text-secondary-themed">{t('no_data_for_range')}</div>
       <div className="relative max-w-sm text-sm text-muted-themed">{t('chart_empty_hint')}</div>
       {onWiden ? (
-        <button
+        <Button
           type="button"
+          hoverScale={1.03}
+          tapScale={0.97}
           onClick={onWiden}
           className="relative mt-1 rounded-full border border-(--status-info)/60 px-4 py-2 text-sm text-(--status-info) transition-colors hover:bg-(--status-info)/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--status-info)"
         >
           {t('chart_empty_widen')}
-        </button>
+        </Button>
       ) : null}
     </motion.div>
   );

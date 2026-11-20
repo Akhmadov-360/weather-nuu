@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { AlertTriangle } from "lucide-react";
+import { TriangleAlert } from "@/components/animate-ui/icons/triangle-alert";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
@@ -18,7 +18,7 @@ export function ErrorState({ message, onRetry }: ErrorStateProps): React.JSX.Ele
       className="flex flex-col items-center justify-center gap-4 rounded-panel border border-(--glass-border) bg-(--glass-surface) p-6 text-center"
     >
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-status-critical/10 text-status-critical">
-        <AlertTriangle className="h-5 w-5" />
+        <TriangleAlert className="h-5 w-5" animateOnView />
       </div>
 
       <div className="text-sm text-secondary-themed">{message ?? t('error_data')}</div>

@@ -1,7 +1,9 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { Moon, Sun } from 'lucide-react';
+import { AnimateIcon } from '@animate-ui/react/icons';
 import { useTranslation } from 'react-i18next';
 
+import { Moon } from '@/components/animate-ui/icons/moon';
+import { Sun } from '@/components/animate-ui/icons/sun';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/shared/hooks/useTheme';
 
@@ -17,6 +19,7 @@ export function ThemeToggle(): React.JSX.Element {
   const Icon = resolvedTheme === 'dark' ? Moon : Sun;
 
   return (
+    <AnimateIcon animateOnHover asChild>
     <Button
       variant="ghost"
       size="icon-sm"
@@ -47,5 +50,6 @@ export function ThemeToggle(): React.JSX.Element {
         </motion.span>
       </AnimatePresence>
     </Button>
+    </AnimateIcon>
   );
 }
