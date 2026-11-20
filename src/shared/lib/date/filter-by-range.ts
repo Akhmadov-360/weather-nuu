@@ -3,8 +3,13 @@ type Dated = { date: string };
 
 export type TimeRange = '1h' | '6h' | '24h' | '7d' | '30d' | '90d';
 
-/** Ranges the canonical live-polled/WS-fed cache (≤24h) can satisfy client-side, no extra fetch needed. */
-export const CLIENT_ONLY_RANGES: ReadonlySet<TimeRange> = new Set(['1h', '6h', '24h']);
+/**
+ * Ranges the live-polled cache can satisfy client-side, no extra fetch needed.
+ * Only 1h: the cache is capped at MAX_LIVE_HISTORY_POINTS (3000 readings, ~4 h at
+ * one reading per 5 s), so 6h and 24h would silently show the same ~4 h window.
+ * They go through the server aggregate instead.
+ */
+export const CLIENT_ONLY_RANGES: ReadonlySet<TimeRange> = new Set(['1h']);
 
 /**
  * hours= value to send the backend for ranges that need a wider
@@ -15,6 +20,8 @@ export const CLIENT_ONLY_RANGES: ReadonlySet<TimeRange> = new Set(['1h', '6h', '
  * export flow for raw analytics. See docs/decisions/history-analytics.md.
  */
 export const RANGE_TO_HOURS: Partial<Record<TimeRange, number>> = {
+  '6h':  6,
+  '24h': 24,
   '7d':  7  * 24,
   '30d': 30 * 24,
   '90d': 90 * 24,
