@@ -9,11 +9,11 @@ import { AssistantChat } from './AssistantChat';
 
 // The third-party visuals are replaced by plain stand-ins: these tests are about what the chat does.
 vi.mock('@/components/ui/prompt-bar', () => ({
-  default: function PromptBarStub({ onSend, onStop, busy, promptLabel, sendLabel, stopLabel }: { onSend: (t: string, d: object) => void; onStop: () => void; busy: boolean; promptLabel: string; sendLabel: string; stopLabel: string }) {
+  default: function PromptBarStub({ onSend, onStop, busy, promptLabel, sendLabel, stopLabel, placeholder }: { onSend: (t: string, d: object) => void; onStop: () => void; busy: boolean; promptLabel: string; sendLabel: string; stopLabel: string; placeholder: string }) {
     const [value, setValue] = useState('');
     return (
       <div>
-        <input aria-label={promptLabel} value={value} onChange={(e) => setValue(e.target.value)} />
+        <textarea aria-label={promptLabel} placeholder={placeholder} value={value} onChange={(e) => setValue(e.target.value)} />
         <button
           type="button"
           onClick={() => {
@@ -38,10 +38,10 @@ vi.mock('@/components/ui/lattice-loader', () => ({
   ),
 }));
 vi.mock('@/components/animate-ui/backgrounds/stars', () => ({ StarsBackground: ({ children }: { children?: React.ReactNode }) => <div>{children}</div> }));
-vi.mock('@animate-ui/react/primitives/texts/typing', () => ({
-  TypingText: ({ text }: { text: string }) => <span data-testid="typing">{text}</span>,
-  TypingTextCursor: () => null,
-}));
+vi.mock('@/components/ui/blur-text', () => ({ default: ({ text }: { text: string }) => <p>{text}</p> }));
+vi.mock('@/components/ui/shiny-text', () => ({ default: ({ text }: { text: string }) => <span>{text}</span> }));
+let currentTheme: 'dark' | 'light' = 'dark';
+vi.mock('@/shared/hooks/useTheme', () => ({ useTheme: () => ({ resolvedTheme: currentTheme }) }));
 
 type Stream = (input: StreamChatInput) => AsyncGenerator<ChatEvent>;
 
@@ -62,9 +62,9 @@ function ask(text: string) {
   fireEvent.click(screen.getByRole('button', { name: 'Отправить' }));
 }
 
-function mockMotionPreference(reduce: boolean) {
+function mockMotionPreference(reduce: boolean, coarse = false) {
   vi.stubGlobal('matchMedia', (query: string) => ({
-    matches: reduce && query.includes('prefers-reduced-motion'),
+    matches: (reduce && query.includes('prefers-reduced-motion')) || (coarse && query.includes('pointer: coarse')),
     media: query,
     addEventListener: () => undefined,
     removeEventListener: () => undefined,
@@ -75,7 +75,11 @@ function mockMotionPreference(reduce: boolean) {
   }));
 }
 
-beforeEach(() => mockMotionPreference(false));
+// Most tests are not about the flight of the question, which would add a second copy of the text: motion is off.
+beforeEach(() => {
+  currentTheme = 'dark';
+  mockMotionPreference(true);
+});
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
@@ -93,15 +97,30 @@ describe('the empty chat', () => {
     expect(calls[0]!.message).toBe('Какая сейчас температура в аудитории?');
   });
 
-  it('types the greeting only when motion is allowed', () => {
-    const { stream } = scripted();
-    render(<AssistantChat context="room" stream={stream} />);
-    expect(screen.getByTestId('typing')).toBeTruthy();
+  it('says which data the assistant works from, for the page it was opened on', () => {
+    render(<AssistantChat context="room" stream={scripted().stream} />);
+    expect(screen.getByText('Данные аудитории в реальном времени')).toBeTruthy();
     cleanup();
-    mockMotionPreference(true);
-    render(<AssistantChat context="room" stream={stream} />);
-    expect(screen.queryByTestId('typing')).toBeNull();
-    expect(screen.getByText('Спросите, что сейчас с воздухом.')).toBeTruthy();
+    render(<AssistantChat context="street" stream={scripted().stream} />);
+    expect(screen.getByText('Данные уличных датчиков')).toBeTruthy();
+  });
+
+  it('asks in the field about the air where the visitor is: the room, or outside', () => {
+    render(<AssistantChat context="room" stream={scripted().stream} />);
+    expect(screen.getByLabelText('Вопрос помощнику').getAttribute('placeholder')).toBe('Спросите о воздухе в аудитории');
+    cleanup();
+    render(<AssistantChat context="street" stream={scripted().stream} />);
+    expect(screen.getByLabelText('Вопрос помощнику').getAttribute('placeholder')).toBe('Спросите о воздухе на улице');
+  });
+
+  it('follows the theme of the page with its own colours', () => {
+    currentTheme = 'light';
+    const { container } = render(<AssistantChat context="room" stream={scripted().stream} />);
+    expect((container.firstElementChild as HTMLElement).style.getPropertyValue('--ai-bg')).toBe('#F5F7FC');
+    cleanup();
+    currentTheme = 'dark';
+    const dark = render(<AssistantChat context="room" stream={scripted().stream} />);
+    expect((dark.container.firstElementChild as HTMLElement).style.getPropertyValue('--ai-bg')).toBe('#0B1020');
   });
 
   it('shows the privacy note and the not-medical-advice line', () => {
@@ -240,5 +259,95 @@ describe('errors', () => {
     render(<AssistantChat context="room" stream={stream} />);
     ask('Вопрос');
     expect((await screen.findByRole('alert')).textContent).toContain('Нет связи с сервером.');
+  });
+});
+
+describe('tool steps', () => {
+  it('shows one line for the tools of an answer, not one for each', async () => {
+    const { stream } = scripted([
+      { type: 'tool_start', id: 'a', name: 'get_current' },
+      { type: 'tool_start', id: 'b', name: 'get_current' },
+      { type: 'tool_start', id: 'c', name: 'get_period_summary' },
+      { type: 'tool_end', id: 'a', name: 'get_current', ok: true },
+      { type: 'tool_end', id: 'b', name: 'get_current', ok: true },
+      { type: 'tool_end', id: 'c', name: 'get_period_summary', ok: true },
+      { type: 'text', delta: 'Готово' },
+      done,
+    ]);
+    render(<AssistantChat context="room" stream={stream} />);
+    ask('Сравни');
+    await screen.findByText('Готово');
+    expect(screen.getAllByText('Данные получены')).toHaveLength(1);
+  });
+});
+
+describe('on a phone', () => {
+  function stubKeyboard(height: number) {
+    vi.stubGlobal('visualViewport', { height, addEventListener: () => undefined, removeEventListener: () => undefined });
+    vi.stubGlobal('innerHeight', 800);
+  }
+
+  it('hides the small print while the keyboard is open, and shows it again when it is closed', () => {
+    stubKeyboard(380);
+    render(<AssistantChat context="room" stream={scripted().stream} />);
+    expect(screen.queryByText('Совет не является медицинской рекомендацией.')).toBeNull();
+    cleanup();
+    stubKeyboard(800);
+    render(<AssistantChat context="room" stream={scripted().stream} />);
+    expect(screen.getByText('Совет не является медицинской рекомендацией.')).toBeTruthy();
+  });
+
+  it('closes the keyboard after a question is sent', async () => {
+    mockMotionPreference(false, true);
+    const { stream } = scripted([done]);
+    render(<AssistantChat context="room" stream={stream} />);
+    const field = screen.getByLabelText('Вопрос помощнику');
+    field.focus();
+    expect(document.activeElement).toBe(field);
+    ask('Вопрос');
+    await waitFor(() => expect(document.activeElement).not.toBe(field));
+  });
+
+  it('keeps the focus in the field on a computer', async () => {
+    const { stream, calls } = scripted([done]);
+    render(<AssistantChat context="room" stream={stream} />);
+    const field = screen.getByLabelText('Вопрос помощнику');
+    field.focus();
+    ask('Вопрос');
+    await waitFor(() => expect(calls).toHaveLength(1));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(document.activeElement).toBe(field);
+  });
+});
+
+describe('the question flying to the dialogue', () => {
+  it('flies a copy of the question while the real bubble waits, then shows the bubble', async () => {
+    mockMotionPreference(false);
+    const { stream } = scripted([{ type: 'text', delta: 'Ответ' }, done]);
+    const { container } = render(<AssistantChat context="room" stream={stream} />);
+    ask('Летящий вопрос');
+    await waitFor(() => expect(document.querySelector('[data-flying-message]')).not.toBeNull());
+    const bubble = container.querySelector('[data-last-user]') as HTMLElement;
+    expect(bubble.style.opacity).toBe('0');
+    // However the animation ends, the real bubble is there for the visitor within a moment.
+    await waitFor(() => expect(document.querySelector('[data-flying-message]')).toBeNull(), { timeout: 2500 });
+    expect(bubble.style.opacity).toBe('');
+  });
+
+  it('does not fly when the visitor asks for less motion', async () => {
+    const { stream } = scripted([done]);
+    const { container } = render(<AssistantChat context="room" stream={stream} />);
+    ask('Без полёта');
+    await screen.findByText('Без полёта');
+    expect(document.querySelector('[data-flying-message]')).toBeNull();
+    expect((container.querySelector('[data-last-user]') as HTMLElement).style.opacity).toBe('');
+  });
+
+  it('flies from the suggestion that was pressed', async () => {
+    mockMotionPreference(false);
+    const { stream } = scripted([done]);
+    render(<AssistantChat context="room" stream={stream} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Какой сейчас уровень пыли PM2.5?' }));
+    await waitFor(() => expect(document.querySelector('[data-flying-message]')).not.toBeNull());
   });
 });
