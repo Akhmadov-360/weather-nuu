@@ -1,7 +1,8 @@
-import { Toaster } from 'sonner';
+import { Toaster } from 'sileo';
+import 'sileo/styles.css';
 import { useTheme } from '@/shared/hooks/useTheme';
 
-/** Thin wrapper so sonner picks up our resolved (not just selected) theme — needs to live inside ThemeProvider. */
+/** Toasts (sileo, spring-physics): a thin wrapper so they follow our resolved theme. Lives inside ThemeProvider. */
 export function AppToaster(): React.JSX.Element {
   const { resolvedTheme } = useTheme();
 
@@ -9,18 +10,8 @@ export function AppToaster(): React.JSX.Element {
     <Toaster
       theme={resolvedTheme}
       position="top-center"
-      offset={{ top: 80 }}
-      mobileOffset={{ top: 56 }}
-      richColors
-      closeButton
-      toastOptions={{
-        style: {
-          background: 'var(--glass-surface-hover)',
-          border: '1px solid var(--glass-border)',
-          color: 'var(--text-primary)',
-          backdropFilter: 'blur(12px)',
-        },
-      }}
+      offset={{ top: 72 }}
+      options={{ fill: resolvedTheme === 'dark' ? '#171C30' : '#FFFFFF', roundness: 18 }}
     />
   );
 }

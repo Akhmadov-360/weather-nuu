@@ -14,7 +14,7 @@ export function ToolChip({ step }: { step: Pick<ToolStep, 'name' | 'status'> }):
       gap={2}
       fontSize={13}
       showTimer={false}
-      color="var(--season-accent, #8FB0DE)"
+      color="var(--ai-accent)"
       status={step.status === 'working' ? 'working' : step.status === 'done' ? 'done' : 'error'}
       label={t(toolKey(step.name))}
       doneLabel={t('assistant_tool_done')}

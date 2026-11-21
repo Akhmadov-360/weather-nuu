@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import { useTranslation } from 'react-i18next';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Outlet, useLocation } from 'react-router-dom';
-import { toast } from 'sonner';
+import { sileo } from 'sileo';
 
 import { loadSeen, markGreetingSeen, shouldShowGreeting } from '@/entities/atmosphere/model/greeting-seen';
 import type { EventId } from '@/entities/atmosphere/model/calendar';
@@ -57,8 +57,11 @@ export function AppShell(): React.JSX.Element {
       if (dropped.current || governor.current.sample(frameMs) !== 'drop') return;
       dropped.current = true;
       if (userChoice === null) dropForSession();
-      toast(t('atm_governor_toast'), {
-        action: { label: t('atm_governor_restore'), onClick: () => setUserChoice('full') },
+      sileo.action({
+        title: t('atm_governor_toast'),
+        position: 'top-center',
+        duration: 12000,
+        button: { title: t('atm_governor_restore'), onClick: () => setUserChoice('full') },
       });
     },
     [dropForSession, setUserChoice, t, userChoice],

@@ -6,6 +6,7 @@ import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import type { AssistantContext } from '../model/events';
 import type { ChatStream } from '../model/use-assistant-chat';
 import { AssistantChat } from './AssistantChat';
+import { paletteStyle, useAssistantTheme } from './palette';
 
 type AssistantPanelProps = {
   context: AssistantContext;
@@ -17,29 +18,31 @@ type AssistantPanelProps = {
 
 /**
  * The assistant as a panel: a sheet over the page from the bottom on a phone (full height, drag the handle
- * down to close), a panel on the right from `sm` up. The chat inside forgets the dialogue when the panel
- * is closed: the server keeps nothing, and neither does the page.
+ * down to close), a panel on the right from `sm` up. It follows the theme of the page, dark or light. The
+ * chat inside forgets the dialogue when the panel is closed: the server keeps nothing, and neither does the page.
  */
 export function AssistantPanel({ context, open, onOpenChange, stream }: AssistantPanelProps): React.JSX.Element {
   const { t } = useTranslation('assistant');
   const isPhone = useMediaQuery('(max-width: 639px)');
+  const theme = useAssistantTheme();
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction={isPhone ? 'bottom' : 'right'}>
       <DrawerContent
-        className="h-[92dvh] max-h-[92dvh] gap-0 overflow-hidden border-white/10 bg-[#0B1020] p-0 text-[#E8ECF8] data-[vaul-drawer-direction=right]:h-dvh data-[vaul-drawer-direction=right]:max-h-dvh data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:rounded-none data-[vaul-drawer-direction=right]:sm:max-w-md"
+        style={paletteStyle(theme)}
+        className="h-[92dvh] max-h-[92dvh] gap-0 overflow-hidden border-(--ai-border) bg-(--ai-bg) p-0 text-(--ai-ink) data-[vaul-drawer-direction=right]:h-dvh data-[vaul-drawer-direction=right]:max-h-dvh data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:rounded-none data-[vaul-drawer-direction=right]:sm:max-w-md"
       >
-        <div className="relative z-20 flex items-center justify-between gap-3 border-b border-white/10 bg-[#0B1020]/80 px-5 py-3 backdrop-blur">
+        <div className="relative z-20 flex items-center justify-between gap-3 border-b border-(--ai-border) bg-(--ai-bg)/80 px-5 py-3 backdrop-blur">
           <div className="min-w-0">
-            <DrawerTitle className="text-base font-semibold text-[#E8ECF8]">{t('assistant_title')}</DrawerTitle>
-            <DrawerDescription className="sr-only">{t('assistant_placeholder')}</DrawerDescription>
+            <DrawerTitle className="text-base font-semibold text-(--ai-ink)">{t('assistant_title')}</DrawerTitle>
+            <DrawerDescription className="sr-only">{t(context === 'street' ? 'assistant_placeholder_street' : 'assistant_placeholder_room')}</DrawerDescription>
           </div>
           <AnimateIcon animateOnHover asChild>
             <DrawerClose asChild>
               <button
                 type="button"
                 aria-label={t('assistant_close')}
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[#8E99B8] transition-colors hover:bg-white/10 hover:text-[#E8ECF8] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#8FB0DE]"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-(--ai-muted) transition-colors hover:bg-(--ai-ink)/10 hover:text-(--ai-ink) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--ai-accent)"
               >
                 <X className="h-4 w-4" aria-hidden />
               </button>
