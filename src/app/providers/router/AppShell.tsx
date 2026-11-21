@@ -26,6 +26,8 @@ const AtmosphereStage = lazy(() => import('@/shared/ui/atmosphere/AtmosphereStag
 // Leaves, petals, snow and rain are drawn by packages (falling-leaves, react-snowfall, react-rainfall); our engine keeps the
 // rest of the scene. In development `?engine=ours` brings back the engine's own falling layers, to compare or to roll back.
 const PackageStage = lazy(() => import('@/shared/ui/atmosphere/packages/PackageStage'));
+// The assistant's button: its own small chunk, and no button at all unless the server says the assistant is on.
+const AssistantLauncher = lazy(() => import('@/features/assistant-chat/ui/Launcher'));
 const OWN_FALLING = import.meta.env.DEV && new URLSearchParams(window.location.search).get('engine') === 'ours';
 
 /**
@@ -136,6 +138,9 @@ export function AppShell(): React.JSX.Element {
           <Outlet />
         </motion.div>
       </div>
+      <Suspense fallback={null}>
+        <AssistantLauncher />
+      </Suspense>
     </div>
     </AtmosphereProvider>
   );
