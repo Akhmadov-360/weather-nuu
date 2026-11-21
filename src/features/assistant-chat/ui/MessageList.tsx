@@ -2,7 +2,6 @@ import { useLayoutEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import LatticeLoader from '@/components/ui/lattice-loader';
 import type { ChatState } from '../model/conversation';
-import { summarizeTools } from '../model/tool-summary';
 import { Markdown } from './Markdown';
 import { ToolChip } from './ToolChip';
 
@@ -24,7 +23,6 @@ export function MessageList({ state, hideLastQuestion = false }: { state: ChatSt
 
   const lastIndex = state.messages.length - 1;
   const lastQuestionIndex = state.messages.map((m) => m.role).lastIndexOf('user');
-  const tool = summarizeTools(state.tools);
   const streaming = state.status === 'streaming';
 
   return (
@@ -58,9 +56,9 @@ export function MessageList({ state, hideLastQuestion = false }: { state: ChatSt
         const current = index === lastIndex;
         return (
           <div key={message.id} className="flex max-w-full flex-col gap-2 text-sm leading-[1.55] text-(--ai-ink)">
-            {current && tool ? <ToolChip step={tool} /> : null}
-            {current && streaming && message.text === '' && !tool ? (
-              <LatticeLoader pattern="orbit" grid={3} cellSize={5} gap={2} fontSize={13} showTimer={false} color="var(--ai-accent)" label={t('assistant_tool_unknown')} />
+            {message.tool ? <ToolChip step={message.tool} /> : null}
+            {current && streaming && message.text === '' && !message.tool ? (
+              <LatticeLoader status="working" pattern="orbit" grid={3} cellSize={5} gap={2} fontSize={13} showTimer={false} color="var(--ai-accent)" label={t('assistant_thinking')} />
             ) : null}
             {message.text ? (
               <Markdown

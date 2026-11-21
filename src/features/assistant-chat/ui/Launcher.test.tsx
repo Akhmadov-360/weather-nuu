@@ -8,7 +8,7 @@ const status = vi.hoisted(() => ({ value: { data: undefined as { enabled: boolea
 
 // The animated icon needs browser features jsdom lacks; its animation is not what is tested here.
 vi.mock('@animate-ui/react/icons', () => ({ AnimateIcon: ({ children }: { children: React.ReactNode }) => children }));
-vi.mock('@/components/animate-ui/icons/bot-message-square', () => ({ BotMessageSquare: () => <svg /> }));
+vi.mock('./use-air-tone', () => ({ useAirTone: () => 'good' }));
 vi.mock('../api/assistant-status', () => ({ useAssistantStatus: () => status.value }));
 vi.mock('./AssistantPanel', () => ({
   AssistantPanel: ({ context, open }: { context: string; open: boolean }) => <div data-testid="panel" data-context={context} data-open={String(open)} />,

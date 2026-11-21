@@ -62,9 +62,9 @@ export default function AtmosphereStage({ layers, budget, dark, lights, onFrame 
   return (
     <>
       {/* In the document: scrolls natively with the cards, so what hangs on their edges never lags. */}
-      <canvas ref={decorRef} className="pointer-events-none absolute inset-0 z-20 h-full w-full" aria-hidden />
+      <canvas ref={decorRef} className="pointer-events-none absolute inset-0 z-20 h-full w-full" aria-hidden data-atmosphere="" />
       {/* Fixed to the window: falling particles, sky effects, lightning. */}
-      <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-40 h-full w-full" aria-hidden />
+      <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-40 h-full w-full" aria-hidden data-atmosphere="" />
     </>
   );
 }

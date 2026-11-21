@@ -130,3 +130,33 @@ describe('finishTurn', () => {
     expect(finishTurn(done)).toBe(done);
   });
 });
+
+describe('the tool line stays with its answer', () => {
+  it('is written onto the answer while the tools work and after they are done', () => {
+    let s = run(startTurn(initialState(), 'q'), { type: 'tool_start', id: 't1', name: 'get_current' });
+    expect(lastAssistant(s)!.tool).toEqual({ name: 'get_current', status: 'working' });
+    s = run(s, { type: 'tool_end', id: 't1', name: 'get_current', ok: true }, { type: 'text', delta: 'Ответ' }, { type: 'done', inputTokens: 0, outputTokens: 0 });
+    expect(lastAssistant(s)!.tool).toEqual({ name: 'get_current', status: 'done' });
+  });
+
+  it('is not lost when the next question is answered without tools', () => {
+    let s = run(
+      startTurn(initialState(), 'Первый'),
+      { type: 'tool_start', id: 't1', name: 'get_current' },
+      { type: 'tool_end', id: 't1', name: 'get_current', ok: true },
+      { type: 'text', delta: 'Ответ 1' },
+      { type: 'done', inputTokens: 0, outputTokens: 0 },
+    );
+    s = run(startTurn(s, 'Второй'), { type: 'text', delta: 'Ответ 2 из общих знаний' }, { type: 'done', inputTokens: 0, outputTokens: 0 });
+    const answers = s.messages.filter((m) => m.role === 'assistant');
+    expect(answers[0]!.tool).toEqual({ name: 'get_current', status: 'done' });
+    expect(answers[1]!.tool).toBeUndefined();
+  });
+
+  it('is settled when the turn ends by an error or by the stop button', () => {
+    const failed = run(startTurn(initialState(), 'q'), { type: 'tool_start', id: 't1', name: 'get_current' }, { type: 'error', code: 'upstream' });
+    expect(failed.messages.at(-1)!.tool).toBeUndefined();
+    const stopped = finishTurn(run(startTurn(initialState(), 'q'), { type: 'text', delta: 'a' }, { type: 'tool_start', id: 't1', name: 'get_current' }));
+    expect(lastAssistant(stopped)!.tool?.status).toBe('done');
+  });
+});

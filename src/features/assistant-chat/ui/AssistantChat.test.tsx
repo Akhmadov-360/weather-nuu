@@ -38,6 +38,7 @@ vi.mock('@/components/ui/lattice-loader', () => ({
   ),
 }));
 vi.mock('@/components/animate-ui/backgrounds/stars', () => ({ StarsBackground: ({ children }: { children?: React.ReactNode }) => <div>{children}</div> }));
+vi.mock('./use-air-tone', () => ({ useAirTone: () => 'good' }));
 vi.mock('@/components/ui/blur-text', () => ({ default: ({ text }: { text: string }) => <p>{text}</p> }));
 vi.mock('@/components/ui/shiny-text', () => ({ default: ({ text }: { text: string }) => <span>{text}</span> }));
 let currentTheme: 'dark' | 'light' = 'dark';
@@ -77,6 +78,7 @@ function mockMotionPreference(reduce: boolean, coarse = false) {
 
 // Most tests are not about the flight of the question, which would add a second copy of the text: motion is off.
 beforeEach(() => {
+  localStorage.clear();
   currentTheme = 'dark';
   mockMotionPreference(true);
 });
@@ -349,5 +351,109 @@ describe('the question flying to the dialogue', () => {
     render(<AssistantChat context="room" stream={stream} />);
     fireEvent.click(screen.getByRole('button', { name: 'Какой сейчас уровень пыли PM2.5?' }));
     await waitFor(() => expect(document.querySelector('[data-flying-message]')).not.toBeNull());
+  });
+});
+
+describe('suggestions follow the page', () => {
+  it('on the street page the questions are about the street, not the auditorium', () => {
+    render(<AssistantChat context="street" stream={scripted().stream} />);
+    expect(screen.getByRole('button', { name: 'Какая сейчас температура на улице?' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Какая сейчас температура в аудитории?' })).toBeNull();
+    expect(screen.queryByText(/PM2\.5/)).toBeNull();
+  });
+
+  it('on the room page they are about the auditorium', () => {
+    render(<AssistantChat context="room" stream={scripted().stream} />);
+    expect(screen.getByRole('button', { name: 'Какая сейчас температура в аудитории?' })).toBeTruthy();
+  });
+});
+
+describe('the badge of the data', () => {
+  it('stays with the first answer after a second question that needed no data', async () => {
+    const { stream } = scripted(
+      [
+        { type: 'tool_start', id: 'a', name: 'get_current' },
+        { type: 'tool_end', id: 'a', name: 'get_current', ok: true },
+        { type: 'text', delta: 'Первый ответ' },
+        done,
+      ],
+      [{ type: 'text', delta: 'Второй ответ из общих знаний' }, done],
+    );
+    render(<AssistantChat context="room" stream={stream} />);
+    ask('Первый?');
+    await screen.findByText('Первый ответ');
+    ask('Что такое PM2.5?');
+    await screen.findByText('Второй ответ из общих знаний');
+    expect(screen.getAllByText('Данные получены')).toHaveLength(1);
+  });
+
+  it('says "thinking", not "gathering data", while an answer without tools is being prepared', async () => {
+    const stream: Stream = async function* () {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      yield done;
+    };
+    render(<AssistantChat context="room" stream={stream} />);
+    ask('Что такое PM2.5?');
+    expect(await screen.findByText('Думаю…')).toBeTruthy();
+    expect(screen.queryByText('Собираю данные…')).toBeNull();
+  });
+});
+
+describe('the conversation is kept on this device', () => {
+  it('comes back when the panel is opened again', async () => {
+    const first = scripted([{ type: 'text', delta: 'Сохранённый ответ' }, done]);
+    const { unmount } = render(<AssistantChat context="room" stream={first.stream} />);
+    ask('Сохранённый вопрос');
+    await screen.findByText('Сохранённый ответ');
+    unmount();
+    render(<AssistantChat context="room" stream={scripted().stream} />);
+    expect(screen.getByText('Сохранённый вопрос')).toBeTruthy();
+    expect(screen.getByText('Сохранённый ответ')).toBeTruthy();
+  });
+
+  it('sends the restored dialogue with the next question', async () => {
+    const first = scripted([{ type: 'text', delta: 'Ответ' }, done]);
+    const { unmount } = render(<AssistantChat context="room" stream={first.stream} />);
+    ask('Вопрос');
+    await screen.findByText('Ответ');
+    unmount();
+    const second = scripted([done]);
+    render(<AssistantChat context="room" stream={second.stream} />);
+    ask('Дальше');
+    await waitFor(() => expect(second.calls).toHaveLength(1));
+    expect(second.calls[0]!.history).toEqual([
+      { role: 'user', content: 'Вопрос' },
+      { role: 'assistant', content: 'Ответ' },
+    ]);
+  });
+
+  it('is forgotten by "New chat": the start screen is back and nothing is kept', async () => {
+    const { stream } = scripted([{ type: 'text', delta: 'Ответ' }, done]);
+    const { unmount } = render(<AssistantChat context="room" stream={stream} />);
+    ask('Вопрос');
+    await screen.findByText('Ответ');
+    fireEvent.click(screen.getByRole('button', { name: 'Новый чат' }));
+    expect(screen.getByText('Спросите, что сейчас с воздухом.')).toBeTruthy();
+    unmount();
+    render(<AssistantChat context="room" stream={scripted().stream} />);
+    expect(screen.queryByText('Вопрос')).toBeNull();
+  });
+
+  it('has no "New chat" button while the chat is empty', () => {
+    render(<AssistantChat context="room" stream={scripted().stream} />);
+    expect(screen.queryByRole('button', { name: 'Новый чат' })).toBeNull();
+  });
+});
+
+describe('a question sent with the keyboard open', () => {
+  it('does not fly: the window changes height at that moment and the flight would jump', async () => {
+    mockMotionPreference(false);
+    vi.stubGlobal('visualViewport', { height: 380, addEventListener: () => undefined, removeEventListener: () => undefined });
+    vi.stubGlobal('innerHeight', 800);
+    const { stream } = scripted([done]);
+    render(<AssistantChat context="room" stream={stream} />);
+    ask('С клавиатурой');
+    await screen.findByText('С клавиатурой');
+    expect(document.querySelector('[data-flying-message]')).toBeNull();
   });
 });

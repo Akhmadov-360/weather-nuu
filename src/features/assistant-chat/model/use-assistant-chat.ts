@@ -3,17 +3,19 @@ import { streamChat } from '../api/stream-chat';
 import { applyEvent, finishTurn, initialState, prepareRetry, startTurn, type ChatState } from './conversation';
 import { MESSAGE_MAX_CHARS, type AssistantContext, type AssistantLang } from './events';
 import { trimHistory } from './history';
+import { clearConversation, loadConversation, saveConversation } from './storage';
 
 export type ChatStream = typeof streamChat;
 
 /**
  * One conversation with the assistant. It holds the state, asks the server, feeds the events through
  * `applyEvent` and cancels the request when the visitor stops it or the chat is closed. The dialogue is
- * kept only here (the server remembers nothing): closing the panel for good forgets it.
+ * kept on this device only (the server remembers nothing): it comes back when the panel is opened again, and
+ * "new chat" forgets it.
  */
 export function useAssistantChat(options: { context: AssistantContext; lang: AssistantLang; stream?: ChatStream }) {
   const { context, lang, stream = streamChat } = options;
-  const [state, setState] = useState<ChatState>(initialState);
+  const [state, setState] = useState<ChatState>(() => loadConversation() ?? initialState());
   const latest = useRef(state);
   latest.current = state;
   const controller = useRef<AbortController | null>(null);
@@ -48,8 +50,17 @@ export function useAssistantChat(options: { context: AssistantContext; lang: Ass
     if (message !== null) void ask(base, message);
   }, [ask]);
 
+  // Keep the conversation (saving skips an answer that is still arriving).
+  useEffect(() => saveConversation(state), [state]);
+
+  const reset = useCallback(() => {
+    controller.current?.abort();
+    clearConversation();
+    setState(initialState());
+  }, []);
+
   // Closing the chat in the middle of an answer closes the connection too.
   useEffect(() => () => controller.current?.abort(), []);
 
-  return { state, send, stop, retry };
+  return { state, send, stop, retry, reset };
 }
