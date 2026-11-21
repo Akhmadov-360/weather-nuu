@@ -6,6 +6,7 @@ import {
   motion,
   useMotionValue,
   useSpring,
+  useReducedMotion,
   type SpringOptions,
   type Transition,
 } from 'motion/react';
@@ -38,6 +39,7 @@ function StarLayer({
   ...props
 }: StarLayerProps) {
   const [boxShadow, setBoxShadow] = React.useState<string>('');
+  const reduceMotion = useReducedMotion();
 
   React.useEffect(() => {
     setBoxShadow(generateStars(count, starColor));
@@ -46,7 +48,7 @@ function StarLayer({
   return (
     <motion.div
       data-slot="star-layer"
-      animate={{ y: [0, -2000] }}
+      animate={reduceMotion ? undefined : { y: [0, -2000] }}
       transition={transition}
       className={cn('absolute top-0 left-0 w-full h-[2000px]', className)}
       {...props}
@@ -77,6 +79,8 @@ type StarsBackgroundProps = React.ComponentProps<'div'> & {
   transition?: SpringOptions;
   starColor?: string;
   pointerEvents?: boolean;
+  /** Multiplies the number of stars of every layer (1 = 1000, 400 and 200). The original is heavy: lower it. */
+  density?: number;
 };
 
 function StarsBackground({
@@ -87,6 +91,7 @@ function StarsBackground({
   transition = { stiffness: 50, damping: 20 },
   starColor = '#fff',
   pointerEvents = true,
+  density = 1,
   ...props
 }: StarsBackgroundProps) {
   const offsetX = useMotionValue(1);
@@ -122,13 +127,13 @@ function StarsBackground({
         className={cn({ 'pointer-events-none': !pointerEvents })}
       >
         <StarLayer
-          count={1000}
+          count={Math.round(1000 * density)}
           size={1}
           transition={{ repeat: Infinity, duration: speed, ease: 'linear' }}
           starColor={starColor}
         />
         <StarLayer
-          count={400}
+          count={Math.round(400 * density)}
           size={2}
           transition={{
             repeat: Infinity,
@@ -138,7 +143,7 @@ function StarsBackground({
           starColor={starColor}
         />
         <StarLayer
-          count={200}
+          count={Math.round(200 * density)}
           size={3}
           transition={{
             repeat: Infinity,

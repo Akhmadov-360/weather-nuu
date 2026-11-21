@@ -89,3 +89,14 @@ export function prepareRetry(state: ChatState): { state: ChatState; message: str
   messages.pop();
   return { state: { ...state, messages, status: 'idle', error: undefined, tools: [] }, message: question.text };
 }
+
+/**
+ * The stream ended without a final event (the visitor pressed stop, or the connection closed quietly):
+ * the turn is over. The text that arrived stays; an answer that never got a word is removed.
+ */
+export function finishTurn(state: ChatState): ChatState {
+  if (state.status !== 'streaming') return state;
+  const last = state.messages.at(-1);
+  const messages = last?.role === 'assistant' && last.text === '' ? state.messages.slice(0, -1) : state.messages;
+  return { ...state, messages, status: 'idle', tools: settleTools(state.tools, 'done') };
+}

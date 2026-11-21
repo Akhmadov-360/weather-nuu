@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyEvent, initialState, prepareRetry, startTurn, type ChatState } from './conversation';
+import { applyEvent, finishTurn, initialState, prepareRetry, startTurn, type ChatState } from './conversation';
 import { trimHistory } from './history';
 import { HISTORY_MAX_CHARS, HISTORY_MAX_MESSAGES } from './events';
 
@@ -106,5 +106,27 @@ describe('trimHistory', () => {
 
   it('drops a single message that is over the limit on its own', () => {
     expect(trimHistory([say('assistant', 'a'.repeat(HISTORY_MAX_CHARS + 1)), say('user', 'ok')])).toEqual([{ role: 'user', content: 'ok' }]);
+  });
+});
+
+describe('finishTurn', () => {
+  it('ends a turn that stopped without a final event (the visitor pressed stop), keeping the text', () => {
+    const s = finishTurn(run(startTurn(initialState(), 'q'), { type: 'text', delta: 'Сейчас' }, { type: 'tool_start', id: 't1', name: 'get_current' }));
+    expect(s.status).toBe('idle');
+    expect(lastAssistant(s)!.text).toBe('Сейчас');
+    expect(s.tools[0]!.status).toBe('done');
+  });
+
+  it('drops the empty answer when nothing had arrived', () => {
+    const s = finishTurn(startTurn(initialState(), 'q'));
+    expect(s.messages.map((m) => m.role)).toEqual(['user']);
+    expect(s.status).toBe('idle');
+  });
+
+  it('leaves a turn that already ended as it is, including an error', () => {
+    const failed = run(startTurn(initialState(), 'q'), { type: 'error', code: 'upstream' });
+    expect(finishTurn(failed)).toBe(failed);
+    const done = run(startTurn(initialState(), 'q'), { type: 'text', delta: 'a' }, { type: 'done', inputTokens: 0, outputTokens: 0 });
+    expect(finishTurn(done)).toBe(done);
   });
 });
