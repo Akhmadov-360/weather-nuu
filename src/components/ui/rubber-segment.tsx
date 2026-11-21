@@ -142,13 +142,16 @@ const RubberSegment: React.FC<RubberSegmentProps> = ({
     if (!track) return;
     const rect = track.getBoundingClientRect();
     box.current = rect;
+    // Measured while a parent is still scaling in (a popover opening) the rectangles are scaled too; the
+    // thumb is laid out in unscaled pixels, so undo the scale. Without a transform this factor is 1.
+    const scale = track.offsetWidth > 0 ? rect.width / track.offsetWidth : 1;
     slots.current = list.map((_, i) => {
       const el = itemRefs.current[i];
       if (!el) return { l: 0, r: 0 };
       const r = el.getBoundingClientRect();
-      return { l: r.left - rect.left - inset, r: r.right - rect.left - inset };
+      return { l: (r.left - rect.left) / scale - inset, r: (r.right - rect.left) / scale - inset };
     });
-    innerW.set(rect.width - inset * 2);
+    innerW.set(rect.width / scale - inset * 2);
     jumpTo(committed.current);
   };
 
