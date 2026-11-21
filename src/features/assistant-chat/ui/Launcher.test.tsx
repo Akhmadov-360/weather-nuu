@@ -26,8 +26,14 @@ function mount(path = '/room') {
 
 beforeEach(() => {
   status.value = { data: undefined, isError: false };
+  // The button asks the browser about reduced motion; jsdom has no matchMedia.
+  vi.stubGlobal('matchMedia', (query: string) => ({ matches: false, media: query, addEventListener: () => undefined, removeEventListener: () => undefined, addListener: () => undefined, removeListener: () => undefined, onchange: null, dispatchEvent: () => false }));
+  sessionStorage.clear();
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 describe('Launcher', () => {
   it('shows nothing while it is not known whether the assistant is on', () => {
