@@ -3,10 +3,11 @@ import { motion } from 'motion/react';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { BotMessageSquare } from '@/components/animate-ui/icons/bot-message-square';
 import { ROUTES } from '@/shared/config/routes';
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import { useAssistantStatus } from '../api/assistant-status';
+import { AirOrb } from './AirOrb';
+import { useAirTone } from './use-air-tone';
 
 // The panel (stars, prompt bar, markdown) is a separate chunk that loads when the visitor first asks for it.
 const loadPanel = () => import('./AssistantPanel').then((m) => ({ default: m.AssistantPanel }));
@@ -47,6 +48,7 @@ export default function Launcher(): React.JSX.Element | null {
   const [open, setOpen] = useState(false);
   const [wanted, setWanted] = useState(false);
   const [teaser, setTeaser] = useState(false);
+  const tone = useAirTone();
   const enabled = Boolean(status.data?.enabled);
 
   useEffect(() => {
@@ -95,7 +97,7 @@ export default function Launcher(): React.JSX.Element | null {
             {t('assistant_teaser')}
           </motion.span>
           <span className="grid h-12 w-12 shrink-0 place-items-center">
-            <BotMessageSquare className="h-5 w-5" aria-hidden />
+            <AirOrb size={30} tone={tone} />
           </span>
         </button>
       </AnimateIcon>

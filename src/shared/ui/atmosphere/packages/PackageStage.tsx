@@ -99,7 +99,7 @@ export default function PackageStage({ plan, dark, onFrame }: PackageStageProps)
   useFrameSampler(onFrame);
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[5]" aria-hidden data-engine="packages">
+    <div className="pointer-events-none fixed inset-0 z-[5]" aria-hidden data-engine="packages" data-atmosphere="">
       {plan.leaves ? <FallingLeaves count={plan.leaves.count} wind={plan.leaves.wind} shapes={[...leafShapes]} opacity={0.92} zIndex={0} respectReducedMotion /> : null}
       {plan.petals && petalImages.length > 0 ? (
         <FallingLeaves count={plan.petals.count} size={[8, 16]} speed={[0.5, 1.2]} wind={plan.petals.wind} images={petalImages} opacity={0.92} zIndex={0} respectReducedMotion />

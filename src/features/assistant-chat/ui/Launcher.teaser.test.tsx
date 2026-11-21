@@ -7,7 +7,7 @@ import '@/app/providers/i18n/i18n';
 const status = vi.hoisted(() => ({ value: { data: { enabled: true } as { enabled: boolean } | undefined, isError: false } }));
 
 vi.mock('@animate-ui/react/icons', () => ({ AnimateIcon: ({ children }: { children: React.ReactNode }) => children }));
-vi.mock('@/components/animate-ui/icons/bot-message-square', () => ({ BotMessageSquare: () => <svg /> }));
+vi.mock('./use-air-tone', () => ({ useAirTone: () => 'good' }));
 vi.mock('../api/assistant-status', () => ({ useAssistantStatus: () => status.value }));
 vi.mock('./AssistantPanel', () => ({ AssistantPanel: () => <div data-testid="panel" /> }));
 

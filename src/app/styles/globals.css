@@ -541,3 +541,11 @@ html[data-season] {
 @utility text-primary-themed   { color: var(--text-primary); }
 @utility text-secondary-themed { color: var(--text-secondary); }
 @utility text-muted-themed     { color: var(--text-muted); }
+
+
+/* While the assistant panel is open on a phone, the falling leaves and the rest of the scene stay out of its way. */
+@media (max-width: 639px) {
+  html[data-assistant-open] [data-atmosphere] {
+    visibility: hidden;
+  }
+}

@@ -1,4 +1,5 @@
 import type { ChatErrorCode, ChatEvent } from './events';
+import { summarizeTools } from './tool-summary';
 
 export type ChatMessage = {
   id: string;
@@ -6,6 +7,8 @@ export type ChatMessage = {
   text: string;
   /** The answer stopped in the middle (an error came after some text). */
   interrupted?: boolean;
+  /** What the tools did for this answer, as one line. It stays with the answer after the turn is over. */
+  tool?: { name: string; status: 'working' | 'done' | 'error' };
 };
 
 export type ToolStep = { id: string; name: string; status: 'working' | 'done' | 'error' };
@@ -49,21 +52,27 @@ function settleTools(tools: ToolStep[], status: 'done' | 'error'): ToolStep[] {
   return tools.map((t) => (t.status === 'working' ? { ...t, status } : t));
 }
 
+/** New tool steps for the turn, and the one-line summary of them written onto the answer being made. */
+function withTools(state: ChatState, tools: ToolStep[]): ChatState {
+  const tool = summarizeTools(tools) ?? undefined;
+  return { ...state, tools, messages: withLastAnswer(state, (m) => ({ ...m, tool })) };
+}
+
 export function applyEvent(state: ChatState, event: ChatEvent): ChatState {
   switch (event.type) {
     case 'text':
       return { ...state, messages: withLastAnswer(state, (m) => ({ ...m, text: m.text + event.delta })) };
     case 'tool_start':
-      return { ...state, tools: [...state.tools, { id: event.id, name: event.name, status: 'working' }] };
+      return withTools(state, [...state.tools, { id: event.id, name: event.name, status: 'working' }]);
     case 'tool_end':
-      return {
-        ...state,
-        tools: state.tools.map((t) => (t.id === event.id ? { ...t, status: event.ok ? 'done' : 'error' } : t)),
-      };
+      return withTools(
+        state,
+        state.tools.map((t) => (t.id === event.id ? { ...t, status: event.ok ? 'done' : 'error' } : t)),
+      );
     case 'citations':
       return state;
     case 'done':
-      return { ...state, status: 'idle', tools: settleTools(state.tools, 'done') };
+      return { ...withTools(state, settleTools(state.tools, 'done')), status: 'idle' };
     case 'error': {
       const last = state.messages.at(-1);
       const hasText = last?.role === 'assistant' && last.text.length > 0;
@@ -72,7 +81,7 @@ export function applyEvent(state: ChatState, event: ChatEvent): ChatState {
         : last?.role === 'assistant'
           ? state.messages.slice(0, -1)
           : state.messages;
-      return { ...state, messages, status: 'error', error: event.code, tools: settleTools(state.tools, 'error') };
+      return { ...withTools({ ...state, messages }, settleTools(state.tools, 'error')), status: 'error', error: event.code };
     }
   }
 }
@@ -98,5 +107,5 @@ export function finishTurn(state: ChatState): ChatState {
   if (state.status !== 'streaming') return state;
   const last = state.messages.at(-1);
   const messages = last?.role === 'assistant' && last.text === '' ? state.messages.slice(0, -1) : state.messages;
-  return { ...state, messages, status: 'idle', tools: settleTools(state.tools, 'done') };
+  return { ...withTools({ ...state, messages }, settleTools(state.tools, 'done')), status: 'idle' };
 }

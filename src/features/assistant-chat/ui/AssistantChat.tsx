@@ -1,3 +1,4 @@
+import { RotateCcw } from 'lucide-react';
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StarsBackground } from '@/components/animate-ui/backgrounds/stars';
@@ -13,6 +14,7 @@ import { FlyingMessage } from './FlyingMessage';
 import { MessageList } from './MessageList';
 import { PALETTE, paletteStyle, useAssistantTheme } from './palette';
 import { StartScreen } from './StartScreen';
+import { useAirTone } from './use-air-tone';
 
 function languageOf(code: string): AssistantLang {
   const base = code.slice(0, 2);
@@ -38,7 +40,8 @@ export function AssistantChat({ context, stream, className }: AssistantChatProps
   const { t, i18n } = useTranslation('assistant');
   const theme = useAssistantTheme();
   const colors = PALETTE[theme];
-  const { state, send, stop, retry } = useAssistantChat({ context, lang: languageOf(i18n.language), stream });
+  const tone = useAirTone();
+  const { state, send, stop, retry, reset } = useAssistantChat({ context, lang: languageOf(i18n.language), stream });
   const keyboardOpen = useKeyboardOpen();
   const calm = useMediaQuery('(prefers-reduced-motion: reduce)');
   const root = useRef<HTMLDivElement>(null);
@@ -51,13 +54,14 @@ export function AssistantChat({ context, stream, className }: AssistantChatProps
     (text: string, from?: Element | null) => {
       const message = text.trim().slice(0, MESSAGE_MAX_CHARS);
       if (!message || streaming) return;
-      if (!calm && from) setFlight({ text: message, from: toBox(from.getBoundingClientRect()), to: null });
+      // With the keyboard up the window changes height while the question would fly: it would jump. It just appears.
+      if (!calm && !keyboardOpen && from) setFlight({ text: message, from: toBox(from.getBoundingClientRect()), to: null });
       send(message);
       // After a question the keyboard of a phone only hides the answer. The field takes the focus back by
       // itself right after sending, so this waits a moment.
       if (window.matchMedia('(pointer: coarse)').matches) window.setTimeout(() => (document.activeElement as HTMLElement | null)?.blur(), 0);
     },
-    [calm, send, streaming],
+    [calm, keyboardOpen, send, streaming],
   );
 
   // The bubble is in the list now (hidden): find where it landed so the question can fly there.
@@ -74,7 +78,19 @@ export function AssistantChat({ context, stream, className }: AssistantChatProps
       <StarsBackground density={0.12} starColor={colors.star} pointerEvents={false} className="absolute inset-0 bg-none opacity-60" />
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-        {empty ? <StartScreen context={context} onPick={ask} /> : <MessageList state={state} hideLastQuestion={flight !== null} />}
+        {empty ? null : (
+          <div className="flex justify-end px-3 pt-1">
+            <button
+              type="button"
+              onClick={reset}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-(--ai-muted) transition-colors hover:bg-(--ai-ink)/10 hover:text-(--ai-ink) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--ai-accent)"
+            >
+              <RotateCcw className="h-3.5 w-3.5" aria-hidden />
+              {t('assistant_new_chat')}
+            </button>
+          </div>
+        )}
+        {empty ? <StartScreen context={context} tone={tone} onPick={ask} /> : <MessageList state={state} hideLastQuestion={flight !== null} />}
 
         {state.status === 'error' && state.error ? (
           <div role="alert" className="mx-5 mb-3 flex items-center justify-between gap-3 rounded-xl border border-(--status-critical,#f87171)/40 bg-(--ai-surface) px-4 py-3 text-sm">
@@ -117,6 +133,7 @@ export function AssistantChat({ context, stream, className }: AssistantChatProps
         {keyboardOpen ? null : (
           <p className="px-5 pb-3 text-center text-[11px] leading-snug text-(--ai-muted)">
             <span className="block">{t('assistant_privacy_note')}</span>
+            <span className="block">{t('assistant_history_note')}</span>
             <span className="block">{t('assistant_disclaimer')}</span>
           </p>
         )}
