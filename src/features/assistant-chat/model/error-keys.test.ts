@@ -9,12 +9,9 @@ const packs = { ru, uz, en } as Record<'ru' | 'uz' | 'en', Record<string, string
 
 describe('error codes', () => {
   it.each(['ru', 'uz', 'en'] as const)('%s has a text for every error code', (lang) => {
-    for (const code of ASSISTANT_ERROR_CODES) expect(packs[lang][ERROR_KEYS[code]], `${lang}:${code}`).toBeTruthy();
+    for (const code of [...ASSISTANT_ERROR_CODES, 'offline'] as const) expect(packs[lang][ERROR_KEYS[code]], `${lang}:${code}`).toBeTruthy();
   });
 
-  it('has a text for the offline case in every language', () => {
-    for (const lang of ['ru', 'uz', 'en'] as const) expect(packs[lang].assistant_err_offline, lang).toBeTruthy();
-  });
 });
 
 describe('tool names', () => {

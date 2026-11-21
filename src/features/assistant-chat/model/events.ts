@@ -13,6 +13,9 @@ export const HISTORY_MAX_CHARS = 6000;
 export const ASSISTANT_ERROR_CODES = ['disabled', 'rate_limited', 'quota', 'upstream', 'bad_request', 'internal'] as const;
 export type AssistantErrorCode = (typeof ASSISTANT_ERROR_CODES)[number];
 
+/** The codes the server sends, plus the one the client adds when the request never reached it. */
+export type ChatErrorCode = AssistantErrorCode | 'offline';
+
 export type AssistantLang = 'ru' | 'uz' | 'en';
 export type AssistantContext = 'room' | 'street';
 
@@ -31,3 +34,6 @@ export const AssistantEventSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('error'), code: z.enum(ASSISTANT_ERROR_CODES) }),
 ]);
 export type AssistantEvent = z.infer<typeof AssistantEventSchema>;
+
+/** What the chat reacts to: the server's events, and a client-side `offline` error. */
+export type ChatEvent = Exclude<AssistantEvent, { type: 'error' }> | { type: 'error'; code: ChatErrorCode };

@@ -1,13 +1,14 @@
-import type { AssistantErrorCode } from './events';
+import type { ChatErrorCode } from './events';
 
 /** Which text of `assistant.json` says what went wrong. Typed by the code list: a new code does not build without a key. */
-export const ERROR_KEYS: Record<AssistantErrorCode, string> = {
+export const ERROR_KEYS: Record<ChatErrorCode, string> = {
   disabled: 'assistant_err_disabled',
   rate_limited: 'assistant_err_rate_limited',
   quota: 'assistant_err_quota',
   upstream: 'assistant_err_upstream',
   bad_request: 'assistant_err_bad_request',
   internal: 'assistant_err_internal',
+  offline: 'assistant_err_offline',
 };
 
 /** The tools the interface has a sentence for. Each key is the tool's name on the server. */

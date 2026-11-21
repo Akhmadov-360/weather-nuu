@@ -1,4 +1,4 @@
-import type { AssistantErrorCode, AssistantEvent } from './events';
+import type { ChatErrorCode, ChatEvent } from './events';
 
 export type ChatMessage = {
   id: string;
@@ -13,7 +13,7 @@ export type ToolStep = { id: string; name: string; status: 'working' | 'done' | 
 export type ChatState = {
   messages: ChatMessage[];
   status: 'idle' | 'streaming' | 'error';
-  error?: AssistantErrorCode;
+  error?: ChatErrorCode;
   /** The tools of the turn in progress (or the last turn). */
   tools: ToolStep[];
   nextId: number;
@@ -49,7 +49,7 @@ function settleTools(tools: ToolStep[], status: 'done' | 'error'): ToolStep[] {
   return tools.map((t) => (t.status === 'working' ? { ...t, status } : t));
 }
 
-export function applyEvent(state: ChatState, event: AssistantEvent): ChatState {
+export function applyEvent(state: ChatState, event: ChatEvent): ChatState {
   switch (event.type) {
     case 'text':
       return { ...state, messages: withLastAnswer(state, (m) => ({ ...m, text: m.text + event.delta })) };

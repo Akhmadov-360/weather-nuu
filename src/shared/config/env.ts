@@ -31,4 +31,8 @@ export const ENV = {
   // (/v1/export/:source). Пока не задеплоен — null, кнопка скачивания
   // выключается сама, без падений.
   exportBaseUrl: (import.meta.env.VITE_EXPORT_BASE_URL as string | undefined) || null,
+
+  // Чат помощника живёт в том же новом apps/api, что и экспорт: тот же базовый адрес.
+  // VITE_ASSISTANT_MOCK=1 включает заготовленный сценарий без сервера (для разработки и показа без ключа).
+  assistantMock: import.meta.env.VITE_ASSISTANT_MOCK === '1',
 } as const;
