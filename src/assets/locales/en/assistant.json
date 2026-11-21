@@ -30,6 +30,7 @@
   "assistant_retry": "Try again",
   "assistant_interrupted": "The answer was cut off",
   "assistant_privacy_note": "Questions are sent to Gemini. Do not write personal data.",
+  "assistant_history_note": "The history is kept only on this device.",
   "assistant_disclaimer": "The advice is not medical advice.",
   "assistant_err_disabled": "The assistant is not available right now.",
   "assistant_err_rate_limited": "Too many questions. Wait a minute.",

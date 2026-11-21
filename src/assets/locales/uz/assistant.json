@@ -30,6 +30,7 @@
   "assistant_retry": "Qayta urinish",
   "assistant_interrupted": "Javob uzilib qoldi",
   "assistant_privacy_note": "Savollar Gemini'ga yuboriladi. Shaxsiy ma'lumotlarni yozmang.",
+  "assistant_history_note": "Tarix faqat shu qurilmada saqlanadi.",
   "assistant_disclaimer": "Maslahat tibbiy tavsiya emas.",
   "assistant_err_disabled": "Yordamchi hozir mavjud emas.",
   "assistant_err_rate_limited": "Savollar juda ko'p. Bir daqiqa kuting.",

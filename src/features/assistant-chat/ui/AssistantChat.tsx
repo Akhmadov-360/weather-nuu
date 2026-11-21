@@ -133,6 +133,7 @@ export function AssistantChat({ context, stream, className }: AssistantChatProps
         {keyboardOpen ? null : (
           <p className="px-5 pb-3 text-center text-[11px] leading-snug text-(--ai-muted)">
             <span className="block">{t('assistant_privacy_note')}</span>
+            <span className="block">{t('assistant_history_note')}</span>
             <span className="block">{t('assistant_disclaimer')}</span>
           </p>
         )}

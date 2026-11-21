@@ -30,6 +30,7 @@
   "assistant_retry": "Повторить",
   "assistant_interrupted": "Ответ оборван",
   "assistant_privacy_note": "Вопросы отправляются в Gemini. Не пишите личные данные.",
+  "assistant_history_note": "История хранится только на этом устройстве.",
   "assistant_disclaimer": "Совет не является медицинской рекомендацией.",
   "assistant_err_disabled": "Помощник сейчас недоступен.",
   "assistant_err_rate_limited": "Слишком много вопросов. Подождите минуту.",

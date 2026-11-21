@@ -44,7 +44,10 @@ export function StartScreen({ context, tone, onPick }: { context: AssistantConte
   const phone = useMediaQuery('(max-width: 639px)');
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-5 overflow-y-auto px-5 py-6">
+    // `m-auto` centres the content when there is room and lets the area scroll from the top when there is not
+    // (`justify-center` would cut the top off on a small screen).
+    <div className="flex flex-1 flex-col overflow-y-auto px-5 py-6">
+      <div className="m-auto flex w-full flex-col items-center gap-5">
       <AirOrb size={56} tone={tone} />
       <div className="flex flex-col items-center gap-2 text-center">
         <BlurText
@@ -88,6 +91,7 @@ export function StartScreen({ context, tone, onPick }: { context: AssistantConte
           );
         })}
       </motion.ul>
+      </div>
     </div>
   );
 }
