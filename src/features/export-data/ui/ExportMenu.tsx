@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AnimateIcon } from '@animate-ui/react/icons';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+import { sileo } from 'sileo';
 
 import { Download } from '@/components/animate-ui/icons/download';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,8 @@ import {
 import type { WeatherPageType } from '@/shared/types/common';
 import type { CustomDateRange } from '@/shared/lib/date/filter-by-range';
 import { ENV } from '@/shared/config/env';
-import { ExportChip } from './ExportChip';
+import { createProgressStore } from '../model/progress-store';
+import { ExportProgress } from './ExportProgress';
 import { MonthPickerDialog } from './MonthPickerDialog';
 
 type ExportMenuProps = {
@@ -75,33 +76,36 @@ export function ExportMenu({
   }
 
   /**
-   * The download is shown as a chip inside a toast with a fixed id: the same
-   * toast is updated as the file streams in, then turns into "saved" or, on
-   * failure, into a retry button that runs the whole download again.
+   * The download is one toast: it shows the file and how far it has got while it streams in, then turns
+   * into "saved" or, on failure, into a retry button that runs the whole download again.
    */
   const runDownloadWithProgress = (url: string, filename: string) => {
-    const toastId = `export:${filename}`;
     const fmtMB = (n: number) => `${(n / 1024 / 1024).toFixed(1)} MB`;
-    const show = (status: 'running' | 'done' | 'error', progress?: string, duration = Infinity) =>
-      toast.custom(
-        () => <ExportChip status={status} filename={filename} progress={progress} onRetry={() => runDownloadWithProgress(url, filename)} />,
-        { id: toastId, duration, unstyled: true, style: { background: 'transparent', border: 'none', boxShadow: 'none', backdropFilter: 'none', width: 'fit-content', maxWidth: 'calc(100vw - 2rem)' } },
-      );
+    const progress = createProgressStore(t('export_toast_preparing'));
 
-    show('running', t('export_toast_preparing'));
-
-    downloadExport(
+    const download = downloadExport(
       url,
       filename,
       (loaded, total, attempt) => {
         // A retry restarts the byte count from 0, so name the attempt: otherwise the counter would look like it dropped.
-        const progress = total ? `${fmtMB(loaded)} / ${fmtMB(total)}` : fmtMB(loaded);
-        show('running', attempt > 1 ? t('export_toast_progress_attempt', { progress, attempt }) : progress);
+        const text = total ? `${fmtMB(loaded)} / ${fmtMB(total)}` : fmtMB(loaded);
+        progress.set(attempt > 1 ? t('export_toast_progress_attempt', { progress: text, attempt }) : text);
       },
-      (attempt, maxAttempts) => show('running', t('export_toast_retrying', { attempt: attempt + 1, max: maxAttempts })),
-    )
-      .then(() => show('done', undefined, 5000))
-      .catch(() => show('error', undefined, 15000));
+      (attempt, maxAttempts) => progress.set(t('export_toast_retrying', { attempt: attempt + 1, max: maxAttempts })),
+    );
+
+    // One toast that goes from "downloading" to "saved", or to a retry button when it failed.
+    sileo.promise(download, {
+      position: 'top-center',
+      loading: { title: t('export_chip_running'), description: <ExportProgress filename={filename} store={progress} /> },
+      success: { title: t('export_chip_done'), description: filename, duration: 5000 },
+      error: {
+        title: t('export_chip_error'),
+        description: t('export_toast_error'),
+        duration: 15000,
+        button: { title: t('export_toast_retry'), onClick: () => runDownloadWithProgress(url, filename) },
+      },
+    }).catch(() => undefined);
   };
 
   const handleDownload = (range?: CustomDateRange) => {
