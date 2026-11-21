@@ -1,6 +1,10 @@
+// @vitest-environment jsdom
+import { cleanup, render } from '@testing-library/react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { Markdown } from './Markdown';
+
+afterEach(cleanup);
 
 const html = (text: string, streaming = false) => renderToStaticMarkup(<Markdown text={text} streaming={streaming} />);
 
@@ -52,11 +56,13 @@ describe('Markdown while the answer is arriving', () => {
 
   it('never shows loose markup characters for any prefix of the answer', () => {
     for (let i = 1; i <= sample.length; i++) {
-      const out = renderToStaticMarkup(<Markdown text={sample.slice(0, i)} streaming />);
-      // Remove the contents of finished code spans and blocks, where these characters are legitimate.
-      const visible = out.replace(/<code>[\s\S]*?<\/code>/g, '').replace(/<[^>]+>/g, '');
+      const { container, unmount } = render(<Markdown text={sample.slice(0, i)} streaming />);
+      // The contents of finished code spans and blocks may legitimately hold these characters.
+      container.querySelectorAll('code').forEach((node) => node.remove());
+      const visible = container.textContent ?? '';
       expect(visible, `prefix of ${i} characters`).not.toMatch(/\*\*|`/);
-      expect(out, `prefix of ${i} characters`).not.toMatch(/streamdown|incomplete/i);
+      expect(visible, `prefix of ${i} characters`).not.toMatch(/streamdown|incomplete/i);
+      unmount();
     }
   });
 
