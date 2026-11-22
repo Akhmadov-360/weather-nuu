@@ -112,3 +112,19 @@ describe('when the browser does not let the page keep notes (private mode)', () 
     expect(() => clearConversation()).not.toThrow();
   });
 });
+
+describe('saved sources', () => {
+  it('keeps the sources of an answer with the conversation', () => {
+    const state: ChatState = {
+      messages: [
+        { id: 'm1', role: 'user', text: 'q' },
+        { id: 'm2', role: 'assistant', text: 'a', sources: [{ id: 'who#1', title: 'T', source: 'WHO 2021', url: 'https://www.who.int/x' }] },
+      ],
+      status: 'idle',
+      tools: [],
+      nextId: 3,
+    };
+    saveConversation(state, 1000);
+    expect(loadConversation(1000)?.messages[1]?.sources).toEqual([{ id: 'who#1', title: 'T', source: 'WHO 2021', url: 'https://www.who.int/x' }]);
+  });
+});

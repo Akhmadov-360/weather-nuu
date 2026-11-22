@@ -7,6 +7,12 @@ const ANSWERS: Record<AssistantLang, string[]> = {
   en: ['This is a demo scenario: ', 'the real model is not connected yet. ', 'This is what an answer looks like: ', 'the room is **24.7 °C** now, ', 'humidity 38 %.'],
 };
 
+const NORMS: Record<AssistantLang, string[]> = {
+  ru: ['Демонстрация ответа из базы знаний: ', 'по рекомендациям ВОЗ 2021 ', 'среднесуточный уровень PM2.5 ', '**15 мкг/м³**.'],
+  uz: ["Bilimlar bazasidan demo javob: ", "JSST 2021 tavsiyasiga ko'ra ", "PM2.5 sutkalik darajasi ", '**15 mkg/m³**.'],
+  en: ['A demo answer from the knowledge base: ', 'the WHO 2021 guideline ', 'for 24-hour PM2.5 is ', '**15 µg/m³**.'],
+};
+
 function pause(ms: number, signal: AbortSignal): Promise<void> {
   if (ms <= 0 || signal.aborted) return Promise.resolve();
   return new Promise((resolve) => {
@@ -23,16 +29,28 @@ export async function* mockStream(input: { message: string; lang: AssistantLang;
   const delay = input.delayMs ?? 60;
   const { signal } = input;
 
-  yield { type: 'tool_start', id: 'mock-1', name: 'get_current' };
+  // A question about norms shows the knowledge-base path: a search, an answer and its sources.
+  const about = /норм|norm|me.yor/i.test(input.message) || /ВОЗ|WHO|JSST/.test(input.message);
+  const tool = about ? 'search_knowledge' : 'get_current';
+  yield { type: 'tool_start', id: 'mock-1', name: tool };
   await pause(delay * 8, signal);
   if (signal.aborted) return;
-  yield { type: 'tool_end', id: 'mock-1', name: 'get_current', ok: true };
+  yield { type: 'tool_end', id: 'mock-1', name: tool, ok: true };
 
-  for (const delta of ANSWERS[input.lang]) {
+  for (const delta of about ? NORMS[input.lang] : ANSWERS[input.lang]) {
     await pause(delay, signal);
     if (signal.aborted) return;
     yield { type: 'text', delta };
   }
   if (signal.aborted) return;
+  if (about) {
+    yield {
+      type: 'citations',
+      items: [
+        { id: 'who-2021.en#1', title: 'WHO air quality guideline levels 2021 / Particulate matter', source: 'WHO global air quality guidelines 2021', url: 'https://www.who.int/publications/i/item/9789240034228' },
+        { id: 'station.en#1', title: 'The NUUz air station', source: 'NUUz station' },
+      ],
+    };
+  }
   yield { type: 'done', inputTokens: 0, outputTokens: 0 };
 }

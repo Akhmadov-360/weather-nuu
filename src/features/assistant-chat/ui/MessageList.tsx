@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import LatticeLoader from '@/components/ui/lattice-loader';
 import type { ChatState } from '../model/conversation';
 import { Markdown } from './Markdown';
+import { Sources } from './Sources';
 import { ToolChip } from './ToolChip';
 
 const PINNED_PX = 80;
@@ -67,6 +68,7 @@ export function MessageList({ state, hideLastQuestion = false }: { state: ChatSt
                 className="break-words [&_code]:rounded [&_code]:bg-(--ai-ink)/10 [&_code]:px-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_p+p]:mt-2 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-(--ai-ink)/10 [&_pre]:p-3 [&_ul]:list-disc [&_ul]:pl-5"
               />
             ) : null}
+            {message.sources?.length ? <Sources items={message.sources} /> : null}
             {message.interrupted ? <p className="text-xs text-(--ai-muted)">{t('assistant_interrupted')}</p> : null}
           </div>
         );
