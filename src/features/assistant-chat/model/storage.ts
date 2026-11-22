@@ -13,6 +13,10 @@ const MessageSchema = z.object({
   text: z.string().min(1).max(HISTORY_MAX_CHARS),
   interrupted: z.boolean().optional(),
   tool: z.object({ name: z.string().max(64), status: z.enum(['working', 'done', 'error']) }).optional(),
+  sources: z
+    .array(z.object({ id: z.string().max(80), title: z.string().max(300), source: z.string().max(200), url: z.string().max(300).optional() }))
+    .max(8)
+    .optional(),
 });
 
 const SavedSchema = z.object({

@@ -35,3 +35,20 @@ describe('mockStream', () => {
     expect(events).toHaveLength(1);
   });
 });
+
+describe('the scripted answer about norms', () => {
+  it('searches the knowledge base and sends its sources before done', async () => {
+    const events: ChatEvent[] = [];
+    for await (const e of mockStream({ message: 'Какая норма PM2.5 по ВОЗ?', lang: 'ru', signal: new AbortController().signal, delayMs: 0 })) events.push(e);
+    expect(events[0]).toMatchObject({ type: 'tool_start', name: 'search_knowledge' });
+    expect(events.at(-2)).toMatchObject({ type: 'citations' });
+    expect(events.at(-1)?.type).toBe('done');
+  });
+
+  it('does not take an ordinary question about the air for one about norms', async () => {
+    const events: ChatEvent[] = [];
+    for await (const e of mockStream({ message: 'Какой воздух сейчас?', lang: 'ru', signal: new AbortController().signal, delayMs: 0 })) events.push(e);
+    expect(events[0]).toMatchObject({ name: 'get_current' });
+    expect(events.some((e) => e.type === 'citations')).toBe(false);
+  });
+});

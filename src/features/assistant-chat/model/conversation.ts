@@ -1,4 +1,4 @@
-import type { ChatErrorCode, ChatEvent } from './events';
+import type { ChatErrorCode, ChatEvent, Citation } from './events';
 import { summarizeTools } from './tool-summary';
 
 export type ChatMessage = {
@@ -9,6 +9,8 @@ export type ChatMessage = {
   interrupted?: boolean;
   /** What the tools did for this answer, as one line. It stays with the answer after the turn is over. */
   tool?: { name: string; status: 'working' | 'done' | 'error' };
+  /** The documents the answer is based on (from the knowledge base), one entry for each. */
+  sources?: Citation[];
 };
 
 export type ToolStep = { id: string; name: string; status: 'working' | 'done' | 'error' };
@@ -58,6 +60,18 @@ function withTools(state: ChatState, tools: ToolStep[]): ChatState {
   return { ...state, tools, messages: withLastAnswer(state, (m) => ({ ...m, tool })) };
 }
 
+/** Several fragments of one document are one source: the visitor needs the document, not the paragraph. */
+export function uniqueSources(items: readonly Citation[]): Citation[] {
+  const seen = new Set<string>();
+  const out: Citation[] = [];
+  for (const item of items) {
+    if (seen.has(item.source)) continue;
+    seen.add(item.source);
+    out.push(item);
+  }
+  return out;
+}
+
 export function applyEvent(state: ChatState, event: ChatEvent): ChatState {
   switch (event.type) {
     case 'text':
@@ -70,7 +84,7 @@ export function applyEvent(state: ChatState, event: ChatEvent): ChatState {
         state.tools.map((t) => (t.id === event.id ? { ...t, status: event.ok ? 'done' : 'error' } : t)),
       );
     case 'citations':
-      return state;
+      return { ...state, messages: withLastAnswer(state, (m) => ({ ...m, sources: uniqueSources(event.items) })) };
     case 'done':
       return { ...withTools(state, settleTools(state.tools, 'done')), status: 'idle' };
     case 'error': {

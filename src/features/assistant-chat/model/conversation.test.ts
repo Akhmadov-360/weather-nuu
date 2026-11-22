@@ -160,3 +160,24 @@ describe('the tool line stays with its answer', () => {
     expect(lastAssistant(stopped)!.tool?.status).toBe('done');
   });
 });
+
+describe('sources of an answer', () => {
+  const items = [
+    { id: 'who#1', title: 'WHO / PM', source: 'WHO 2021', url: 'https://www.who.int/x' },
+    { id: 'who#2', title: 'WHO / Other', source: 'WHO 2021', url: 'https://www.who.int/x' },
+    { id: 'epa#1', title: 'EPA', source: 'US EPA AQI' },
+  ];
+
+  it('writes the documents on the answer, one for each document and not one for each fragment', () => {
+    const s = run(startTurn(initialState(), 'q'), { type: 'text', delta: 'a' }, { type: 'citations', items }, { type: 'done', inputTokens: 1, outputTokens: 1 });
+    expect(lastAssistant(s)!.sources?.map((x) => x.source)).toEqual(['WHO 2021', 'US EPA AQI']);
+  });
+
+  it('keeps the sources of an earlier answer when the next one has none', () => {
+    let s = run(startTurn(initialState(), 'q1'), { type: 'text', delta: 'a' }, { type: 'citations', items }, { type: 'done', inputTokens: 1, outputTokens: 1 });
+    s = run(startTurn(s, 'q2'), { type: 'text', delta: 'b' }, { type: 'done', inputTokens: 1, outputTokens: 1 });
+    const answers = s.messages.filter((m) => m.role === 'assistant');
+    expect(answers[0]!.sources).toHaveLength(2);
+    expect(answers[1]!.sources).toBeUndefined();
+  });
+});

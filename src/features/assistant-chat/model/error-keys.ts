@@ -16,6 +16,7 @@ export const TOOL_KEYS = {
   get_current: 'assistant_tool_get_current',
   get_period_summary: 'assistant_tool_get_period_summary',
   compare_room_street: 'assistant_tool_compare_room_street',
+  search_knowledge: 'assistant_tool_search_knowledge',
 } as const;
 
 export function toolKey(name: string): string {
