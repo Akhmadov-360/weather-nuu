@@ -28,11 +28,14 @@ export const AssistantEventSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('tool_end'), id: z.string(), name: z.string(), ok: z.boolean() }),
   z.object({
     type: z.literal('citations'),
-    items: z.array(z.object({ id: z.string(), title: z.string(), source: z.string() })),
+    items: z.array(z.object({ id: z.string(), title: z.string(), source: z.string(), url: z.string().optional() })),
   }),
   z.object({ type: z.literal('done'), inputTokens: z.number(), outputTokens: z.number() }),
   z.object({ type: z.literal('error'), code: z.enum(ASSISTANT_ERROR_CODES) }),
 ]);
+/** A source the answer used: a fragment of the knowledge base, the name of its document and, when it has one, its address. */
+export type Citation = { id: string; title: string; source: string; url?: string };
+
 export type AssistantEvent = z.infer<typeof AssistantEventSchema>;
 
 /** What the chat reacts to: the server's events, and a client-side `offline` error. */
