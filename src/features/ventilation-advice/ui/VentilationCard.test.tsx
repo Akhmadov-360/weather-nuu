@@ -6,6 +6,15 @@ import { i18n } from '@/app/providers/i18n/i18n';
 import type { VentilationAdvice } from '../model/advice';
 import { VentilationCard } from './VentilationCard';
 
+// The (i) is tested on its own (info-hint.test.tsx); here its content is shown in place.
+vi.mock('@/shared/ui/info-hint', () => ({
+  InfoHint: ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div data-testid="hint" aria-label={label}>
+      {children}
+    </div>
+  ),
+}));
+
 type QueryState = { data?: VentilationAdvice | null; isLoading?: boolean; isError?: boolean };
 let state: QueryState = {};
 vi.mock('../api/ventilation.queries', () => ({ useVentilationAdviceQuery: () => ({ data: undefined, isLoading: false, isError: false, ...state }) }));
@@ -36,17 +45,28 @@ afterEach(() => {
 });
 
 describe('VentilationCard', () => {
-  it('shows the verdict, the reason and the numbers, with the dust outside marked as a model', () => {
+  it('shows the verdict in large type, the reason and the three numbers with their captions', () => {
     state = { data: advice() };
     render(<VentilationCard enabled />);
     expect(screen.getByText('Откройте окно')).toBeTruthy();
     expect(screen.getByText(/На улице воздух чище, чем в аудитории \(по модели\)/)).toBeTruthy();
+    expect(screen.getByText('Пыль PM2.5, мкг/м³')).toBeTruthy();
     expect(screen.getByText('48,2')).toBeTruthy();
     expect(screen.getByText('14,1')).toBeTruthy();
-    expect(screen.getByText(/Пыль PM2.5 на улице \(модель\)/)).toBeTruthy();
-    expect(screen.getByText(/модельная оценка, не измерение/)).toBeTruthy();
-    expect(screen.getByText(/Через 15 мин в аудитории/)).toBeTruthy();
-    expect(screen.getByText(/14,9–24,3/)).toBeTruthy();
+    expect(screen.getByText('17,6')).toBeTruthy();
+    expect(screen.getByText('14,9–24,3')).toBeTruthy();
+    expect(screen.getByText('В аудитории')).toBeTruthy();
+    expect(screen.getByText('На улице (модель)')).toBeTruthy();
+    expect(screen.getByText('Через 15 мин')).toBeTruthy();
+  });
+
+  it('says in the (i), not on the face of the card, that the dust outside is a model', () => {
+    state = { data: advice() };
+    render(<VentilationCard enabled />);
+    const hint = screen.getByTestId('hint');
+    expect(hint.getAttribute('aria-label')).toBe('О данных карточки');
+    expect(hint.textContent).toMatch(/модельная оценка, не измерение/);
+    expect(hint.textContent).toMatch(/Совет не является медицинской рекомендацией/);
   });
 
   it('links the source of the model data, safely, as its licence asks', () => {
@@ -61,11 +81,11 @@ describe('VentilationCard', () => {
   it('says that the speed of air exchange is a literature value, and does not say it when it was measured', () => {
     state = { data: advice() };
     render(<VentilationCard enabled />);
-    expect(screen.getByText(/взята из литературы/)).toBeTruthy();
+    expect(screen.getByTestId('hint').textContent).toMatch(/взята из литературы/);
     cleanup();
     state = { data: advice({ lambda: { value: 8, source: 'data', verified: true, range: [6, 10] } }) };
     render(<VentilationCard enabled />);
-    expect(screen.queryByText(/взята из литературы/)).toBeNull();
+    expect(screen.getByTestId('hint').textContent).not.toMatch(/взята из литературы/);
   });
 
   it('says plainly that there is not enough data, without numbers it does not have', () => {
@@ -73,9 +93,22 @@ describe('VentilationCard', () => {
     render(<VentilationCard enabled />);
     expect(screen.getByText('Недостаточно данных')).toBeTruthy();
     expect(screen.getByText('Нет данных о пыли на улице.')).toBeTruthy();
-    expect(screen.queryByText(/Через 15 мин/)).toBeNull();
-    expect(screen.queryByText(/модельная оценка/)).toBeNull();
-    expect(screen.queryByText(/взята из литературы/)).toBeNull();
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByTestId('hint').textContent).not.toMatch(/модельная оценка/);
+    expect(screen.getByTestId('hint').textContent).not.toMatch(/взята из литературы/);
+  });
+
+  it('says how long to wait when the forecast promises a clean street', () => {
+    state = { data: advice({ verdict: 'wait', reason: 'forecast_better', waitHours: 2, predicted: 40.2, predictedRange: null }) };
+    render(<VentilationCard enabled />);
+    expect(screen.getByText('Подождите')).toBeTruthy();
+    expect(screen.getByText(/станет чище примерно через 2 ч/)).toBeTruthy();
+  });
+
+  it('says plainly that the wait has no hours when the answer is older and does not have them', () => {
+    state = { data: advice({ verdict: 'wait', reason: 'forecast_better', waitHours: undefined }) };
+    render(<VentilationCard enabled />);
+    expect(screen.getByText('По прогнозу улица скоро станет чище.')).toBeTruthy();
   });
 
   it('is not shown when it is off, when the request failed or when the API is not set', () => {

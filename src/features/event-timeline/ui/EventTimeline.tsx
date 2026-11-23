@@ -1,6 +1,7 @@
 import { BadgeCheck, Brush, LogIn, LogOut, Snowflake, Wind, type LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { GlassPanel } from '@/shared/ui/glass-panel';
+import { InfoCard, InfoCardSkeleton } from '@/shared/ui/info-card';
+import { InfoHint } from '@/shared/ui/info-hint';
 import { formatStationDate, formatStationTime } from '@/widgets/time-card/model/station-time';
 import { useRoomEventsQuery } from '../api/events.queries';
 import { hasLittleData, latestEvents, type EventClass, type RoomEvent } from '../model/events';
@@ -32,9 +33,9 @@ function Row({ event, nowMs }: { event: RoomEvent; nowMs: number }): React.JSX.E
         <Icon aria-hidden="true" className="size-4" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm">{t(`events_class_${event.cls}`)}</span>
+        <span className="block truncate text-sm text-primary-themed">{t(`events_class_${event.cls}`)}</span>
         {event.confirmedByStreet ? (
-          <span className="inline-flex items-center gap-1 text-xs text-secondary-themed">
+          <span className="inline-flex items-center gap-1 text-[11px] text-muted-themed">
             <BadgeCheck aria-hidden="true" className="size-3.5" />
             {t('events_confirmed')}
           </span>
@@ -48,9 +49,9 @@ function Row({ event, nowMs }: { event: RoomEvent; nowMs: number }): React.JSX.E
 }
 
 /**
- * The last events of the auditorium that the platform found in the readings: an open window, cleaning, the
- * air conditioner. Compact, on the page of the room only. It says plainly that the events are found by the
- * system and not written by people, and says so when there are too few readings to trust an empty list.
+ * The last events of the auditorium that the platform found in the readings: an open window, cleaning, the air
+ * conditioner. Compact, in the shape of the cards of the sensors, on the page of the room only. That the events are found
+ * by the system and not written by people is said in the (i) of the card; an empty list says whether the day had readings.
  * If the request fails the card is not shown: the dashboard works without it.
  */
 export function EventTimeline({ enabled }: { enabled: boolean }): React.JSX.Element | null {
@@ -59,30 +60,22 @@ export function EventTimeline({ enabled }: { enabled: boolean }): React.JSX.Elem
   const data = query.data;
 
   if (!enabled || query.isError || data === null) return null;
-  if (query.isLoading || !data) {
-    return <GlassPanel className="h-32 animate-pulse p-4">{null}</GlassPanel>;
-  }
+  if (query.isLoading || !data) return <InfoCardSkeleton />;
 
   const { shown, hidden } = latestEvents(data.events);
   const nowMs = Date.now();
   return (
-    <GlassPanel className="p-4">
-      <section aria-labelledby="events-title">
-        <h3 id="events-title" className="text-sm text-secondary-themed">
-          {t('events_title')}
-        </h3>
-        {shown.length > 0 ? (
-          <ul className="mt-2 divide-y divide-(--glass-border)/50">
-            {shown.map((event) => (
-              <Row key={`${event.cls}-${event.start}`} event={event} nowMs={nowMs} />
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-3 text-sm">{hasLittleData(data) ? t('events_little_data') : t('events_none')}</p>
-        )}
-        {hidden > 0 ? <p className="mt-1 text-xs text-secondary-themed">{t('events_more', { count: hidden })}</p> : null}
-        <p className="mt-3 text-xs text-secondary-themed">{t('events_method')}</p>
-      </section>
-    </GlassPanel>
+    <InfoCard label={t('events_title')} hint={<InfoHint label={t('events_info_label')}><p>{t('events_method')}</p></InfoHint>}>
+      {shown.length > 0 ? (
+        <ul className="mt-2 divide-y divide-(--glass-border)/50">
+          {shown.map((event) => (
+            <Row key={`${event.cls}-${event.start}`} event={event} nowMs={nowMs} />
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-4 text-[13px] leading-snug text-secondary-themed">{hasLittleData(data) ? t('events_little_data') : t('events_none')}</p>
+      )}
+      {hidden > 0 ? <p className="mt-auto pt-2 text-[11px] text-muted-themed">{t('events_more', { count: hidden })}</p> : null}
+    </InfoCard>
   );
 }

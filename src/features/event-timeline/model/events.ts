@@ -28,7 +28,7 @@ export type EventsResponse = z.infer<typeof EventsResponseSchema>;
 /** The period the timeline shows: the last day. */
 export const TIMELINE_HOURS = 24;
 /** How many of the latest events the compact list shows. */
-export const TIMELINE_MAX_ITEMS = 6;
+export const TIMELINE_MAX_ITEMS = 4;
 
 /** Newest first, and at most `limit`; the rest is counted so that the card can say "and 3 more". */
 export function latestEvents(events: readonly RoomEvent[], limit: number = TIMELINE_MAX_ITEMS): { shown: RoomEvent[]; hidden: number } {

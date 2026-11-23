@@ -134,8 +134,13 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
             </motion.div>
 
             {/* Events are found in the readings of the room; the street has no such card. */}
-            <VentilationCard enabled={config.key === 'room'} />
-            <EventTimeline enabled={config.key === 'room'} />
+            {/* The two cards of the room are one row of two columns from 640 px; on a phone one under the other. */}
+            {config.key === 'room' ? (
+              <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 sm:gap-4">
+                <VentilationCard enabled />
+                <EventTimeline enabled />
+              </div>
+            ) : null}
 
             <motion.section
               variants={fadeUp}

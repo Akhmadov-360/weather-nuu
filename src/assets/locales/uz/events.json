@@ -9,5 +9,6 @@
   "events_none": "So‘nggi sutkada hodisa topilmadi.",
   "events_little_data": "So‘nggi sutkada ko‘rsatkichlar kam: bo‘sh ro‘yxat «ma’lumot yo‘q» degani bo‘lishi mumkin.",
   "events_method": "Hodisalarni tizim datchik ko‘rsatkichlaridan topadi, ularni odamlar yozmagan. Usul hozircha faqat modelli ma’lumotlarda sinalgan.",
-  "events_more": "Yana hodisalar: {{count}}."
+  "events_more": "Yana hodisalar: {{count}}.",
+  "events_info_label": "Hodisalar qanday topilgan"
 }

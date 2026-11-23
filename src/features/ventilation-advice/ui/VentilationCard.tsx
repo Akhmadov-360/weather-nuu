@@ -1,28 +1,30 @@
-import { CircleCheck, CircleHelp, Clock, DoorClosed, DoorOpen, type LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { GlassPanel } from '@/shared/ui/glass-panel';
+import { InfoCard, InfoCardSkeleton } from '@/shared/ui/info-card';
+import { InfoHint } from '@/shared/ui/info-hint';
 import { useVentilationAdviceQuery } from '../api/ventilation.queries';
-import { formatDust, formatRange, verdictTone, type Tone, type Verdict } from '../model/advice';
+import { formatDust, formatRange, verdictTone, type Tone } from '../model/advice';
 
-const ICONS: Record<Verdict, LucideIcon> = {
-  open: DoorOpen,
-  dont_open: DoorClosed,
-  wait: Clock,
-  not_needed: CircleCheck,
-  unknown: CircleHelp,
+const DOT: Record<Tone, string> = {
+  safe: 'bg-status-safe',
+  warning: 'bg-status-warning',
+  neutral: 'bg-(--text-muted)',
 };
 
-const TONE_COLOR: Record<Tone, string> = {
-  safe: 'var(--status-safe)',
-  warning: 'var(--status-warning)',
-  neutral: 'currentColor',
-};
+function Stat({ caption, value, note }: { caption: string; value: string; note?: string | null }): React.JSX.Element {
+  return (
+    <div className="min-w-0">
+      <dd className="text-xl leading-none font-semibold tracking-tight text-primary-themed tabular-nums sm:text-2xl">{value}</dd>
+      {note ? <p className="mt-1 text-[11px] leading-none text-muted-themed tabular-nums">{note}</p> : null}
+      <dt className="mt-1.5 text-[11px] leading-tight text-muted-themed">{caption}</dt>
+    </div>
+  );
+}
 
 /**
- * Advice on the window of the auditorium. The verdict first, then the reason, then the numbers it stands on. It says
- * plainly what is not measured: the dust outside is a model estimate (the Street kit has no dust sensor), and the
- * speed of air exchange is a literature value until the readings of the room give a measured one. If the request fails,
- * the card is not shown: the dashboard works without it.
+ * Advice on the window of the auditorium, in the shape of the cards of the sensors: the verdict in large type, the reason
+ * under it, the three numbers it stands on. What is not measured is said in the (i) of the card, not on the face of it: the
+ * dust outside is a model estimate (the Street kit has no dust sensor), and the speed of air exchange is a literature value
+ * until the readings of the room give a measured one. If the request fails the card is not shown: the dashboard works without it.
  */
 export function VentilationCard({ enabled }: { enabled: boolean }): React.JSX.Element | null {
   const { t, i18n } = useTranslation('ventilation');
@@ -30,54 +32,22 @@ export function VentilationCard({ enabled }: { enabled: boolean }): React.JSX.El
   const advice = query.data;
 
   if (!enabled || query.isError || advice === null) return null;
-  if (query.isLoading || !advice) return <GlassPanel className="h-32 animate-pulse p-4">{null}</GlassPanel>;
+  if (query.isLoading || !advice) return <InfoCardSkeleton />;
 
-  const Icon = ICONS[advice.verdict];
   const language = i18n.language;
+  const tone = verdictTone(advice.verdict);
   const range = formatRange(advice.predictedRange, language);
+  const dash = '—';
+  const reason =
+    advice.reason === 'forecast_better' && advice.waitHours != null
+      ? t('ventilation_reason_forecast_better_hours', { hours: formatDust(advice.waitHours, language) })
+      : t(`ventilation_reason_${advice.reason}`);
+
   return (
-    <GlassPanel className="p-4">
-      <section aria-labelledby="ventilation-title">
-        <h3 id="ventilation-title" className="text-sm text-secondary-themed">
-          {t('ventilation_title')}
-        </h3>
-        <div className="mt-2 flex items-start gap-3">
-          <span className="mt-0.5 shrink-0" style={{ color: TONE_COLOR[verdictTone(advice.verdict)] }}>
-            <Icon aria-hidden="true" className="size-7" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-lg leading-tight font-medium">{t(`ventilation_verdict_${advice.verdict}`)}</p>
-            <p className="mt-1 text-sm text-secondary-themed">{t(`ventilation_reason_${advice.reason}`)}</p>
-          </div>
-        </div>
-
-        {advice.inside || advice.outside ? (
-          <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-            {advice.inside ? (
-              <>
-                <dt className="text-secondary-themed">{t('ventilation_inside')}</dt>
-                <dd className="text-right tabular-nums">{formatDust(advice.inside.pm25, language)}</dd>
-              </>
-            ) : null}
-            {advice.outside ? (
-              <>
-                <dt className="text-secondary-themed">{t('ventilation_outside_model')}</dt>
-                <dd className="text-right tabular-nums">{formatDust(advice.outside.pm25, language)}</dd>
-              </>
-            ) : null}
-            {advice.predicted !== null ? (
-              <>
-                <dt className="text-secondary-themed">{t('ventilation_expected', { minutes: advice.horizonMinutes })}</dt>
-                <dd className="text-right tabular-nums">
-                  {formatDust(advice.predicted, language)}
-                  {range ? <span className="text-secondary-themed"> ({range})</span> : null}
-                </dd>
-              </>
-            ) : null}
-          </dl>
-        ) : null}
-
-        <div className="mt-3 space-y-1 text-xs text-secondary-themed">
+    <InfoCard
+      label={t('ventilation_title')}
+      hint={
+        <InfoHint label={t('ventilation_info_label')}>
           {advice.outside ? (
             <p>
               {t('ventilation_model_note')}{' '}
@@ -88,8 +58,23 @@ export function VentilationCard({ enabled }: { enabled: boolean }): React.JSX.El
           ) : null}
           {advice.predicted !== null && advice.lambda.source === 'prior' ? <p>{t('ventilation_prior_note')}</p> : null}
           <p>{t('ventilation_disclaimer')}</p>
-        </div>
-      </section>
-    </GlassPanel>
+        </InfoHint>
+      }
+    >
+      <p className="mt-3 text-2xl leading-tight font-semibold tracking-tight text-primary-themed sm:text-[28px]">{t(`ventilation_verdict_${advice.verdict}`)}</p>
+      <p className="mt-2 flex gap-2 text-[13px] leading-snug text-secondary-themed">
+        <span aria-hidden="true" className={`mt-[7px] size-1.5 shrink-0 rounded-full ${DOT[tone]}`} />
+        <span>{reason}</span>
+      </p>
+
+      <div className="mt-auto pt-4">
+        <p className="text-[11px] text-muted-themed">{t('ventilation_units')}</p>
+        <dl className="mt-2 grid grid-cols-3 gap-3">
+          <Stat caption={t('ventilation_stat_inside')} value={advice.inside ? formatDust(advice.inside.pm25, language) : dash} />
+          <Stat caption={t('ventilation_stat_outside')} value={advice.outside ? formatDust(advice.outside.pm25, language) : dash} />
+          <Stat caption={t('ventilation_stat_expected', { minutes: advice.horizonMinutes })} value={advice.predicted !== null ? formatDust(advice.predicted, language) : dash} note={range} />
+        </dl>
+      </div>
+    </InfoCard>
   );
 }
