@@ -107,7 +107,7 @@ export function AssistantChat({ context, stream, className }: AssistantChatProps
           </div>
         ) : null}
 
-        <div className="px-4 pb-2">
+        <div className={`px-4 ${keyboardOpen ? 'pb-[max(0.5rem,env(safe-area-inset-bottom))]' : 'pb-2'}`}>
           <PromptBar
             promptLabel={t('assistant_prompt_label')}
             sendLabel={t('assistant_send')}
@@ -131,7 +131,7 @@ export function AssistantChat({ context, stream, className }: AssistantChatProps
         </div>
 
         {keyboardOpen ? null : (
-          <p className="px-5 pb-3 text-center text-[11px] leading-snug text-(--ai-muted)">
+          <p className="px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] text-center text-[11px] leading-snug text-(--ai-muted)">
             <span className="block">{t('assistant_privacy_note')}</span>
             <span className="block">{t('assistant_history_note')}</span>
             <span className="block">{t('assistant_disclaimer')}</span>

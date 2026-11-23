@@ -15,6 +15,13 @@ describe('the advice contract', () => {
     expect(VentilationAdviceSchema.safeParse({ ...example.advice, verdict: 'maybe' }).success).toBe(false);
   });
 
+  it('accepts an answer from an older server that has no waitHours', () => {
+    const older: Record<string, unknown> = { ...example.advice };
+    delete older.waitHours;
+    expect(VentilationAdviceSchema.safeParse(older).success).toBe(true);
+    expect(VentilationAdviceSchema.safeParse({ ...older, waitHours: 2 }).success).toBe(true);
+  });
+
   it('lists every verdict and reason that the interface has a text for', () => {
     expect(VERDICTS).toHaveLength(5);
     expect(REASONS).toContain('no_indoor_data');

@@ -6,6 +6,15 @@ import { i18n } from '@/app/providers/i18n/i18n';
 import type { EventsResponse } from '../model/events';
 import { EventTimeline } from './EventTimeline';
 
+// The (i) is tested on its own (info-hint.test.tsx); here its content is shown in place.
+vi.mock('@/shared/ui/info-hint', () => ({
+  InfoHint: ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div data-testid="hint" aria-label={label}>
+      {children}
+    </div>
+  ),
+}));
+
 type QueryState = { data?: EventsResponse | null; isLoading?: boolean; isError?: boolean };
 let state: QueryState = {};
 vi.mock('../api/events.queries', () => ({ useRoomEventsQuery: () => ({ data: undefined, isLoading: false, isError: false, ...state }) }));
@@ -40,7 +49,9 @@ describe('EventTimeline', () => {
     expect(items[0]).toContain('Проветривание');
     expect(items[1]).toContain('Кондиционер');
     expect(screen.getByText(/воздух сблизился с уличным/)).toBeTruthy();
-    expect(screen.getByText(/находит система по показаниям/)).toBeTruthy();
+    // That the system found the events, and that nobody wrote them down, is in the (i) of the card.
+    expect(screen.getByTestId('hint').getAttribute('aria-label')).toBe('Как найдены события');
+    expect(screen.getByTestId('hint').textContent).toMatch(/находит система по показаниям/);
   });
 
   it('shows the time on the clock of the station (Tashkent), not of the visitor', () => {
@@ -65,8 +76,8 @@ describe('EventTimeline', () => {
     const many = Array.from({ length: 9 }, (_, i) => ev('cleaning', `2026-11-23T0${i}:00:00.000Z`));
     state = { data: response({ events: many }) };
     render(<EventTimeline enabled />);
-    expect(screen.getAllByRole('listitem')).toHaveLength(6);
-    expect(screen.getByText(/Ещё событий: 3/)).toBeTruthy();
+    expect(screen.getAllByRole('listitem')).toHaveLength(4);
+    expect(screen.getByText(/Ещё событий: 5/)).toBeTruthy();
   });
 
   it('is not shown when it is off, when the request failed or when the API is not set', () => {

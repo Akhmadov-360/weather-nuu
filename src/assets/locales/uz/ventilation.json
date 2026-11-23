@@ -14,11 +14,14 @@
   "ventilation_reason_forecast_better": "Prognozga ko‘ra ko‘cha tez orada toza bo‘ladi.",
   "ventilation_reason_no_outdoor_data": "Ko‘chadagi chang haqida ma’lumot yo‘q.",
   "ventilation_reason_no_indoor_data": "Auditoriya datchigi ma’lumot yubormayapti.",
-  "ventilation_inside": "Auditoriyadagi PM2.5 chang, mkg/m³",
-  "ventilation_outside_model": "Ko‘chadagi PM2.5 chang (model), mkg/m³",
-  "ventilation_expected": "{{minutes}} daqiqadan keyin auditoriyada (baho)",
   "ventilation_model_note": "Ko‘chadagi chang — model bahosi, o‘lchov emas (ko‘cha komplektida chang datchigi yo‘q).",
   "ventilation_model_credit": "CAMS, Open-Meteo orqali",
   "ventilation_prior_note": "Havo almashinuvi tezligi adabiyotdan ehtiyotkor baho sifatida olingan: bu auditoriyada u hali o‘lchanmagan.",
-  "ventilation_disclaimer": "Maslahat tibbiy tavsiya emas."
+  "ventilation_disclaimer": "Maslahat tibbiy tavsiya emas.",
+  "ventilation_info_label": "Ma’lumotlar haqida",
+  "ventilation_units": "PM2.5 chang, mkg/m³",
+  "ventilation_stat_inside": "Auditoriyada",
+  "ventilation_stat_outside": "Ko‘chada (model)",
+  "ventilation_stat_expected": "{{minutes}} daqiqadan keyin",
+  "ventilation_reason_forecast_better_hours": "Hozir ko‘cha yomonroq. Model prognoziga ko‘ra taxminan {{hours}} soatdan keyin toza bo‘ladi."
 }

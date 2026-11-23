@@ -9,5 +9,6 @@
   "events_none": "No events found over the last day.",
   "events_little_data": "Few readings over the last day: an empty list may mean \"no data\".",
   "events_method": "The system finds events in the sensor readings; nobody wrote them down. The method has been checked on synthetic data only.",
-  "events_more": "More events: {{count}}."
+  "events_more": "More events: {{count}}.",
+  "events_info_label": "How the events were found"
 }

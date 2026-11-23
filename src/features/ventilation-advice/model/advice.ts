@@ -36,6 +36,8 @@ export const VentilationAdviceSchema = z.object({
   predicted: z.number().nullable(),
   predictedRange: z.tuple([z.number(), z.number()]).nullable(),
   gain: z.number().nullable(),
+  /** For "wait": in about how many hours the forecast promises a clean enough street. Older answers have no such field. */
+  waitHours: z.number().nullish(),
   lambda: z.object({ value: z.number().positive(), source: z.enum(['data', 'prior']), verified: z.boolean(), range: z.tuple([z.number(), z.number()]).nullable() }),
   forecast: z.array(z.object({ hours: z.number(), value: z.number() })),
 });

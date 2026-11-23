@@ -14,11 +14,14 @@
   "ventilation_reason_forecast_better": "The forecast says the street will be cleaner soon.",
   "ventilation_reason_no_outdoor_data": "There is no data on the dust outside.",
   "ventilation_reason_no_indoor_data": "The room sensor is not sending data.",
-  "ventilation_inside": "PM2.5 dust in the room, µg/m³",
-  "ventilation_outside_model": "PM2.5 dust outside (model), µg/m³",
-  "ventilation_expected": "In the room in {{minutes}} min (estimate)",
   "ventilation_model_note": "Dust outside is a model estimate, not a measurement (the street kit has no dust sensor).",
   "ventilation_model_credit": "CAMS via Open-Meteo",
   "ventilation_prior_note": "The speed of air exchange is a cautious value from the literature: it has not been measured in this room yet.",
-  "ventilation_disclaimer": "The advice is not medical advice."
+  "ventilation_disclaimer": "The advice is not medical advice.",
+  "ventilation_info_label": "About these data",
+  "ventilation_units": "PM2.5 dust, µg/m³",
+  "ventilation_stat_inside": "In the room",
+  "ventilation_stat_outside": "Outside (model)",
+  "ventilation_stat_expected": "In {{minutes}} min",
+  "ventilation_reason_forecast_better_hours": "The street is worse now. The model forecast says it will be cleaner in about {{hours}} h."
 }

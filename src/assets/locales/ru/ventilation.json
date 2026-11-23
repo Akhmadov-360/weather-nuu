@@ -14,11 +14,14 @@
   "ventilation_reason_forecast_better": "По прогнозу улица скоро станет чище.",
   "ventilation_reason_no_outdoor_data": "Нет данных о пыли на улице.",
   "ventilation_reason_no_indoor_data": "Датчик аудитории не передаёт данные.",
-  "ventilation_inside": "Пыль PM2.5 в аудитории, мкг/м³",
-  "ventilation_outside_model": "Пыль PM2.5 на улице (модель), мкг/м³",
-  "ventilation_expected": "Через {{minutes}} мин в аудитории (оценка)",
   "ventilation_model_note": "Пыль на улице: модельная оценка, не измерение (у уличного комплекта нет датчика пыли).",
   "ventilation_model_credit": "CAMS через Open-Meteo",
   "ventilation_prior_note": "Скорость воздухообмена взята из литературы осторожной оценкой: в этой аудитории её ещё не измеряли.",
-  "ventilation_disclaimer": "Совет не является медицинской рекомендацией."
+  "ventilation_disclaimer": "Совет не является медицинской рекомендацией.",
+  "ventilation_info_label": "О данных карточки",
+  "ventilation_units": "Пыль PM2.5, мкг/м³",
+  "ventilation_stat_inside": "В аудитории",
+  "ventilation_stat_outside": "На улице (модель)",
+  "ventilation_stat_expected": "Через {{minutes}} мин",
+  "ventilation_reason_forecast_better_hours": "Сейчас на улице хуже. По прогнозу модели станет чище примерно через {{hours}} ч."
 }
