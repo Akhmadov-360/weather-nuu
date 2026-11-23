@@ -105,6 +105,24 @@ describe('VentilationCard', () => {
     expect(screen.getByText(/станет чище примерно через 2 ч/)).toBeTruthy();
   });
 
+  it('says minutes, rounded to five, when the wait is under an hour', () => {
+    state = { data: advice({ verdict: 'wait', reason: 'forecast_better', waitHours: 0.7 }) };
+    render(<VentilationCard enabled />);
+    expect(screen.getByText(/станет чище примерно через 40 мин/)).toBeTruthy();
+  });
+
+  it('says that the air outside is above the norm, not that it is worse than the room, when it is cleaner than the room', () => {
+    state = { data: advice({ verdict: 'wait', reason: 'forecast_better', waitHours: 2, inside: { pm25: 51.7, at: '2026-11-23T18:16:00.000Z' }, outside: { ...advice().outside!, pm25: 38 } }) };
+    render(<VentilationCard enabled />);
+    expect(screen.getByText(/Сейчас воздух на улице выше нормы/)).toBeTruthy();
+  });
+
+  it('says that the street is not cleaner than the room when it is not', () => {
+    state = { data: advice({ verdict: 'wait', reason: 'forecast_better', waitHours: 2, inside: { pm25: 30, at: '2026-11-23T18:16:00.000Z' }, outside: { ...advice().outside!, pm25: 45 } }) };
+    render(<VentilationCard enabled />);
+    expect(screen.getByText(/Сейчас на улице не чище, чем в аудитории/)).toBeTruthy();
+  });
+
   it('says plainly that the wait has no hours when the answer is older and does not have them', () => {
     state = { data: advice({ verdict: 'wait', reason: 'forecast_better', waitHours: undefined }) };
     render(<VentilationCard enabled />);

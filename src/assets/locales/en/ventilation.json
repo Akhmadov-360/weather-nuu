@@ -23,5 +23,9 @@
   "ventilation_stat_inside": "In the room",
   "ventilation_stat_outside": "Outside (model)",
   "ventilation_stat_expected": "In {{minutes}} min",
-  "ventilation_reason_forecast_better_hours": "The street is worse now. The model forecast says it will be cleaner in about {{hours}} h."
+  "ventilation_reason_forecast_better_hours": "{{lead}} The model forecast says it will be cleaner in about {{when}}.",
+  "ventilation_wait_lead_worse": "The street is not cleaner than the room now.",
+  "ventilation_wait_lead_dirty": "The air outside is above the norm now.",
+  "ventilation_wait_min": "{{count}} min",
+  "ventilation_wait_h": "{{count}} h"
 }
