@@ -23,5 +23,9 @@
   "ventilation_stat_inside": "Auditoriyada",
   "ventilation_stat_outside": "Ko‘chada (model)",
   "ventilation_stat_expected": "{{minutes}} daqiqadan keyin",
-  "ventilation_reason_forecast_better_hours": "Hozir ko‘cha yomonroq. Model prognoziga ko‘ra taxminan {{hours}} soatdan keyin toza bo‘ladi."
+  "ventilation_reason_forecast_better_hours": "{{lead}} Model prognoziga ko‘ra taxminan {{when}}dan keyin toza bo‘ladi.",
+  "ventilation_wait_lead_worse": "Hozir ko‘cha auditoriyadan toza emas.",
+  "ventilation_wait_lead_dirty": "Hozir ko‘chadagi havo me’yordan yuqori.",
+  "ventilation_wait_min": "{{count}} daqiqa",
+  "ventilation_wait_h": "{{count}} soat"
 }

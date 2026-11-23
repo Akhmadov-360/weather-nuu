@@ -20,6 +20,12 @@ function Stat({ caption, value, note }: { caption: string; value: string; note?:
   );
 }
 
+/** "40 min" under an hour (to 5 minutes), "2 h" from an hour (to the whole hour). */
+function waitText(hours: number, t: (key: string, o: { count: number }) => string): string {
+  if (hours < 1) return t('ventilation_wait_min', { count: Math.max(5, Math.round((hours * 60) / 5) * 5) });
+  return t('ventilation_wait_h', { count: Math.round(hours) });
+}
+
 /**
  * Advice on the window of the auditorium, in the shape of the cards of the sensors: the verdict in large type, the reason
  * under it, the three numbers it stands on. What is not measured is said in the (i) of the card, not on the face of it: the
@@ -40,7 +46,10 @@ export function VentilationCard({ enabled }: { enabled: boolean }): React.JSX.El
   const dash = '—';
   const reason =
     advice.reason === 'forecast_better' && advice.waitHours != null
-      ? t('ventilation_reason_forecast_better_hours', { hours: formatDust(advice.waitHours, language) })
+      ? t('ventilation_reason_forecast_better_hours', {
+          lead: t(advice.outside && advice.inside && advice.outside.pm25 < advice.inside.pm25 ? 'ventilation_wait_lead_dirty' : 'ventilation_wait_lead_worse'),
+          when: waitText(advice.waitHours, t),
+        })
       : t(`ventilation_reason_${advice.reason}`);
 
   return (
