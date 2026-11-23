@@ -6,7 +6,16 @@
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "strict": true
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "vite.config.ts",
+    "src/shared/seo/build-pages.ts",
+    "src/shared/seo/pages.ts",
+    "src/shared/seo/seo.json",
+    "src/shared/config/sections.ts",
+    "src/shared/config/routes.ts"
+  ]
 }

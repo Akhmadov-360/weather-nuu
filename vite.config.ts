@@ -1,8 +1,10 @@
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { defineConfig } from 'vitest/config';
+import { defineConfig, type Plugin } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { imagetools } from 'vite-imagetools';
+import { buildSeoFiles } from './src/shared/seo/build-pages';
 
 // Куда проксировать запросы /api в режиме разработки. По умолчанию — локальный
 // бэкенд из docker-compose.dev.yml (репозиторий weather-backend).
@@ -28,8 +30,32 @@ const proxy = {
   '/api/v1': { target, changeOrigin: true, rewrite: toV1 },
 };
 
+/**
+ * After the build: a page of its own for every address (its title, description, address, social card and structured
+ * data), the 404 page, the sitemap and the robots rules (src/shared/seo). The server then answers a search engine
+ * and a social network with the right tags without running the application.
+ */
+function seoPages(): Plugin {
+  let outDir = '';
+  return {
+    name: 'seo-pages',
+    apply: 'build',
+    configResolved(config) {
+      outDir = path.resolve(config.root, config.build.outDir);
+    },
+    closeBundle() {
+      const template = readFileSync(path.join(outDir, 'index.html'), 'utf8');
+      const files = buildSeoFiles(template, new Date().toISOString().slice(0, 10));
+      for (const [name, content] of Object.entries(files)) {
+        mkdirSync(path.dirname(path.join(outDir, name)), { recursive: true });
+        writeFileSync(path.join(outDir, name), content);
+      }
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss(), imagetools()],
+  plugins: [react(), tailwindcss(), imagetools(), seoPages()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
