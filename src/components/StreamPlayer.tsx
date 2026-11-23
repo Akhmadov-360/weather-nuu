@@ -1,4 +1,4 @@
-import Hls from "hls.js";
+import type Hls from "hls.js";
 import { useEffect, useRef } from "react";
 
 type StreamPlayerProps = {
@@ -14,54 +14,62 @@ export function StreamPlayer({ url, autoReconnect = true }: StreamPlayerProps) {
     if (!url || !videoRef.current) return;
 
     let hls: Hls | null = null;
+    let cancelled = false;
 
-    const setup = () => {
-      if (!videoRef.current) return;
+    const setup = async () => {
+      if (cancelled || !videoRef.current) return;
 
-      // HLS
-      if (url.endsWith(".m3u8") && Hls.isSupported()) {
-        hls = new Hls();
+      // HLS. The player library is large (about 600 KB), so it is fetched only when a stream is actually opened,
+      // not with the dashboard that every visitor loads.
+      if (url.endsWith(".m3u8")) {
+        const { default: HlsLib } = await import("hls.js");
+        if (cancelled || !videoRef.current) return;
+        if (HlsLib.isSupported()) {
+          hls = new HlsLib();
 
-        hls.loadSource(url);
-        hls.attachMedia(videoRef.current);
+          hls.loadSource(url);
+          hls.attachMedia(videoRef.current);
 
-        hls.on(Hls.Events.ERROR, (_, data) => {
-          if (!autoReconnect) return;
+          hls.on(HlsLib.Events.ERROR, (_, data) => {
+            if (!autoReconnect) return;
 
-          if (data.fatal) {
-            retryRef.current++;
+            if (data.fatal) {
+              retryRef.current++;
 
-            setTimeout(
-              () => {
-                hls?.destroy();
-                setup();
-              },
-              Math.min(3000 * retryRef.current, 10000),
-            );
-          }
-        });
-      } else {
-        videoRef.current.src = url;
-
-        videoRef.current.onerror = () => {
-          if (!autoReconnect) return;
-
-          retryRef.current++;
-
-          setTimeout(
-            () => {
-              if (!videoRef.current) return;
-              videoRef.current.load();
-            },
-            Math.min(3000 * retryRef.current, 10000),
-          );
-        };
+              setTimeout(
+                () => {
+                  hls?.destroy();
+                  void setup();
+                },
+                Math.min(3000 * retryRef.current, 10000),
+              );
+            }
+          });
+          return;
+        }
       }
+
+      videoRef.current.src = url;
+
+      videoRef.current.onerror = () => {
+        if (!autoReconnect) return;
+
+        retryRef.current++;
+
+        setTimeout(
+          () => {
+            if (!videoRef.current) return;
+            videoRef.current.load();
+          },
+          Math.min(3000 * retryRef.current, 10000),
+        );
+      };
     };
 
-    setup();
+    void setup();
 
     return () => {
+      cancelled = true;
       hls?.destroy();
     };
   }, [url, autoReconnect]);
