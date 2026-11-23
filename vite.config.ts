@@ -42,10 +42,10 @@ export default defineConfig({
         // the application code again, the rest stays in the browser cache. The groups follow what loads together.
         manualChunks(id: string) {
           if (!id.includes('node_modules')) return undefined;
-          if (/[\/]node_modules[\/](react|react-dom|scheduler|react-router|react-router-dom|@remix-run)[\/]/.test(id)) return 'vendor-react';
-          if (/[\/]node_modules[\/](motion|motion-dom|motion-utils|framer-motion|@animate-ui|@number-flow|number-flow)[\/]/.test(id)) return 'vendor-motion';
-          if (/[\/]node_modules[\/](i18next|react-i18next)[\/]/.test(id)) return 'vendor-i18n';
-          if (/[\/]node_modules[\/](@tanstack|axios|zod)[\/]/.test(id)) return 'vendor-data';
+          if (/[/]node_modules[/](react|react-dom|scheduler|react-router|react-router-dom|@remix-run)[/]/.test(id)) return 'vendor-react';
+          if (/[/]node_modules[/](motion|motion-dom|motion-utils|framer-motion|@animate-ui|@number-flow|number-flow)[/]/.test(id)) return 'vendor-motion';
+          if (/[/]node_modules[/](i18next|react-i18next)[/]/.test(id)) return 'vendor-i18n';
+          if (/[/]node_modules[/](@tanstack|axios|zod)[/]/.test(id)) return 'vendor-data';
           return undefined;
         },
       },
