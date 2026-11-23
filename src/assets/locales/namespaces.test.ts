@@ -2,14 +2,17 @@ import { describe, expect, it } from 'vitest';
 import enAnalytics from './en/analytics.json';
 import enAssistant from './en/assistant.json';
 import enCommon from './en/common.json';
+import enEvents from './en/events.json';
 import enMap from './en/map.json';
 import ruAnalytics from './ru/analytics.json';
 import ruAssistant from './ru/assistant.json';
 import ruCommon from './ru/common.json';
+import ruEvents from './ru/events.json';
 import ruMap from './ru/map.json';
 import uzAnalytics from './uz/analytics.json';
 import uzAssistant from './uz/assistant.json';
 import uzCommon from './uz/common.json';
+import uzEvents from './uz/events.json';
 import uzMap from './uz/map.json';
 
 /**
@@ -22,6 +25,7 @@ const NAMESPACES: Record<string, Record<'ru' | 'uz' | 'en', Record<string, strin
   map: { ru: ruMap, uz: uzMap, en: enMap },
   analytics: { ru: ruAnalytics, uz: uzAnalytics, en: enAnalytics },
   assistant: { ru: ruAssistant, uz: uzAssistant, en: enAssistant },
+  events: { ru: ruEvents, uz: uzEvents, en: enEvents },
 };
 
 describe.each(Object.entries(NAMESPACES))('namespace %s', (_name, langs) => {

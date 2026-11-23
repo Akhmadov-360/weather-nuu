@@ -23,6 +23,7 @@ import { WeatherSummarySkeleton } from './WeatherSummarySkeleton';
 import { previewNow } from '@/widgets/time-card/model/station-time';
 import { OnApproach } from '@/shared/ui/on-approach';
 import { LiveStreams } from '../../../components/LiveStreams';
+import { EventTimeline } from '@/features/event-timeline/ui/EventTimeline';
 
 // ECharts is ~2 MB: load it after the cards are on screen instead of blocking first paint.
 const SensorCharts = lazy(() =>
@@ -130,6 +131,9 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
                 <GasStrip mq5={latest.mq5} mq3={latest.mq3} />
               </div>
             </motion.div>
+
+            {/* Events are found in the readings of the room; the street has no such card. */}
+            <EventTimeline enabled={config.key === 'room'} />
 
             <motion.section
               variants={fadeUp}
