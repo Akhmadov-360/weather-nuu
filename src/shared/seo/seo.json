@@ -1,0 +1,85 @@
+{
+  "siteUrl": "https://weather.nuu.uz",
+  "siteName": "Weather NUUz",
+  "image": {
+    "path": "/og-image.png",
+    "width": 1200,
+    "height": 630,
+    "alt": {
+      "ru": "Weather NUUz: качество воздуха в аудитории и на улице",
+      "uz": "Weather NUUz: auditoriya va ko‘chadagi havo sifati",
+      "en": "Weather NUUz: air quality in a lecture room and outside"
+    }
+  },
+  "pages": {
+    "room": {
+      "path": "/room",
+      "title": {
+        "ru": "Воздух в аудитории НУУз онлайн — Weather NUUz",
+        "uz": "NUUz auditoriyasidagi havo onlayn — Weather NUUz",
+        "en": "Air quality in a NUUz lecture room, live — Weather NUUz"
+      },
+      "description": {
+        "ru": "Воздух в аудитории Национального университета Узбекистана в реальном времени: пыль PM2.5, температура, влажность, давление, графики и совет по проветриванию.",
+        "uz": "O‘zbekiston Milliy universiteti auditoriyasidagi havo real vaqtda: PM2.5 chang, harorat, namlik, bosim, grafiklar va shamollatish bo‘yicha maslahat.",
+        "en": "Live air in a lecture room of the National University of Uzbekistan: PM2.5 dust, temperature, humidity, pressure, charts and advice on opening the window."
+      },
+      "heading": {
+        "ru": "Воздух в аудитории",
+        "uz": "Auditoriyadagi havo",
+        "en": "Air in the lecture room"
+      }
+    },
+    "street": {
+      "path": "/street",
+      "title": {
+        "ru": "Воздух на улице у НУУз онлайн — Weather NUUz",
+        "uz": "NUUz yonidagi ko‘cha havosi onlayn — Weather NUUz",
+        "en": "Outdoor air at NUUz, live — Weather NUUz"
+      },
+      "description": {
+        "ru": "Погода у корпуса Национального университета Узбекистана в реальном времени: температура, влажность и давление с уличного датчика, графики за любой период.",
+        "uz": "O‘zbekiston Milliy universiteti binosi yonidagi ob-havo real vaqtda: ko‘cha datchigidan harorat, namlik va bosim, istalgan davr grafiklari.",
+        "en": "Live weather at the National University of Uzbekistan campus in Tashkent: temperature, humidity and pressure from the street sensor, with charts for any period."
+      },
+      "heading": {
+        "ru": "Воздух на улице",
+        "uz": "Ko‘chadagi havo",
+        "en": "Air outside"
+      }
+    },
+    "map": {
+      "path": "/map",
+      "title": { "ru": "Карта станций — Weather NUUz", "uz": "Stansiyalar xaritasi — Weather NUUz", "en": "Map of stations — Weather NUUz" },
+      "description": {
+        "ru": "Карта станций качества воздуха Ташкента.",
+        "uz": "Toshkent havo sifati stansiyalari xaritasi.",
+        "en": "Map of the air quality stations of Tashkent."
+      },
+      "heading": { "ru": "Карта", "uz": "Xarita", "en": "Map" }
+    },
+    "analytics": {
+      "path": "/analytics",
+      "title": { "ru": "Аналитика — Weather NUUz", "uz": "Tahlil — Weather NUUz", "en": "Analytics — Weather NUUz" },
+      "description": {
+        "ru": "Аналитика данных датчиков Weather NUUz.",
+        "uz": "Weather NUUz datchiklari ma’lumotlari tahlili.",
+        "en": "Analytics of the Weather NUUz sensor data."
+      },
+      "heading": { "ru": "Аналитика", "uz": "Tahlil", "en": "Analytics" }
+    }
+  },
+  "notFound": {
+    "title": { "ru": "Страница не найдена — Weather NUUz", "uz": "Sahifa topilmadi — Weather NUUz", "en": "Page not found — Weather NUUz" },
+    "description": {
+      "ru": "Такой страницы нет. Откройте воздух в аудитории или на улице.",
+      "uz": "Bunday sahifa yo‘q. Auditoriyadagi yoki ko‘chadagi havoni oching.",
+      "en": "There is no such page. Open the air in the lecture room or outside."
+    }
+  },
+  "about": {
+    "ru": "Weather NUUz показывает качество воздуха в аудитории и на улице у Национального университета Узбекистана в Ташкенте: температуру, влажность, давление, пыль PM2.5 и PM10 по шкале US EPA. Данные идут с датчиков в реальном времени; есть графики за любой период, выгрузка данных, помощник с ответами на вопросы и совет, когда открыть окно.",
+    "uz": "Weather NUUz Toshkentdagi O‘zbekiston Milliy universiteti auditoriyasi va ko‘chasidagi havo sifatini ko‘rsatadi: harorat, namlik, bosim, US EPA shkalasi bo‘yicha PM2.5 va PM10 chang. Ma’lumotlar datchiklardan real vaqtda keladi; istalgan davr grafiklari, ma’lumotlarni yuklab olish, savollarga javob beruvchi yordamchi va derazani qachon ochish haqida maslahat bor.",
+    "en": "Weather NUUz shows the air quality in a lecture room and outside at the National University of Uzbekistan in Tashkent: temperature, humidity, pressure, PM2.5 and PM10 dust on the US EPA scale. The data come from sensors in real time; there are charts for any period, a data export, an assistant that answers questions and advice on when to open the window."
+  }
+}

@@ -12,6 +12,7 @@ import { ROUTES } from '@/shared/config/routes';
 import { sectionForPath } from '@/shared/config/sections';
 import { useIdleReady } from '@/shared/hooks/useIdleReady';
 import { useTheme } from '@/shared/hooks/useTheme';
+import { usePageMeta } from '@/shared/seo/use-page-meta';
 import { AtmosphereSky } from '@/shared/ui/atmosphere/AtmosphereSky';
 import { burstConfetti } from '@/shared/ui/atmosphere/confetti';
 import { packagePlan } from '@/shared/ui/atmosphere/packages/plan';
@@ -37,6 +38,7 @@ const OWN_FALLING = import.meta.env.DEV && new URLSearchParams(window.location.s
  */
 export function AppShell(): React.JSX.Element {
   const { pathname } = useLocation();
+  usePageMeta();
   const reduceMotion = useReducedMotion();
   // Room and Street are dashboards with their own station config; the other sections use the Room scene.
   const config = pathname === ROUTES.street ? STREET_CONFIG : ROOM_CONFIG;
