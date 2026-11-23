@@ -1,0 +1,13 @@
+{
+  "events_title": "Auditoriyadagi kunlik hodisalar",
+  "events_class_ventilation": "Shamollatish",
+  "events_class_ac": "Konditsioner",
+  "events_class_cleaning": "Tozalash",
+  "events_class_class_start": "Dars boshlanishi",
+  "events_class_class_end": "Dars tugashi",
+  "events_confirmed": "xona havosi ko‘cha havosiga yaqinlashdi",
+  "events_none": "So‘nggi sutkada hodisa topilmadi.",
+  "events_little_data": "So‘nggi sutkada ko‘rsatkichlar kam: bo‘sh ro‘yxat «ma’lumot yo‘q» degani bo‘lishi mumkin.",
+  "events_method": "Hodisalarni tizim datchik ko‘rsatkichlaridan topadi, ularni odamlar yozmagan. Usul hozircha faqat modelli ma’lumotlarda sinalgan.",
+  "events_more": "Yana hodisalar: {{count}}."
+}

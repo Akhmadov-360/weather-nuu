@@ -1,0 +1,13 @@
+{
+  "events_title": "Events in the room over the last day",
+  "events_class_ventilation": "Ventilation",
+  "events_class_ac": "Air conditioner",
+  "events_class_cleaning": "Cleaning",
+  "events_class_class_start": "Lesson start",
+  "events_class_class_end": "Lesson end",
+  "events_confirmed": "room air came closer to the street air",
+  "events_none": "No events found over the last day.",
+  "events_little_data": "Few readings over the last day: an empty list may mean \"no data\".",
+  "events_method": "The system finds events in the sensor readings; nobody wrote them down. The method has been checked on synthetic data only.",
+  "events_more": "More events: {{count}}."
+}
