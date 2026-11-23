@@ -24,6 +24,7 @@ import { previewNow } from '@/widgets/time-card/model/station-time';
 import { OnApproach } from '@/shared/ui/on-approach';
 import { LiveStreams } from '../../../components/LiveStreams';
 import { EventTimeline } from '@/features/event-timeline/ui/EventTimeline';
+import { VentilationCard } from '@/features/ventilation-advice/ui/VentilationCard';
 
 // ECharts is ~2 MB: load it after the cards are on screen instead of blocking first paint.
 const SensorCharts = lazy(() =>
@@ -133,6 +134,7 @@ export function DashboardLayout({ config }: DashboardLayoutProps): React.JSX.Ele
             </motion.div>
 
             {/* Events are found in the readings of the room; the street has no such card. */}
+            <VentilationCard enabled={config.key === 'room'} />
             <EventTimeline enabled={config.key === 'room'} />
 
             <motion.section
